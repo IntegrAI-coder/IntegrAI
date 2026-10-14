@@ -1,0 +1,38 @@
+# Secrets — never commit (public repo)
+.env
+.env.*
+*.pem
+*.key
+secrets*.json
+.aws/
+samconfig.toml
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# AWS SAM / CDK build output
+.aws-sam/
+cdk.out/
+
+# Media and eval outputs (may contain sensitive content)
+samples/*.ogg
+samples/*.mp4
+samples/*.jpg
+samples/*.png
+eval/out/
+
+# Reserved dataset — must NEVER be distributed
+dataset_e1_validacion_interna*
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
