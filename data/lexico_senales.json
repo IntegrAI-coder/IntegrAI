@@ -1,0 +1,35 @@
+{
+  "nota": "Léxico de señales por núcleo. El extractor (MOCK o LLM) usa esto para mapear evidencia -> señales positivas/negativas por núcleo. Es el puente entre el lenguaje natural de las educadoras y el decision model tipado.",
+  "identidad_autonomia": {
+    "positivas": ["se viste solo", "come solo", "autonomo", "autonoma", "se identifica", "dice su nombre", "expresa", "regula", "independiente", "se lava las manos", "se saca los zapatos"],
+    "negativas": ["no logra", "depende", "llora", "no quiere", "necesita ayuda", "se frustra"]
+  },
+  "convivencia_ciudadania": {
+    "positivas": ["comparte", "colabora", "juega con", "respeta turnos", "pide por favor", "ayuda", "acuerda", "espera su turno", "dialogo", "resuelve"],
+    "negativas": ["pelea", "quita", "no comparte", "interrumpe", "empuja", "no respeta"]
+  },
+  "corporalidad_movimiento": {
+    "positivas": ["corre", "salta", "trepa", "equilibrio", "coordina", "motricidad", "recorta", "ensarta", "toma el lapiz", "lápiz", "pelota"],
+    "negativas": ["se cae", "dificultad motora", "torpe", "no coordina", "poco movimiento"]
+  },
+  "lenguaje_verbal": {
+    "positivas": ["habla", "conversa", "relata", "cuenta", "narra", "vocabulario", "pregunta", "responde", "canta", "escucha cuento", "lee", "escribe", "letras"],
+    "negativas": ["no habla", "pocas palabras", "tartamudea", "no comprende", "silencio", "no responde"]
+  },
+  "lenguajes_artisticos": {
+    "positivas": ["pinta", "dibuja", "modela", "plastilina", "musica", "baila", "canta", "crea", "colores", "collage", "teatro", "dramatiza"],
+    "negativas": ["no participa", "se niega", "rechaza materiales", "no explora"]
+  },
+  "entorno_natural": {
+    "positivas": ["observa", "planta", "animal", "naturaleza", "pregunta", "experimento", "predice", "explora", "hoja", "insecto", "cuidado del agua"],
+    "negativas": ["no le interesa", "no cuida", "ignora"]
+  },
+  "entorno_sociocultural": {
+    "positivas": ["familia", "comunidad", "oficio", "rol", "celebracion", "bandera", "tradicion", "barrio", "bombero", "doctor", "símbolos", "patrimonio"],
+    "negativas": ["no reconoce", "desconoce"]
+  },
+  "pensamiento_matematico": {
+    "positivas": ["cuenta", "numeros", "cantidad", "clasifica", "ordena", "compara", "forma", "figura", "patron", "serie", "grande chico", "adelante atras"],
+    "negativas": ["no cuenta", "confunde", "no clasifica"]
+  }
+}

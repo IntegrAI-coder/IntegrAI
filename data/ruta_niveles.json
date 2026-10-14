@@ -1,0 +1,128 @@
+[
+  {
+    "nivel": 1,
+    "nombre_nivel": "Atención y regulación inicial",
+    "edad_min_meses": 0,
+    "edad_max_meses": 2,
+    "dominios": [
+      "motor_grueso",
+      "motor_fino",
+      "lenguaje_comunicacion",
+      "socioemocional",
+      "cognitivo"
+    ],
+    "descripcion": "Responde brevemente a estímulos, rostros, voces y contacto; comienza a organizar movimientos y estados de calma."
+  },
+  {
+    "nivel": 2,
+    "nombre_nivel": "Interacción y control emergente",
+    "edad_min_meses": 2,
+    "edad_max_meses": 4,
+    "dominios": [
+      "motor_grueso",
+      "motor_fino",
+      "lenguaje_comunicacion",
+      "socioemocional",
+      "cognitivo"
+    ],
+    "descripcion": "Aumenta el control de cabeza, la atención compartida y el intercambio de sonidos y expresiones."
+  },
+  {
+    "nivel": 3,
+    "nombre_nivel": "Alcance y exploración corporal",
+    "edad_min_meses": 4,
+    "edad_max_meses": 6,
+    "dominios": [
+      "motor_grueso",
+      "motor_fino",
+      "lenguaje_comunicacion",
+      "socioemocional",
+      "cognitivo"
+    ],
+    "descripcion": "Alcanza, manipula, vocaliza y cambia de postura para explorar personas y objetos cercanos."
+  },
+  {
+    "nivel": 4,
+    "nombre_nivel": "Sedestación y comunicación intencional",
+    "edad_min_meses": 6,
+    "edad_max_meses": 9,
+    "dominios": [
+      "motor_grueso",
+      "motor_fino",
+      "lenguaje_comunicacion",
+      "socioemocional",
+      "cognitivo"
+    ],
+    "descripcion": "Se sostiene sentado, coordina manos, balbucea e inicia acciones para mantener intercambios o buscar objetos."
+  },
+  {
+    "nivel": 5,
+    "nombre_nivel": "Movilidad y propósito",
+    "edad_min_meses": 9,
+    "edad_max_meses": 12,
+    "dominios": [
+      "motor_grueso",
+      "motor_fino",
+      "lenguaje_comunicacion",
+      "socioemocional",
+      "cognitivo"
+    ],
+    "descripcion": "Se desplaza con mayor autonomía, usa gestos y acciones dirigidas a una meta y comprende rutinas sencillas."
+  },
+  {
+    "nivel": 6,
+    "nombre_nivel": "Autonomía funcional inicial",
+    "edad_min_meses": 12,
+    "edad_max_meses": 18,
+    "dominios": [
+      "motor_grueso",
+      "motor_fino",
+      "lenguaje_comunicacion",
+      "socioemocional",
+      "cognitivo"
+    ],
+    "descripcion": "Camina o practica marcha autónoma, usa objetos de forma funcional, comprende consignas simples y emplea palabras o aproximaciones consistentes."
+  },
+  {
+    "nivel": 7,
+    "nombre_nivel": "Representación y combinación inicial",
+    "edad_min_meses": 18,
+    "edad_max_meses": 21,
+    "dominios": [
+      "motor_grueso",
+      "motor_fino",
+      "lenguaje_comunicacion",
+      "socioemocional",
+      "cognitivo"
+    ],
+    "descripcion": "Amplía movilidad, vocabulario, imitación y juego representacional; resuelve problemas cotidianos sencillos."
+  },
+  {
+    "nivel": 8,
+    "nombre_nivel": "Combinación y participación",
+    "edad_min_meses": 21,
+    "edad_max_meses": 27,
+    "dominios": [
+      "motor_grueso",
+      "motor_fino",
+      "lenguaje_comunicacion",
+      "socioemocional",
+      "cognitivo"
+    ],
+    "descripcion": "Combina palabras y acciones, participa junto a pares, clasifica o empareja y ejecuta secuencias breves."
+  },
+  {
+    "nivel": 9,
+    "nombre_nivel": "Secuencias y autonomía creciente",
+    "edad_min_meses": 27,
+    "edad_max_meses": 36,
+    "dominios": [
+      "motor_grueso",
+      "motor_fino",
+      "lenguaje_comunicacion",
+      "socioemocional",
+      "cognitivo"
+    ],
+    "descripcion": "Coordina movimientos más complejos, conversa con combinaciones breves, coopera por turnos y desarrolla juego y resolución de problemas en secuencia."
+  }
+]
