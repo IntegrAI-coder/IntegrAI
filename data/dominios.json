@@ -1,0 +1,22 @@
+[
+  {
+    "id": "motor_grueso",
+    "nombre": "Motor grueso"
+  },
+  {
+    "id": "motor_fino",
+    "nombre": "Motor fino"
+  },
+  {
+    "id": "lenguaje_comunicacion",
+    "nombre": "Lenguaje y comunicación"
+  },
+  {
+    "id": "socioemocional",
+    "nombre": "Socioemocional"
+  },
+  {
+    "id": "cognitivo",
+    "nombre": "Cognitivo"
+  }
+]

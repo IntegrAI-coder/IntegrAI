@@ -36,3 +36,12 @@ dataset_e1_validacion_interna*
 Thumbs.db
 .vscode/
 .idea/
+# --- integra (arquitectura de decisión) ---
+.venv/
+models/
+plataforma.db
+*.pem
+__pycache__/
+*.pyc
+.env
+dataset_e1_validacion_interna.zip

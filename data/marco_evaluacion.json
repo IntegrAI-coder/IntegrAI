@@ -1,0 +1,108 @@
+{
+  "meta": {
+    "nombre": "Marco de evaluación de aprendizajes",
+    "fuente": "Bases Curriculares de la Educación Parvularia (MINEDUC 2018) + instrumento de evaluación por logros (Fundación Integra)",
+    "version": "1.0",
+    "nota": "Semilla para el agente. Los aprendizajes esperados son indicadores observables; el agente mapea evidencia -> nivel por núcleo."
+  },
+  "escala": {
+    "niveles": ["No observado", "En proceso", "Logrado"],
+    "descripcion": {
+      "No observado": "No hay evidencia suficiente o el aprendizaje no se manifestó en los registros aportados.",
+      "En proceso": "El aprendizaje se manifiesta de forma parcial, incipiente o inconsistente.",
+      "Logrado": "El aprendizaje se manifiesta de forma estable y consistente en la evidencia."
+    }
+  },
+  "ambitos": [
+    {
+      "id": "formacion_personal_social",
+      "nombre": "Formación Personal y Social",
+      "nucleos": [
+        {
+          "id": "identidad_autonomia",
+          "nombre": "Identidad y Autonomía",
+          "aprendizajes": [
+            "Se identifica y nombra a sí mismo, sus características y preferencias.",
+            "Realiza de forma autónoma acciones de cuidado personal (vestirse, alimentarse, higiene).",
+            "Expresa sus emociones y las regula con apoyo del adulto."
+          ]
+        },
+        {
+          "id": "convivencia_ciudadania",
+          "nombre": "Convivencia y Ciudadanía",
+          "aprendizajes": [
+            "Comparte y colabora con pares en el juego y actividades.",
+            "Respeta normas básicas de convivencia y turnos.",
+            "Resuelve conflictos dialogando con apoyo del adulto."
+          ]
+        },
+        {
+          "id": "corporalidad_movimiento",
+          "nombre": "Corporalidad y Movimiento",
+          "aprendizajes": [
+            "Controla movimientos gruesos (correr, saltar, trepar) con coordinación.",
+            "Desarrolla motricidad fina (recortar, ensartar, tomar el lápiz).",
+            "Explora su cuerpo y el espacio con seguridad."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "comunicacion_integral",
+      "nombre": "Comunicación Integral",
+      "nucleos": [
+        {
+          "id": "lenguaje_verbal",
+          "nombre": "Lenguaje Verbal",
+          "aprendizajes": [
+            "Se expresa oralmente con frases y vocabulario cada vez más amplio.",
+            "Comprende instrucciones y relatos simples.",
+            "Muestra interés por la lectura y la escritura emergente."
+          ]
+        },
+        {
+          "id": "lenguajes_artisticos",
+          "nombre": "Lenguajes Artísticos",
+          "aprendizajes": [
+            "Explora materiales y técnicas de expresión plástica.",
+            "Participa en experiencias musicales y de movimiento.",
+            "Representa ideas y emociones a través de distintos lenguajes."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "interaccion_entorno",
+      "nombre": "Interacción y Comprensión del Entorno",
+      "nucleos": [
+        {
+          "id": "entorno_natural",
+          "nombre": "Exploración del Entorno Natural",
+          "aprendizajes": [
+            "Observa y describe elementos de la naturaleza.",
+            "Formula preguntas y hace predicciones simples.",
+            "Cuida el entorno y los seres vivos."
+          ]
+        },
+        {
+          "id": "entorno_sociocultural",
+          "nombre": "Comprensión del Entorno Sociocultural",
+          "aprendizajes": [
+            "Reconoce roles, oficios y prácticas de su comunidad.",
+            "Identifica símbolos y elementos culturales cercanos.",
+            "Participa en instancias de la vida en comunidad (celebraciones, rutinas)."
+          ]
+        },
+        {
+          "id": "pensamiento_matematico",
+          "nombre": "Pensamiento Matemático",
+          "aprendizajes": [
+            "Cuenta y reconoce cantidades.",
+            "Clasifica, compara y ordena objetos por atributos.",
+            "Reconoce formas, tamaños y nociones espaciales básicas."
+          ]
+        }
+      ]
+    }
+  ]
+}
