@@ -69,3 +69,13 @@ bench/detalle_rubrica*.jsonl
 # Repositorios de terceros clonados para el pipeline RAG (no se versionan)
 # Solo el directorio raíz: src/repos/ es código propio del proyecto.
 /repos/
+
+# Dashboard HTML de la raíz: artefacto generado por dashboard/visualizar_datos.py.
+# El vigente vive en dashboard/visualizacion_datos.html (este se regenera/copia para ver local).
+/visualizacion_datos.html
+
+# Vite
+frontend/.vite/
+
+# Cache de evaluación del pipeline (notas generadas, se regenera)
+eval_notas.json
