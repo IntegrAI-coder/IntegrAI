@@ -1,22 +1,29 @@
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { useEstadoDatos } from '../data/DatosContext';
-import { fichaNino, nivelPorNumero } from '../domain/consultas';
-import { Breadcrumbs } from '../components/Breadcrumbs';
-import { Tarjeta } from '../components/Tarjeta';
-import { BadgeNivel } from '../components/BadgeNivel';
 import { BadgeAlerta } from '../components/BadgeAlerta';
-import { GraficoTrayectoria } from '../components/GraficoTrayectoria';
+import { BadgeNivel } from '../components/BadgeNivel';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Cargando, ErrorEstado, Vacio } from '../components/Estado';
+import { GraficoTrayectoria } from '../components/GraficoTrayectoria';
+import { Tarjeta } from '../components/Tarjeta';
+import { useEstadoDatos } from '../data/DatosContext';
+import { useRevision } from '../data/RevisionContext';
+import { tieneAccesoNino } from '../domain/acceso';
+import { fichaNino, nivelPorNumero } from '../domain/consultas';
 
 const HOY = new Date();
 
 export function Nino() {
   const { idNino = '' } = useParams();
   const estado = useEstadoDatos();
+  const { profesora } = useRevision();
+  const nino = estado.estado === 'listo'
+    ? estado.datos.ninos.find((item) => item.idNino === idNino)
+    : undefined;
+  const autorizado = !profesora || !nino || tieneAccesoNino(profesora, nino);
 
   const vista = useMemo(() => {
-    if (estado.estado !== 'listo') {
+    if (estado.estado !== 'listo' || !autorizado) {
       return null;
     }
     const ficha = fichaNino(estado.datos, idNino, HOY);
@@ -33,17 +40,19 @@ export function Nino() {
         nivel: o.nivelEstimado,
       })),
     };
-  }, [estado, idNino]);
+  }, [autorizado, estado, idNino]);
 
-  const idJardin = vista?.ficha.nino.idJardin;
-  const sala = vista?.ficha.nino.salaGrupo;
+  const idJardin = vista?.ficha.nino.idJardin ?? nino?.idJardin;
+  const sala = vista?.ficha.nino.salaGrupo ?? nino?.salaGrupo;
 
   return (
     <>
       <Breadcrumbs
         migas={[
-          { etiqueta: 'Cursos', ruta: '/' },
-          ...(idJardin && sala
+          profesora
+            ? { etiqueta: 'Inicio', ruta: '/profesora/inicio' }
+            : { etiqueta: 'Cursos', ruta: '/' },
+          ...(autorizado && idJardin && sala
             ? [{ etiqueta: `${idJardin} · ${sala}`, ruta: `/curso/${idJardin}/${sala}` }]
             : []),
           { etiqueta: idNino },
@@ -54,25 +63,19 @@ export function Nino() {
       {estado.estado === 'error' && (
         <ErrorEstado mensaje={`No se pudieron cargar los datos: ${estado.mensaje}`} />
       )}
-
-      {estado.estado === 'listo' && !vista && (
+      {estado.estado === 'listo' && !autorizado && <Vacio mensaje="No tienes acceso" />}
+      {estado.estado === 'listo' && autorizado && !vista && (
         <Vacio mensaje={`No se encontró el niño/a ${idNino}.`} />
       )}
 
-      {estado.estado === 'listo' && vista && (
+      {estado.estado === 'listo' && autorizado && vista && (
         <>
           <h2>{vista.ficha.nino.idNino}</h2>
 
           <section aria-label="Resumen del niño/a" className="tarjetas">
             <Tarjeta etiqueta="Edad (meses)" valor={String(vista.ficha.edadMeses)} />
-            <Tarjeta
-              etiqueta="Nivel vigente"
-              valor={vista.ficha.nivelVigente?.toString() ?? '—'}
-            />
-            <Tarjeta
-              etiqueta="Nivel esperado"
-              valor={vista.ficha.nivelEsperado?.toString() ?? '—'}
-            />
+            <Tarjeta etiqueta="Nivel vigente" valor={vista.ficha.nivelVigente?.toString() ?? '—'} />
+            <Tarjeta etiqueta="Nivel esperado" valor={vista.ficha.nivelEsperado?.toString() ?? '—'} />
             <Tarjeta
               etiqueta="Brecha"
               valor={
@@ -127,9 +130,7 @@ export function Nino() {
                         ))}
                       </ul>
                     ) : (
-                      <p className="ficha-descripcion">
-                        Sin manifestaciones registradas.
-                      </p>
+                      <p className="ficha-descripcion">Sin manifestaciones registradas.</p>
                     )}
                   </article>
                 ))

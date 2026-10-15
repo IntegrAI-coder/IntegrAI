@@ -13,6 +13,7 @@ import type { AlumnoCurso } from './consultas';
 const HOY = new Date('2026-01-01');
 
 const datos: Datos = {
+  educadoras: [],
   niveles: [
     { nivel: 1, nombreNivel: 'N1', edadMinMeses: 0, edadMaxMeses: 12, descripcion: 'd1' },
     { nivel: 2, nombreNivel: 'N2', edadMinMeses: 12, edadMaxMeses: 24, descripcion: 'd2' },

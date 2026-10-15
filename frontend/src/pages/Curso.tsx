@@ -1,29 +1,33 @@
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { BadgeAlerta } from '../components/BadgeAlerta';
+import { BadgeNivel } from '../components/BadgeNivel';
+import { Breadcrumbs } from '../components/Breadcrumbs';
+import { Cargando, ErrorEstado, Vacio } from '../components/Estado';
+import { GraficoDistribucion } from '../components/GraficoDistribucion';
+import { Tabla, type Columna } from '../components/Tabla';
+import { Tarjeta } from '../components/Tarjeta';
 import { useEstadoDatos } from '../data/DatosContext';
+import { useRevision } from '../data/RevisionContext';
+import { tieneAccesoCurso } from '../domain/acceso';
 import {
   alumnosDeCurso,
   distribucionNiveles,
   type AlumnoCurso,
 } from '../domain/consultas';
-import { promedio } from '../domain/metrics';
 import { formatearPromedio } from '../domain/formato';
-import { Breadcrumbs } from '../components/Breadcrumbs';
-import { Tabla, type Columna } from '../components/Tabla';
-import { Tarjeta } from '../components/Tarjeta';
-import { BadgeNivel } from '../components/BadgeNivel';
-import { BadgeAlerta } from '../components/BadgeAlerta';
-import { GraficoDistribucion } from '../components/GraficoDistribucion';
-import { Cargando, ErrorEstado, Vacio } from '../components/Estado';
+import { promedio } from '../domain/metrics';
 
 const HOY = new Date();
 
 export function Curso() {
   const { idJardin = '', sala = '' } = useParams();
   const estado = useEstadoDatos();
+  const { profesora } = useRevision();
+  const autorizado = !profesora || tieneAccesoCurso(profesora, idJardin, sala);
 
   const vista = useMemo(() => {
-    if (estado.estado !== 'listo') {
+    if (estado.estado !== 'listo' || !autorizado) {
       return null;
     }
     const alumnos = alumnosDeCurso(estado.datos, idJardin, sala, HOY);
@@ -38,7 +42,7 @@ export function Curso() {
       totalAlertas: alumnos.filter((a) => a.alerta).length,
       distribucion: distribucionNiveles(alumnos),
     };
-  }, [estado, idJardin, sala]);
+  }, [autorizado, estado, idJardin, sala]);
 
   const nombreJardin = vista?.jardin?.nombreFantasia ?? idJardin;
 
@@ -46,7 +50,9 @@ export function Curso() {
     <>
       <Breadcrumbs
         migas={[
-          { etiqueta: 'Cursos', ruta: '/' },
+          profesora
+            ? { etiqueta: 'Inicio', ruta: '/profesora/inicio' }
+            : { etiqueta: 'Cursos', ruta: '/' },
           { etiqueta: `${nombreJardin} · ${sala}` },
         ]}
       />
@@ -55,12 +61,11 @@ export function Curso() {
       {estado.estado === 'error' && (
         <ErrorEstado mensaje={`No se pudieron cargar los datos: ${estado.mensaje}`} />
       )}
+      {estado.estado === 'listo' && !autorizado && <Vacio mensaje="No tienes acceso" />}
 
-      {estado.estado === 'listo' && vista && (
+      {estado.estado === 'listo' && autorizado && vista && (
         <>
-          <h2>
-            {nombreJardin} · Sala {sala}
-          </h2>
+          <h2>{nombreJardin} · Sala {sala}</h2>
 
           {vista.alumnos.length === 0 ? (
             <Vacio mensaje="Este curso no tiene niños/as registrados." />

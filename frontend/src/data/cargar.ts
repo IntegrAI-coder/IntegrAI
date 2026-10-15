@@ -1,5 +1,7 @@
 import Papa from 'papaparse';
+import educadorasCsv from './educadoras.csv?raw';
 import type {
+  Educadora,
   Evaluacion,
   Jardin,
   Manifestacion,
@@ -11,6 +13,7 @@ import type {
 } from '../domain/tipos';
 
 export interface Datos {
+  educadoras: Educadora[];
   niveles: Nivel[];
   jardines: Jardin[];
   ninos: Nino[];
@@ -23,6 +26,11 @@ export interface Datos {
 }
 
 type Fila = Record<string, string>;
+
+function filasDesdeCsv(texto: string): Fila[] {
+  const resultado = Papa.parse<Fila>(texto, { header: true, skipEmptyLines: true });
+  return resultado.data;
+}
 
 /**
  * Fuente de datos. Si `VITE_API_BASE` está definido, el dashboard lee los datos
@@ -57,6 +65,17 @@ interface DatosCrudos {
   observacion_manifestaciones?: Fila[];
   evaluaciones?: Fila[];
 }
+
+function educadorasDesde(filas: Fila[]): Educadora[] {
+  return filas.map((f) => ({
+    idEducadora: f.id_educadora ?? '',
+    idJardin: f.id_jardin ?? '',
+    rol: f.rol ?? '',
+    aniosExperiencia: Number(f.anios_experiencia),
+  }));
+}
+
+const EDUCADORAS_DEMO = educadorasDesde(filasDesdeCsv(educadorasCsv));
 
 function nivelesDesde(filas: Fila[]): Nivel[] {
   return filas.map((f) => ({
@@ -125,8 +144,9 @@ function evaluacionesDesde(filas: Fila[]): Evaluacion[] {
   }));
 }
 
-function armarDatos(r: DatosCrudos): Datos {
+function armarDatos(r: DatosCrudos, educadoras: Educadora[]): Datos {
   return {
+    educadoras,
     niveles: nivelesDesde(r.ruta_niveles ?? []),
     jardines: jardinesDesde(r.jardines ?? []),
     ninos: ninosDesde(r.ninos ?? []),
@@ -137,12 +157,12 @@ function armarDatos(r: DatosCrudos): Datos {
   };
 }
 
-async function desdeApi(): Promise<Datos> {
+async function desdeApi(educadoras: Educadora[]): Promise<Datos> {
   const respuesta = await fetch(`${API_BASE}/api/datos`);
   if (!respuesta.ok) {
     throw new Error(`El backend respondió ${respuesta.status} en /api/datos`);
   }
-  return armarDatos((await respuesta.json()) as DatosCrudos);
+  return armarDatos((await respuesta.json()) as DatosCrudos, educadoras);
 }
 
 function rutaCsv(nombre: string): string {
@@ -156,11 +176,10 @@ async function leerCsv(nombre: string): Promise<Fila[]> {
     throw new Error(`No se pudo cargar ${ruta} (${respuesta.status})`);
   }
   const texto = await respuesta.text();
-  const resultado = Papa.parse<Fila>(texto, { header: true, skipEmptyLines: true });
-  return resultado.data;
+  return filasDesdeCsv(texto);
 }
 
-async function desdeCsv(): Promise<Datos> {
+async function desdeCsv(educadoras: Educadora[]): Promise<Datos> {
   const [
     ruta_niveles,
     jardines,
@@ -183,7 +202,7 @@ async function desdeCsv(): Promise<Datos> {
     observaciones,
     manifestaciones,
     observacion_manifestaciones,
-  });
+  }, educadoras);
 }
 
 function pendienteDesde(f: Record<string, unknown>): Pendiente {
@@ -221,10 +240,10 @@ export async function cargarPendientes(): Promise<Pendiente[]> {
 export async function cargarDatos(): Promise<Datos> {
   if (USAR_API) {
     try {
-      return await desdeApi();
+      return await desdeApi(EDUCADORAS_DEMO);
     } catch (error) {
       console.warn('No se pudo leer /api/datos; uso los CSV estáticos.', error);
     }
   }
-  return desdeCsv();
+  return desdeCsv(EDUCADORAS_DEMO);
 }
