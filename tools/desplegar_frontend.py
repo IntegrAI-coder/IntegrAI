@@ -145,7 +145,8 @@ def subir(build: bool = True) -> None:
     if build:
         # vite.config.ts usa base '/IntegrAI/' para GitHub Pages (PR #22); en CloudFront la app vive en la raíz.
         # VITE_API_BASE="" -> el dashboard lee datos VIVOS vía /api/* (mismo origen; ver el behavior /api/* abajo).
-        env = {**os.environ, "VITE_API_BASE": os.getenv("VITE_API_BASE", "")}
+        env = {**os.environ, "VITE_API_BASE": os.getenv("VITE_API_BASE", ""),
+               "VITE_REVISION": os.getenv("VITE_REVISION", "api")}  # la profesora usa el backend real
         subprocess.run("npm ci --no-audit --no-fund && npm run build -- --base=/", cwd=fe, shell=True, check=True, env=env)
     dist = fe / "dist"
     archivos = [dist / "index.html"] + sorted((dist / "assets").rglob("*")) + [dist / c for c in CSV_USADOS]

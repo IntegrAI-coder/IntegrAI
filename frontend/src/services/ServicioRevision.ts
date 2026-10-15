@@ -3,10 +3,14 @@ import { asignarProfesorasDemo, telefonosCoinciden } from '../domain/acceso';
 import { generarPendientesDemo } from '../domain/revisionDemo';
 import type { Pendiente, Profesora } from '../domain/tipos';
 
+export type AccionRevision = 'aprobado' | 'editado' | 'rechazado';
+
 export interface ServicioRevision {
   ingresar(telefono: string, datos: Datos): Promise<Profesora | null>;
   profesorasDemo(datos: Datos): Profesora[];
   pendientes(profesora: Profesora, datos: Datos): Promise<Pendiente[]>;
+  /** Aprueba / edita (con nivel) / rechaza un caso. En modo API escribe la evaluación canónica. */
+  resolver(pendiente: Pendiente, accion: AccionRevision, nivel?: number): Promise<void>;
 }
 
 export type ModoRevision = 'demo' | 'api';
@@ -99,6 +103,11 @@ export const servicioRevisionDemo: ServicioRevision = {
   async pendientes(profesora, datos) {
     return generarPendientesDemo(datos, profesora);
   },
+
+  async resolver(pendiente, accion, nivel) {
+    // En demo no hay backend: se refleja localmente en el contexto.
+    void pendiente; void accion; void nivel;
+  },
 };
 
 export const servicioRevisionApi: ServicioRevision = {
@@ -119,7 +128,7 @@ export const servicioRevisionApi: ServicioRevision = {
   },
 
   async pendientes(profesora, datos) {
-    const endpoint = `/pendientes?from=${encodeURIComponent(profesora.telefono)}`;
+    const endpoint = `/api/pendientes?from=${encodeURIComponent(profesora.telefono)}`;
     const respuesta = await fetch(endpoint);
     if (!respuesta.ok) {
       throw new Error(`El backend respondió ${respuesta.status} en /pendientes`);
@@ -129,6 +138,26 @@ export const servicioRevisionApi: ServicioRevision = {
       throw new Error('Respuesta inválida de /pendientes');
     }
     return valor.pendientes.map((pendiente) => pendienteDesdeApi(pendiente, profesora, datos));
+  },
+
+  async resolver(pendiente, accion, nivel) {
+    const respuesta = await fetch('/api/pendiente/resolver', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id_pendiente: pendiente.idPendiente,
+        accion,
+        nivel: accion === 'editado' ? nivel : undefined,
+        resuelto_por: pendiente.idEducadora ?? undefined,
+      }),
+    });
+    if (!respuesta.ok) {
+      throw new Error(`El backend respondió ${respuesta.status} al resolver el caso`);
+    }
+    const valor = await jsonValido(respuesta, '/api/pendiente/resolver');
+    if (esObjeto(valor) && valor.ok === false) {
+      throw new Error(String(valor.error ?? 'no se pudo resolver el caso'));
+    }
   },
 };
 

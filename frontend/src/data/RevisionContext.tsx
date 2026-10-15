@@ -12,6 +12,7 @@ import type { NotificacionAdvertencia, Pendiente, Profesora } from '../domain/ti
 import {
   modoRevision,
   servicioRevision,
+  type AccionRevision,
   type ModoRevision,
 } from '../services/ServicioRevision';
 import { useEstadoDatos, useVersionDatos } from './DatosContext';
@@ -33,6 +34,8 @@ interface RevisionContexto {
   estadoPendientes: EstadoPendientesRevision;
   ingresar: (telefono: string) => Promise<Profesora | null>;
   salir: () => void;
+  /** Aprueba / edita (con nivel) / rechaza un caso y lo quita de la cola. */
+  resolver: (idPendiente: string, accion: AccionRevision, nivel?: number) => Promise<void>;
 }
 
 const RevisionContext = createContext<RevisionContexto | null>(null);
@@ -150,6 +153,15 @@ export function RevisionProvider({ children }: { children: ReactNode }) {
     setPendientes([]);
   }, []);
 
+  const resolver = useCallback(async (idPendiente: string, accion: AccionRevision, nivel?: number) => {
+    const caso = pendientes.find((p) => p.idPendiente === idPendiente);
+    if (!caso) {
+      return;
+    }
+    await servicioRevision.resolver(caso, accion, nivel);
+    setPendientes((prev) => prev.filter((p) => p.idPendiente !== idPendiente));
+  }, [pendientes]);
+
   const valor = useMemo<RevisionContexto>(() => ({
     profesora,
     modo: modoRevision,
@@ -159,6 +171,7 @@ export function RevisionProvider({ children }: { children: ReactNode }) {
     estadoPendientes,
     ingresar,
     salir,
+    resolver,
   }), [
     estadoPendientes,
     ingresar,
@@ -166,6 +179,7 @@ export function RevisionProvider({ children }: { children: ReactNode }) {
     pendientes,
     profesora,
     profesorasDemo,
+    resolver,
     salir,
   ]);
 

@@ -237,6 +237,29 @@ export async function cargarPendientes(): Promise<Pendiente[]> {
   return (datos.pendientes ?? []).map(pendienteDesde);
 }
 
+/** Aprueba / edita (con nivel) / rechaza un pendiente (requiere backend). */
+export async function resolverPendiente(
+  idPendiente: string,
+  accion: 'aprobado' | 'editado' | 'rechazado',
+  nivel?: number,
+): Promise<void> {
+  if (!USAR_API) {
+    throw new Error('Requiere datos vivos del backend');
+  }
+  const respuesta = await fetch(`${API_BASE}/api/pendiente/resolver`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id_pendiente: idPendiente, accion, nivel }),
+  });
+  if (!respuesta.ok) {
+    throw new Error(`El backend respondió ${respuesta.status} al resolver`);
+  }
+  const datos = (await respuesta.json()) as { ok?: boolean; error?: string };
+  if (datos && datos.ok === false) {
+    throw new Error(datos.error ?? 'no se pudo resolver');
+  }
+}
+
 export async function cargarDatos(): Promise<Datos> {
   if (USAR_API) {
     try {

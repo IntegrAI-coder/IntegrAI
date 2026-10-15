@@ -27,9 +27,8 @@ function pendiente(
 
 describe('notificaciones de advertencia', () => {
   it('mapea el texto, detalle, fecha y vínculo exactos', () => {
-    const [notificacion] = notificacionesDesdePendientes([
-      pendiente('P-1', 'NINO-X', 0.08, '2026-02-03T10:00:00'),
-    ]);
+    const caso = pendiente('P-1', 'NINO-X', 0.08, '2026-02-03T10:00:00');
+    const [notificacion] = notificacionesDesdePendientes([caso]);
 
     expect(notificacion).toEqual({
       idNotificacion: 'P-1',
@@ -38,6 +37,7 @@ describe('notificaciones de advertencia', () => {
       detalle: 'El modelo propuso el nivel 3 con margen 0,08 (umbral 0,15)',
       fecha: '2026-02-03T10:00:00',
       href: '/nino/NINO-X',
+      pendiente: caso,
     });
   });
 

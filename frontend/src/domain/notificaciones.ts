@@ -27,5 +27,6 @@ export function notificacionesDesdePendientes(
       detalle: `El modelo propuso el nivel ${pendiente.nivelPropuesto ?? '—'} con margen ${decimalEspanol(pendiente.margen as number)} (umbral 0,15)`,
       fecha: pendiente.creadoEn,
       href: `/nino/${encodeURIComponent(pendiente.idNinoPropuesto)}`,
+      pendiente,
     }));
 }
