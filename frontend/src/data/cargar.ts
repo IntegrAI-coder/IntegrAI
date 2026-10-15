@@ -1,5 +1,6 @@
 import Papa from 'papaparse';
 import type {
+  Evaluacion,
   Jardin,
   Manifestacion,
   Nino,
@@ -15,6 +16,9 @@ export interface Datos {
   observaciones: Observacion[];
   manifestaciones: Manifestacion[];
   observacionManifestaciones: ObservacionManifestacion[];
+  /** Nivel consolidado + alerta (que produce el cron en el backend). Opcional:
+   *  en el modo CSV estático no existe y el dashboard usa la observación más reciente. */
+  evaluaciones?: Evaluacion[];
 }
 
 type Fila = Record<string, string>;
@@ -40,6 +44,7 @@ interface DatosCrudos {
   observaciones?: Fila[];
   manifestaciones?: Fila[];
   observacion_manifestaciones?: Fila[];
+  evaluaciones?: Fila[];
 }
 
 function nivelesDesde(filas: Fila[]): Nivel[] {
@@ -97,6 +102,18 @@ function omDesde(filas: Fila[]): ObservacionManifestacion[] {
   }));
 }
 
+function evaluacionesDesde(filas: Fila[]): Evaluacion[] {
+  return filas.map((f) => ({
+    idNino: f.id_nino ?? '',
+    dominio: f.dominio ?? '',
+    nivel: Number(f.nivel),
+    margen: Number(f.margen),
+    periodo: f.periodo ?? '',
+    tendencia: f.tendencia ?? '',
+    alerta: f.alerta && f.alerta !== '' ? f.alerta : null,
+  }));
+}
+
 function armarDatos(r: DatosCrudos): Datos {
   return {
     niveles: nivelesDesde(r.ruta_niveles ?? []),
@@ -105,6 +122,7 @@ function armarDatos(r: DatosCrudos): Datos {
     observaciones: observacionesDesde(r.observaciones ?? []),
     manifestaciones: manifestacionesDesde(r.manifestaciones ?? []),
     observacionManifestaciones: omDesde(r.observacion_manifestaciones ?? []),
+    evaluaciones: evaluacionesDesde(r.evaluaciones ?? []),
   };
 }
 

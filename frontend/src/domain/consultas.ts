@@ -1,5 +1,5 @@
 import type { Datos } from '../data/cargar';
-import type { Manifestacion, Nino, Nivel, Observacion } from './tipos';
+import type { Evaluacion, Manifestacion, Nino, Nivel, Observacion } from './tipos';
 import {
   brecha,
   edadMeses,
@@ -32,6 +32,20 @@ export function claveCurso(idJardin: string, salaGrupo: string): string {
   return `${idJardin}__${salaGrupo}`;
 }
 
+/** Nivel CONSOLIDADO por niño/a (la evaluación `global` más reciente que produce el
+ *  cron en el backend). Si no hay, el dashboard cae a la observación más reciente. */
+function evaluacionesGlobales(datos: Datos): Map<string, Evaluacion> {
+  const mapa = new Map<string, Evaluacion>();
+  for (const e of datos.evaluaciones ?? []) {
+    if (e.dominio !== 'global') continue;
+    const previo = mapa.get(e.idNino);
+    if (!previo || e.periodo >= previo.periodo) {
+      mapa.set(e.idNino, e);
+    }
+  }
+  return mapa;
+}
+
 function observacionesDe(datos: Datos): Map<string, Observacion[]> {
   const mapa = new Map<string, Observacion[]>();
   for (const obs of datos.observaciones) {
@@ -47,18 +61,23 @@ export function alumnoDesde(
   observaciones: Observacion[],
   niveles: Nivel[],
   hoy: Date,
+  evaluacion?: Evaluacion,
 ): AlumnoCurso {
   const meses = edadMeses(nino.fechaNacimiento, hoy);
-  const vigente = nivelVigente(observaciones);
+  // Si hay evaluación consolidada del backend, esa manda (nivel + alerta rubric-aware).
+  const vigente = evaluacion ? evaluacion.nivel : nivelVigente(observaciones);
   const esperado = nivelEsperado(meses, niveles);
   const valorBrecha = brecha(vigente, esperado);
+  const alerta = evaluacion
+    ? (evaluacion.alerta ?? '').trim() !== ''
+    : tieneAlerta(valorBrecha);
   return {
     idNino: nino.idNino,
     edadMeses: meses,
     nivelVigente: vigente,
     nivelEsperado: esperado,
     brecha: valorBrecha,
-    alerta: tieneAlerta(valorBrecha),
+    alerta,
   };
 }
 
@@ -69,13 +88,15 @@ export function alumnosDeCurso(
   hoy: Date,
 ): AlumnoCurso[] {
   const obsPorNino = observacionesDe(datos);
+  const evs = evaluacionesGlobales(datos);
   return datos.ninos
     .filter((n) => n.idJardin === idJardin && n.salaGrupo === salaGrupo)
-    .map((n) => alumnoDesde(n, obsPorNino.get(n.idNino) ?? [], datos.niveles, hoy));
+    .map((n) => alumnoDesde(n, obsPorNino.get(n.idNino) ?? [], datos.niveles, hoy, evs.get(n.idNino)));
 }
 
 export function resumenCursos(datos: Datos, hoy: Date): ResumenCurso[] {
   const obsPorNino = observacionesDe(datos);
+  const evs = evaluacionesGlobales(datos);
   const jardinPorId = new Map(datos.jardines.map((j) => [j.idJardin, j]));
   const porCurso = new Map<string, { idJardin: string; sala: string; ninos: Nino[] }>();
 
@@ -91,7 +112,7 @@ export function resumenCursos(datos: Datos, hoy: Date): ResumenCurso[] {
   const resumenes: ResumenCurso[] = [];
   for (const { idJardin, sala, ninos } of porCurso.values()) {
     const alumnos = ninos.map((n) =>
-      alumnoDesde(n, obsPorNino.get(n.idNino) ?? [], datos.niveles, hoy),
+      alumnoDesde(n, obsPorNino.get(n.idNino) ?? [], datos.niveles, hoy, evs.get(n.idNino)),
     );
     const nivelesVigentes = alumnos
       .map((a) => a.nivelVigente)
@@ -174,7 +195,7 @@ export function fichaNino(
     .filter((o) => o.idNino === idNino)
     .sort((a, b) => a.fechaObservacion.localeCompare(b.fechaObservacion));
 
-  const alumno = alumnoDesde(nino, observaciones, datos.niveles, hoy);
+  const alumno = alumnoDesde(nino, observaciones, datos.niveles, hoy, evaluacionesGlobales(datos).get(idNino));
 
   const detalladas: ObservacionDetallada[] = observaciones.map((o) => ({
     idObservacion: o.idObservacion,
