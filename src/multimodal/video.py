@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 from pathlib import Path
 
 from .. import config
@@ -48,8 +49,9 @@ def describir_video(path: str) -> Segmento:
             if texto:
                 return Segmento(fuente="video_visual", texto=texto, calidad=0.8, modelo=modelo,
                                 advertencias=adv + ["descripción visual generada por modelo: revisar"])
-        except Exception as e:  # noqa: BLE001
-            adv.append(f"{nombre} falló: {type(e).__name__}")
+        except Exception:  # noqa: BLE001
+            logging.getLogger(__name__).exception("descripción de video con %s falló", nombre)
+            adv.append("descripción visual no disponible")
     return Segmento(fuente="video_visual", texto="", calidad=0.0, advertencias=adv or ["sin descripción visual"])
 
 

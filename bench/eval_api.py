@@ -7,7 +7,7 @@ de U2. /clasificar no recibe niño ni teléfono: no escribe en la plataforma.
 Métricas: exacto, ±1, % a revisión, exactos entre aceptados y, si el caso trae `es_rezago`,
 recall y precisión de la alerta de rezago (pred < nivel típico de la edad).
 
-    python -m bench.eval_api                                   # bench/casos.jsonl
+    INTEGRAI_API_URL=https://<api> python -m bench.eval_api    # bench/casos.jsonl
     python -m bench.eval_api --casos casos_contra_edad.jsonl --conductas
 """
 from __future__ import annotations
@@ -16,6 +16,7 @@ import argparse
 import collections
 import csv
 import json
+import os
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -41,10 +42,12 @@ def _pct(a: int, b: int) -> str:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--url", default="http://44.204.243.156:8000")
+    ap.add_argument("--url", default=os.getenv("INTEGRAI_API_URL", ""), help="URL del clasificador (o INTEGRAI_API_URL)")
     ap.add_argument("--casos", default="casos.jsonl")
     ap.add_argument("--conductas", action="store_true", help="agrega la variante nota → conductas (etapa 2 de U2)")
     a = ap.parse_args()
+    if not a.url:
+        raise SystemExit("define --url o la variable INTEGRAI_API_URL")
     casos = [json.loads(l) for l in open(AQUI / a.casos, encoding="utf-8")]
     excluir = {c.get("id_observacion") for c in casos}
     nac = {r["id_nino"]: r["fecha_nacimiento"] for r in csv.DictReader(open(DATA / "ninos.csv", encoding="utf-8"))}

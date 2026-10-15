@@ -9,6 +9,7 @@
 """
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 from .. import config
@@ -75,8 +76,9 @@ def leer_post_it(path: str, verificar: bool = True) -> Segmento:
             modelo += f" + verif {config.MODELO_OCR_VERIF}"
             if d > 0.15:
                 adv.append(f"lecturas del post-it discrepan (CER {d:.0%}): confirmar el texto con la tía")
-        except Exception as e:  # noqa: BLE001
-            adv.append(f"verificación no disponible: {e!r}")
+        except Exception:  # noqa: BLE001
+            logging.getLogger(__name__).exception("verificación del post-it falló")
+            adv.append("verificación de la lectura no disponible")
     n_ileg = texto.lower().count("[ilegible]")
     if n_ileg:
         adv.append(f"{n_ileg} palabra(s) ilegible(s)")

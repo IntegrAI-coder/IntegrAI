@@ -146,17 +146,17 @@ POST /clasificar
 
 | Ítem | Valor |
 |---|---|
-| **Instance ID** | `i-0226f28f9b99716f2` |
+| **Instance ID** | `[redactado]` |
 | **Estado** | running |
 | **Tipo** | `c6i.2xlarge` (8 vCPU · 16 GB RAM · 60 GB gp3) |
-| **IP pública** | `44.204.243.156` |
+| **IP pública** | `[redactado]` |
 | **AZ** | `us-east-1a` |
 | **SO** | Ubuntu 24.04 LTS · Python 3.12 |
-| **Acceso** | **SSM** (Session Manager) + key `integra-kp.pem` |
-| **Security Group** | `sg-06699d42c3e0fb9eb` (22/80/443/8000/8501 → 0.0.0.0/0) ⚠️ *a endurecer* |
+| **Acceso** | **SSM** (Session Manager) |
+| **Security Group** | `[redactado]` ⚠️ *a endurecer (ver docs/SEGURIDAD.md)* |
 | **IAM** | instance profile con **Bedrock** ✅ (probado) |
 | **Servicios** | `integra.service` (dashboard Streamlit, systemd, auto-restart) |
-| **Dashboard** | **http://44.204.243.156** (Streamlit, HTTP 200) |
+| **Dashboard** | Streamlit (URL interna del equipo) |
 | **Modelos en disco** | `laya` (2.3G) · `laya-typed-decisions` (808M) · `laya-integra` (fine-tune v1) · `laya-integra2` (fine-tune v2, en curso) |
 | **Stack** | boto3 · streamlit 1.66 · **laya 0.4.7** · torch 2.14.1+cpu · transformers · faster-whisper |
 | **Disco** | 15 GB usados / 58 GB (25%) |

@@ -9,6 +9,7 @@
 """
 from __future__ import annotations
 
+import logging
 import math
 from pathlib import Path
 
@@ -19,6 +20,7 @@ PROMPT_VOCAB = ("Observación de una educadora de párvulos en Chile. Sala cuna,
                 "la tía, el niño, la niña, gatea, balbucea, apila bloques, hace pinza, "
                 "se para con apoyo, camina, señala, nombra, imita, juega, comparte.")
 
+log = logging.getLogger(__name__)
 _modelos: dict[str, object] = {}
 
 
@@ -39,8 +41,9 @@ def transcribir(path: str, fuente: Fuente = "audio", modelo: str | None = None,
             path, language="es", vad_filter=True, beam_size=5,
             initial_prompt=PROMPT_VOCAB if con_prompt else None)
         segs = list(segs)
-    except Exception as e:  # noqa: BLE001
-        return Segmento(fuente=fuente, texto="", calidad=0.0, advertencias=[f"whisper falló: {e!r}"], modelo=nombre)
+    except Exception:  # noqa: BLE001
+        log.exception("whisper falló")
+        return Segmento(fuente=fuente, texto="", calidad=0.0, advertencias=["no se pudo transcribir el audio"], modelo=nombre)
     texto = " ".join(s.text.strip() for s in segs).strip()
     adv: list[str] = []
     if not segs or not texto:

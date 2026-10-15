@@ -141,5 +141,7 @@ class Procesador:
         obs = normalizar_entradas(entradas)
         detalle = [{"tipo": s.fuente, "texto": s.texto, "calidad": s.calidad, "modelo": s.modelo,
                     "advertencias": s.advertencias} for s in obs.segmentos]
-        detalle.append({"tipo": "observacion_normalizada", **obs.model_dump(exclude={"segmentos"})})
+        # nino_mencionado (nombre/apodo) solo sirve para resolver el ID: no se expone ni se guarda
+        detalle.append({"tipo": "observacion_normalizada", **obs.model_dump(exclude={"segmentos", "nino_mencionado"}),
+                        "nino_identificado": obs.nino_mencionado is not None})
         return obs.texto_para_matcher(), detalle
