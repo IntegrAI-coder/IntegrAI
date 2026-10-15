@@ -97,16 +97,17 @@ def infra_datos():
 
 def infra_ti():
     fig, ax = lienzo("Infraestructura TI · hoy vs. objetivo",
-                     "Etiqueta = responsable · borde naranjo = riesgo actual · cuenta AWS del evento, us-east-1")
-    # --- HOY ---
+                     "Etiqueta = responsable · borde naranjo = riesgo abierto · ✓ = ya aplicado (15-oct) · cuenta AWS del evento, us-east-1")
+    # --- HOY (auditado por SSM el 15-oct) ---
     ax.text(3, 85, "HOY", fontsize=15, fontweight="bold", color="#B5541A")
-    caja(ax, 3, 66, 22, 14, "Internet", ["cualquiera llega", "a la API sin token"], alerta=True)
+    caja(ax, 3, 66, 22, 14, "Internet", ["llega directo a :80 y :8000", "CloudFront TLS ✓ creado"], alerta=True)
     caja(ax, 3, 46, 22, 14, "Webhook externo", ["Traefik TLS + Chatwoot", "→ EC2 por HTTP plano"], alerta=True, dueno="Sebastián")
-    caja(ax, 33, 46, 30, 34, "EC2 integra-server", ["IP pública, HTTP :80 y :8000", "API /procesar /clasificar", "sin token · Swagger público",
-                                                    "/health expone el roster", "Streamlit sin login", "SQLite + Laya + Whisper",
-                                                    "llaves STS del evento"], alerta=True, dueno="Sebastián")
-    caja(ax, 33, 28, 30, 13, "Bedrock", ["Sonnet 5 · Nova · Titan", "sin logging de invocación"], dueno="AWS")
-    caja(ax, 3, 25, 22, 16, "Repo público", ["datos sintéticos", "IP redactada (PR seguridad)"], clase="P", dueno="Mauricio")
+    caja(ax, 33, 46, 30, 34, "EC2 integra-server", ["IP pública · :80 y :8000 abiertos", "IMDSv2 ✓ · 443 cerrado ✓",
+                                                    "código seguro en main ✓", "falta activar token en la API",
+                                                    "servicios corren como root", "EBS sin cifrar (cuenta ✓)",
+                                                    "SQLite + Laya + Whisper"], alerta=True, dueno="Sebastián")
+    caja(ax, 33, 28, 30, 13, "Bedrock", ["Sonnet 5 · Nova · Pegasus", "sin logging de invocación ✓"], dueno="AWS")
+    caja(ax, 3, 25, 22, 16, "Repo público", ["datos sintéticos", "IP e IDs redactados ✓"], clase="P", dueno="Mauricio")
     flecha(ax, (25.6, 73), (32.4, 70), "HTTP", color="#B5541A")
     flecha(ax, (25.6, 53), (32.4, 53), "HTTP", color="#B5541A")
     ax.text(14, 62.6, "Meta → HTTPS", fontsize=8, color=GRIS, ha="center")

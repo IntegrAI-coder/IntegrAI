@@ -38,8 +38,8 @@ Tres revisiones en paralelo (código del repo, infraestructura vista desde fuera
 |---|---|---|---|
 | H1 | Webhook aceptaba POST **sin firma** si faltaba `WA_APP_SECRET` (fail-open) | Crítica | ✅ Corregido: fail-closed (`webhook/server.py`) |
 | H2 | **Sin whitelist**: cualquier número registraba observaciones en el jardín | Crítica | ✅ Corregido: `WA_WHITELIST`; los desconocidos se descartan sin respuesta |
-| H3 | API de decisión **sin autenticación**, Swagger público, `/health` con datos del jardín | Crítica | ✅ Corregido en código: `INTEGRA_API_TOKEN`, docs apagados, `/health` mínimo. **Falta desplegar** |
-| H4 | **Sin HTTPS** en la EC2 (443 cerrado). El webhook externo reenvía medios de niños por **HTTP plano** | Crítica | ⏳ Ivan: CloudFront o ALB con TLS (F0) |
+| H3 | API de decisión **sin autenticación**, Swagger público, `/health` con datos del jardín | Crítica | ✅ Código en `main` (PR #6). ✅ Token generado en Secrets Manager (`integrai/api-token`). ⏳ **Activarlo en la EC2** con `tools/desplegar_seguridad_ec2.sh` (corte coordinado, §3.1) |
+| H4 | **Sin HTTPS** en la EC2. El webhook externo reenvía medios de niños por **HTTP plano** | Crítica | ✅ **CloudFront con TLS creado** delante de la EC2 (dashboard → :80, API → :8000, sin caché, cabeceras de seguridad). ⏳ El webhook debe usar la URL `https://` y luego cerrar el acceso directo por IP (`tools/seguridad_aws.py corte`) |
 | H5 | IP, ID de instancia, SG y nombre de la llave publicados en el repo público | Alta | ✅ Redactados (siguen en el historial; la instancia es temporal) |
 | H6 | `GET /procesar` y `bench/*` ponían la nota del niño en la URL | Alta | ✅ GET eliminado; bench usa `INTEGRA_API_URL` |
 | H7 | Lectura arbitraria de archivos vía `Entrada.ref` (path traversal) | Alta | ✅ `src/seguridad/archivos.ruta_segura` |
@@ -57,7 +57,35 @@ Tres revisiones en paralelo (código del repo, infraestructura vista desde fuera
 | H19 | Dependencias sin versión fija (`>=`), sin `pip-audit` | Baja | ⏳ CI |
 | H20 | `tools/ssm_push.py` arma comandos shell con la ruta remota | Baja | Herramienta interna; no exponer |
 
-## 3. Plan de despliegue por fases
+## 3. Avance de la ejecución
+
+Actualizado el 15-oct-2026. Se ejecutó primero todo lo que **no interrumpe la demo**.
+
+| # | Medida | Estado | Cómo |
+|---|---|---|---|
+| 1 | Código seguro (firma fail-closed, whitelist, token, U2, video visual) | ✅ En `main` (PR #6) + video/Pegasus en el PR de esta rama | — |
+| 2 | IP, ID de instancia y nombre de la llave fuera del repo | ✅ | PR #6 |
+| 3 | IMDSv2 obligatorio | ✅ (ya estaba) | — |
+| 4 | Puerto 443 cerrado (no escuchaba nada) | ✅ Aplicado | Security group |
+| 5 | Cifrado EBS por defecto en la cuenta | ✅ Aplicado | Discos nuevos cifrados; el actual sigue sin cifrar (requiere detener la instancia) |
+| 6 | Token de la API en **Secrets Manager** (`integrai/api-token`) | ✅ Creado | Nadie lo ve en texto; la EC2 lo lee al desplegar |
+| 7 | **CloudFront con TLS** delante de la EC2 | ✅ Creado | Dashboard → :80, `/procesar*`, `/clasificar`, `/health` → :8000. Sin caché, cabeceras de seguridad (HSTS) |
+| 8 | Activar el token en la API | ⏳ Corte coordinado | `tools/desplegar_seguridad_ec2.sh` |
+| 9 | Webhook → CloudFront (`https`) + `WA_APP_SECRET` + `WA_WHITELIST` + token | ⏳ Sebastián | Variables del webhook |
+| 10 | Cerrar 80/8000 a internet (solo CloudFront) | ⏳ Después de 9 | `tools/seguridad_aws.py corte` (revertible con `revertir-corte`) |
+| 11 | Servicios sin root, cifrar el EBS actual | ⏳ Después de la demo | Requiere reiniciar o detener la instancia |
+
+### 3.1 Corte coordinado (unos 10 minutos, con Sebastián conectado)
+
+1. **EC2:** desplegar `main` en `/opt/integra` y ejecutar `sudo bash tools/desplegar_seguridad_ec2.sh`. El script verifica `/health` 200, `/docs` 404 y `/clasificar` sin token 401.
+2. **Webhook (Sebastián):** `INTEGRA_BACKEND=https://<dominio-cloudfront>`, `INTEGRA_API_TOKEN=<valor de integrai/api-token>`, `WA_APP_SECRET`, `WA_WHITELIST=<teléfonos del equipo>`. Reiniciar el contenedor.
+3. **Prueba:** mandar un texto por WhatsApp desde un número autorizado (debe responder) y desde uno no autorizado (no debe responder).
+4. **Cerrar el acceso directo:** `INTEGRA_INSTANCE_ID=<id> python tools/seguridad_aws.py corte`. A partir de aquí, el dashboard solo se abre por la URL de CloudFront.
+5. **Si algo falla:** `python tools/seguridad_aws.py revertir-corte` y borrar `/etc/systemd/system/integra-webapi.service.d/seguridad.conf` + `systemctl daemon-reload && systemctl restart integra-webapi`.
+
+El dominio de CloudFront y los valores de los secretos **no se escriben en el repo**: se comparten por el canal interno del equipo.
+
+## 4. Plan de despliegue por fases
 
 ### F0 — Antes de la demo (cierre 16-oct, 10:15)
 
@@ -102,7 +130,7 @@ Tres revisiones en paralelo (código del repo, infraestructura vista desde fuera
 | Evaluación de sesgo (por sexo y región) y del set "contra la edad" en cada versión del modelo | Mauricio |
 | Revisión anual de riesgos y de este documento | Mauricio |
 
-## 4. Controles ya implementados (esta rama)
+## 5. Controles implementados en el código
 
 | Archivo | Control |
 |---|---|
@@ -112,8 +140,10 @@ Tres revisiones en paralelo (código del repo, infraestructura vista desde fuera
 | `src/seguridad/archivos.py` | `ruta_segura` (confinada a `DIR_MEDIOS`) y `validar_medio` (16 MB + magic bytes) |
 | `src/multimodal/*` | Validación previa de cada medio, nota delimitada contra prompt injection, `nino_mencionado` fuera del `detalle`, errores genéricos |
 | `tests/test_seguridad.py`, `tests/test_webhook_whatsapp.py` | 9 tests: firma, whitelist, PII en logs, path traversal, magic bytes y tamaño |
+| `tools/seguridad_aws.py` | `auditar` (estado), `corte` / `revertir-corte` (80/8000 solo desde CloudFront) |
+| `tools/desplegar_seguridad_ec2.sh` | Activa el token desde Secrets Manager en la EC2 y lo verifica |
 
-## 5. Variables de entorno de seguridad
+## 6. Variables de entorno de seguridad
 
 | Variable | Dónde | Valor |
 |---|---|---|
@@ -126,8 +156,9 @@ Tres revisiones en paralelo (código del repo, infraestructura vista desde fuera
 | `U2_CONDUCTAS` | EC2 | `1` (por defecto) |
 | `DIR_MEDIOS`, `MAX_MEDIA_BYTES` | EC2 | Directorio de medios temporales y tope |
 
-## 6. Verificación
+## 7. Verificación
 
-- `pytest tests/` → 15 tests en verde.
+- `pytest tests/` → 16 tests en verde.
+- `INTEGRA_INSTANCE_ID=<id> python tools/seguridad_aws.py auditar` → estado de cada control en la cuenta.
 - Después de desplegar: `curl https://<backend>/docs` → 404. `curl -X POST https://<backend>/clasificar?texto=x` sin `X-Api-Key` → 401. Un mensaje desde un número fuera de la whitelist → sin respuesta. Un POST al webhook sin firma → 403.
 - Con credenciales AWS renovadas: repetir la auditoría interna (SG, IMDSv2, rol IAM, CloudTrail, GuardDuty, logging de Bedrock) y actualizar la tabla de hallazgos.
