@@ -7,6 +7,7 @@ import type {
   Nivel,
   Observacion,
   ObservacionManifestacion,
+  Pendiente,
 } from '../domain/tipos';
 
 export interface Datos {
@@ -36,6 +37,11 @@ type Fila = Record<string, string>;
 const RAW_API_BASE = import.meta.env.VITE_API_BASE;
 const USAR_API = RAW_API_BASE !== undefined;
 const API_BASE = (RAW_API_BASE ?? '').replace(/\/+$/, '');
+
+/** ¿El dashboard está leyendo datos VIVOS del backend? (habilita vistas que lo requieren). */
+export function usaApi(): boolean {
+  return USAR_API;
+}
 
 interface DatosCrudos {
   ruta_niveles?: Fila[];
@@ -173,6 +179,38 @@ async function desdeCsv(): Promise<Datos> {
     manifestaciones,
     observacion_manifestaciones,
   });
+}
+
+function pendienteDesde(f: Record<string, unknown>): Pendiente {
+  const num = (v: unknown): number | null => (v === null || v === undefined || v === '' ? null : Number(v));
+  const txt = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
+  return {
+    idPendiente: txt(f.id_pendiente),
+    idNinoPropuesto: txt(f.id_nino_propuesto),
+    idEducadora: f.id_educadora ? String(f.id_educadora) : null,
+    nivelPropuesto: num(f.nivel_propuesto),
+    dominio: f.dominio ? String(f.dominio) : null,
+    margen: num(f.margen),
+    motivo: txt(f.motivo),
+    evidencia: txt(f.evidencia),
+    estado: txt(f.estado),
+    creadoEn: txt(f.creado_en),
+    idJardin: f.id_jardin ? String(f.id_jardin) : null,
+    salaGrupo: f.sala_grupo ? String(f.sala_grupo) : null,
+  };
+}
+
+/** Cola POR VERIFICAR (requiere backend; en modo CSV devuelve []). */
+export async function cargarPendientes(): Promise<Pendiente[]> {
+  if (!USAR_API) {
+    return [];
+  }
+  const respuesta = await fetch(`${API_BASE}/api/pendientes`);
+  if (!respuesta.ok) {
+    throw new Error(`El backend respondió ${respuesta.status} en /api/pendientes`);
+  }
+  const datos = (await respuesta.json()) as { pendientes?: Record<string, unknown>[] };
+  return (datos.pendientes ?? []).map(pendienteDesde);
 }
 
 export async function cargarDatos(): Promise<Datos> {
