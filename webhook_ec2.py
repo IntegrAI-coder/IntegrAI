@@ -279,6 +279,12 @@ def procesar_media(m: MediaMsg) -> dict:
     return _procesar(m.from_, texto)
 
 
+# --- sincronización de repos (clonar/escanear/indexar en el RAG) ---
+from src.repos.endpoints import router as _repos_router  # noqa: E402
+
+app.include_router(_repos_router)
+
+
 # --- estático (index.html del demo) como fallback en "/" ---
 if _os.path.isdir("/opt/integra/www"):
     app.mount("/", StaticFiles(directory="/opt/integra/www", html=True), name="www")
