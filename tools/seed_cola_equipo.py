@@ -19,10 +19,15 @@ Uso (en la EC2, con el venv):
 from __future__ import annotations
 
 import os
+import random
 import sys
 
 sys.path.insert(0, os.getenv("INTEGRA_HOME", "/opt/integra"))
 from src.plataforma import Plataforma  # noqa: E402
+from catalogo_manifestaciones import elegir, indice  # noqa: E402
+
+MANIF = indice()
+_RND = random.Random(20261015)
 
 JARDIN = "JAR-EQUIPO"
 FECHA = "2026-10-15"
@@ -77,11 +82,11 @@ def main() -> None:
             a, b = _niveles(i)
             # dos observaciones de niveles distintos y confianza parecida → margen bajo
             p.registrar_observacion(idn, edu, FECHA, "texto", a, _nota(nombre, a),
-                                    dominios=["cognitivo"], confianza=0.55, origen=ORIGEN,
-                                    metodo_resolucion="demo")
+                                    dominios=["cognitivo"], manifestaciones=elegir(MANIF, a, "cognitivo", rnd=_RND),
+                                    confianza=0.55, origen=ORIGEN, metodo_resolucion="demo")
             p.registrar_observacion(idn, edu, FECHA, "texto", b, _nota(nombre, b),
-                                    dominios=["motor_fino"], confianza=0.50, origen=ORIGEN,
-                                    metodo_resolucion="demo")
+                                    dominios=["motor_fino"], manifestaciones=elegir(MANIF, b, "motor_fino", rnd=_RND),
+                                    confianza=0.50, origen=ORIGEN, metodo_resolucion="demo")
             total_obs += 2
             sembrados.append((sala, idn, nombre, a, b))
 
