@@ -23,6 +23,8 @@ export interface AlumnoCurso {
   alerta: boolean;
   /** Rezagado RELATIVO a su sala (no a un estándar absoluto). */
   rezagoRelativo: boolean;
+  /** El nivel vigente fue AJUSTADO manualmente por la profesora. */
+  ajustadoManual: boolean;
 }
 
 export interface ResumenCurso {
@@ -86,6 +88,7 @@ export function alumnoDesde(
     brecha: valorBrecha,
     alerta,
     rezagoRelativo: false,
+    ajustadoManual: evaluacion ? (evaluacion.origen ?? '').startsWith('manual') : false,
   };
 }
 
@@ -190,6 +193,7 @@ export interface FichaNino {
   brecha: number | null;
   alerta: boolean;
   rezagoRelativo: boolean;
+  ajustadoManual: boolean;
   observaciones: ObservacionDetallada[];
 }
 
@@ -245,6 +249,7 @@ export function fichaNino(
     brecha: alumno.brecha,
     alerta: alumno.alerta,
     rezagoRelativo: alumno.rezagoRelativo,
+    ajustadoManual: alumno.ajustadoManual,
     observaciones: detalladas,
   };
 }
