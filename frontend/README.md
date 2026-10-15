@@ -1,118 +1,92 @@
 # IntegrAI · Frontend del dashboard
 
-Interfaz de solo consulta para revisar las clasificaciones de nivel de desarrollo
-(1–9) de niños y niñas a partir de las observaciones de las educadoras. No edita
-datos ni accede a ningún backend.
+Interfaz React para coordinación y profesoras. Permite consultar los niveles de desarrollo (1–9), revisar trayectorias y mostrar advertencias cuando una clasificación queda bajo el umbral. No edita clasificaciones.
 
-**Demo en vivo:** https://integrai-coder.github.io/IntegrAI/ (GitHub Pages) · https://d2eg8hbkfurj9b.cloudfront.net (CloudFront, la web oficial del proyecto)
+**Demo en vivo:** https://integrai-coder.github.io/IntegrAI/ (GitHub Pages) · https://d2eg8hbkfurj9b.cloudfront.net (CloudFront)
 
-## Requisitos
+## Requisitos y ejecución
 
 - Node.js 18+ y npm.
-
-## Cómo correrlo
 
 ```bash
 cd frontend
 npm i
 npm run dev     # servidor de desarrollo (Vite)
-npm test        # tests de dominio (Vitest)
+npm test        # tests Vitest en modo single-run
 npm run build   # chequeo de tipos + build de producción
 ```
 
-Abre la URL que imprime Vite (por defecto http://localhost:5173).
+Abre la URL que imprime Vite (por defecto `http://localhost:5173`). La aplicación usa `HashRouter`.
 
-## Datos
+## Fuentes de datos y revisión
 
-Los CSV viven en `../data` (raíz del repo) y **no se copian** a este proyecto.
-`vite.config.ts` usa `publicDir: '../data'`, así que Vite los sirve (en dev) y los
-incluye en `dist/` (en build). Las rutas se arman con `import.meta.env.BASE_URL`
-(`src/data/cargar.ts`), para que funcionen tanto en local (`/ninos.csv`) como bajo
-el subpath de GitHub Pages (`/IntegrAI/ninos.csv`).
+Los CSV viven en `../data`. `vite.config.ts` usa `publicDir: '../data'`, por lo que Vite los sirve en desarrollo y los incluye en `dist/`. Las rutas se construyen con `import.meta.env.BASE_URL` para funcionar tanto en `/` como en el subpath `/IntegrAI/`.
 
-Cada CSV se carga **una sola vez** al iniciar la app en `DatosProvider`
-(`src/data/DatosContext.tsx`) y se comparte entre las tres vistas mediante React
-Context. Así ~2.950 observaciones y ~500 niños se parsean una vez y no en cada
-navegación.
+`DatosProvider` (`src/data/DatosContext.tsx`) carga los datos una vez y los comparte entre las vistas. Si se configura `VITE_API_BASE`, intenta `GET /api/datos`, conserva el fallback CSV y refresca mediante SSE (`/api/eventos`) más polling. `educadoras.csv` siempre se carga para el modo demostración porque `GET /api/datos` no incluye educadoras.
 
-## Despliegue (GitHub Pages)
+La fuente de revisión se elige de forma independiente:
 
-El sitio se publica automáticamente en
-https://integrai-coder.github.io/IntegrAI/ mediante
-`.github/workflows/pages.yml`: en cada push a `main` que toque `frontend/**` o
-`data/**`, la CI corre `npm ci && npm test && npm run build` dentro de `frontend/`
-y publica `frontend/dist` con `actions/deploy-pages` (Node 20).
+```dotenv
+# Predeterminado cuando no se define: demo
+VITE_REVISION=demo
 
-Como Pages sirve bajo el subpath `/IntegrAI/`, el proyecto usa
-`base: '/IntegrAI/'` en `vite.config.ts` y `HashRouter` (las rutas quedan como
-`/IntegrAI/#/curso/...`), de modo que recargar una vista profunda no da 404.
-
-## Despliegue (CloudFront, web oficial)
-
-La raíz de https://d2eg8hbkfurj9b.cloudfront.net sirve este mismo frontend desde un bucket S3 **privado** (solo CloudFront lo lee vía OAC). Como allí la app vive en `/` y no en `/IntegrAI/`, el build se hace con `--base=/`:
-
-```bash
-python tools/desplegar_frontend.py subir   # npm ci && npm run build -- --base=/  → S3 → invalidación
+# Opcional e independiente: datos vivos del dashboard
+# VITE_API_BASE=
 ```
 
-Solo se publican `index.html`, `assets/` y los 6 CSV que lee `src/data/cargar.ts`. Los dos despliegues (Pages y CloudFront) salen del mismo código de `main`.
+- `VITE_REVISION=demo`: deriva profesoras de `educadoras.csv`. Ordena educadoras y salas, reparte una sala de su jardín a cada educadora de forma cíclica y genera teléfonos ficticios (`EDU-0007` → `56900000007`). Sobre las 12 observaciones más recientes de sus cursos calcula un margen determinista con FNV-1a de 32 bits: `hash / 2^32 × 0,6`. Solo los márgenes menores a `0,15` generan advertencias. La pantalla muestra **Modo demostración** y permite ingresar con un clic.
+- `VITE_REVISION=api`: usa rutas del mismo origen, sin enviar API keys ni secretos:
+  - `GET /api/profesora?telefono=<teléfono>` → `{id_educadora, telefono, cursos:[{id_jardin, sala_grupo}]}`.
+  - `GET /pendientes?from=<teléfono>` → cola de observaciones por verificar.
 
-## Estructura
-
-```
-src/
-  domain/      Tipos, métricas puras y consultas derivadas (+ tests Vitest)
-  data/        Carga y parseo de CSV (PapaParse) y Context de datos
-  pages/       Cursos, Curso, Nino
-  components/  Tabla ordenable, badges, breadcrumbs, gráficos, estados
-```
-
-### Lógica de dominio (`src/domain/`)
-
-Todos los cálculos son funciones puras, probadas con Vitest:
-
-- `edadMeses(fechaNac, hoy)` — edad en meses completos (nunca negativa).
-- `nivelEsperado(meses, niveles)` — nivel según los rangos de `ruta_niveles.csv`.
-- `brecha = nivelVigente − nivelEsperado`.
-- `tieneAlerta` cuando `brecha <= UMBRAL_ALERTA` (`-2`, constante en `metrics.ts`).
-- `consultas.ts` arma los modelos de vista (resumen de cursos, alumnos, ficha).
-
-**Curso** = `id_jardin + sala_grupo`. **Nivel vigente** = `nivel_estimado` de la
-observación más reciente del niño/a.
+`VITE_API_BASE` controla únicamente la fuente general CSV/API y `VITE_REVISION` controla únicamente el ingreso y las advertencias de profesoras; se pueden combinar de forma independiente.
 
 ## Vistas
 
-1. `/` — Lista de cursos (jardín, comuna, sala, n.º de niños/as, nivel promedio,
-   n.º de alertas) con buscador de texto.
-2. `/curso/:idJardin/:sala` — Resumen del curso, gráfico de barras de la
-   distribución por nivel (1–9) y tabla de alumnos con columnas ordenables.
-3. `/nino/:idNino` — Nivel vigente con nombre y descripción, brecha, gráfico de
-   línea con la trayectoria y lista de observaciones con sus manifestaciones.
+### Coordinación (sin sesión de profesora)
 
-Navegación con breadcrumbs: Cursos › Curso › Niño/a.
+1. `/` — cursos con buscador.
+2. `/curso/:idJardin/:sala` — resumen, distribución y alumnos del curso.
+3. `/nino/:idNino` — ficha, trayectoria y observaciones.
+4. `/jardines` — panorama por jardín.
+5. `/pendientes` — cola general disponible con backend.
 
-## Privacidad
+La cabecera conserva Cursos, Jardines y Por verificar, y agrega **Soy profesora**.
 
-Solo se muestran códigos (`NINO-00001`), nunca nombres ni RUT. El dato
-`sexo_registrado` del CSV no se muestra. Pie de página fijo: «Herramienta de
-apoyo pedagógico, no constituye diagnóstico clínico».
+### Profesora
 
-## Decisiones tomadas donde el spec no era explícito
+1. `/profesora` — ingreso con el mismo número de WhatsApp usado para enviar observaciones.
+2. `/profesora/inicio` — conteo de cursos y casos, todas las advertencias y tabla de cursos propios.
+3. La campana cuenta todas las advertencias y despliega las 6 más recientes. No existe estado leído ni acción para marcar una advertencia: desaparece solo cuando el servicio deja de devolver el pendiente.
 
-- **Rangos de nivel**: `edad_min_meses` inclusivo y `edad_max_meses` exclusivo.
-  Si la edad supera el rango del nivel 9 (36 meses) se asigna el nivel 9; si no
-  cae en ningún rango, `nivelEsperado` es `null` y la brecha/alerta quedan en
-  blanco (`—`) en vez de inventar un valor.
-- **Nivel promedio del curso**: promedio de los niveles vigentes disponibles;
-  los niños/as sin observaciones no cuentan. Se muestra con un decimal.
-- **Fecha "hoy"**: se usa la fecha del navegador (`new Date()`) para la edad.
-- **Orden de observaciones**: la ficha las lista de la más reciente a la más
-  antigua; el gráfico de trayectoria va de la más antigua a la más reciente.
-- **Ruta desconocida**: cualquier URL no reconocida redirige a `/`.
-- **Estilos**: CSS plano con variables, tipografía del sistema, acento azul y
-  ámbar para alertas. Responsive desde 360 px, foco visible y HTML semántico.
+Los teléfonos se normalizan conservando solo dígitos. Coinciden si son iguales o, cuando ambos tienen al menos 9 dígitos, si tienen los mismos últimos 9. La sesión se guarda en `sessionStorage`, por lo que sobrevive a recargar la pestaña y termina al pulsar **Salir** o cerrar la pestaña.
 
-## Fuera de alcance
+> **Importante — no es seguridad:** el filtro por cursos solo ordena y restringe la interfaz. Los datos ya cargados siguen en el navegador; la autorización y el filtrado reales deben implementarse en el backend.
 
-Autenticación, edición de niveles, backend, despliegue, modo oscuro e
-internacionalización.
+No se implementa encuesta de clasificación. La única notificación es la advertencia por clasificación bajo el umbral.
+
+## Lógica de dominio
+
+Las funciones puras de `src/domain/` tienen tests Vitest. Entre otras cosas calculan edad, nivel esperado, brecha, nivel vigente, resúmenes, comparación de teléfonos, asignación demo, acceso a cursos y advertencias. **Curso** es la combinación `id_jardin + sala_grupo`.
+
+Solo se muestran códigos de niños/as (`NINO-00001`), nunca nombres ni RUT. El pie recuerda que la herramienta no constituye diagnóstico clínico.
+
+## Despliegue
+
+GitHub Pages publica bajo `/IntegrAI/`; por eso Vite usa esa base por defecto y las rutas quedan después de `#`. CloudFront publica la aplicación en `/` con:
+
+```bash
+python tools/desplegar_frontend.py subir
+```
+
+El build de CloudFront debe publicar también `educadoras.csv` además de los CSV históricos para que el modo demo pueda listar profesoras.
+
+## Pendientes del backend (fuera de alcance)
+
+Estos puntos solo se documentan; no están implementados en el frontend ni en este cambio:
+
+1. Crear `GET /api/profesora` y una sesión por profesora (por ejemplo, un código enviado por WhatsApp). Hoy `/pendientes` exige un `X-Api-Key` compartido que no puede ir en el navegador.
+2. `_procesar` marca observaciones como `por_verificar` pero nunca llama a `encolar_pendiente`, así que hoy esos casos no llegan a `/pendientes` y no generarían advertencias.
+3. `/api/datos` no filtra por profesora.
+
+Hasta resolverlos, el modo API no proporciona seguridad ni un flujo completo de advertencias. La restricción real por profesora debe aplicarse en cada endpoint del backend.
