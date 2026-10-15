@@ -20,6 +20,8 @@ MODELO_VISION = os.getenv("MODELO_VISION", "amazon.nova-pro-v1:0")
 
 # --- U2 · Ingesta multimodal (src/multimodal) ---
 # "legacy" = Procesador original | "v2" = puente de texto en 2 etapas (transcripción + conductas)
+# Marco de evaluación: "integra_iya" (rúbrica oficial, principal) | "dataset_e1" (regresión)
+MARCO = os.getenv("MARCO", "integra_iya")
 U2_PIPELINE = os.getenv("U2_PIPELINE", "legacy")
 WHISPER_MODEL = os.getenv("WHISPER_MODEL", "large-v3-turbo")
 MODELO_OCR = os.getenv("MODELO_OCR", "us.anthropic.claude-sonnet-5")

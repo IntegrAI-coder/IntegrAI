@@ -63,7 +63,7 @@ def _etapa1(tipo: str, ref: str, pie: str, texto_extraido: str) -> list[Segmento
     return [Segmento(fuente="texto", texto=txt, modelo="directo")] if txt else []
 
 
-def normalizar_entradas(entradas, etapa2: bool = True) -> ObservacionNormalizada:
+def normalizar_entradas(entradas, etapa2: bool = True, guia=None) -> ObservacionNormalizada:
     """entradas: iterable con atributos tipo, ref, pie, texto_extraido (procesadores.Entrada)."""
     t0 = time.perf_counter()
     segmentos: list[Segmento] = []
@@ -78,7 +78,7 @@ def normalizar_entradas(entradas, etapa2: bool = True) -> ObservacionNormalizada
     if etapa2 and transcripcion:
         from .. import config
         from .conductas import extraer
-        conductas, nino, adv2 = extraer([(s.fuente, s.texto) for s in segmentos if s.texto])
+        conductas, nino, adv2 = extraer([(s.fuente, s.texto) for s in segmentos if s.texto], guia=guia)
         adv += adv2
         modelos["conductas"] = config.MODELO_CONDUCTAS
     con_texto = [s for s in segmentos if s.texto]
