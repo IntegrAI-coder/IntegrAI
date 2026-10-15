@@ -42,3 +42,13 @@ export interface ObservacionManifestacion {
   idObservacion: string;
   idManifestacion: string;
 }
+
+export interface Evaluacion {
+  idNino: string;
+  dominio: string;
+  nivel: number;
+  margen: number;
+  periodo: string;
+  tendencia: string;
+  alerta: string | null;
+}

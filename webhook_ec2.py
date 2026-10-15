@@ -300,6 +300,10 @@ def api_datos() -> dict:
             "FROM observaciones ORDER BY id_observacion"),
         "observacion_manifestaciones": _sql_filas(
             "SELECT id_observacion,id_manifestacion FROM observacion_manifestaciones"),
+        # nivel CONSOLIDADO + alerta (rubric-aware) que produce el cron
+        "evaluaciones": _sql_filas(
+            "SELECT id_nino,dominio,nivel,margen,periodo,tendencia,alerta "
+            "FROM evaluaciones ORDER BY id_nino, periodo"),
     }
 
 

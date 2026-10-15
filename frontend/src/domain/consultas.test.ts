@@ -102,3 +102,24 @@ describe('fichaNino', () => {
     expect(fichaNino(datos, 'NINO-999', HOY)).toBeNull();
   });
 });
+
+describe('evaluación consolidada del backend', () => {
+  it('usa el nivel y la alerta del backend cuando existen', () => {
+    const conEval: Datos = {
+      ...datos,
+      evaluaciones: [
+        { idNino: 'NINO-1', dominio: 'global', nivel: 3, margen: 0.5, periodo: '2026-01-01', tendencia: 'estable', alerta: null },
+        { idNino: 'NINO-2', dominio: 'global', nivel: 4, margen: 0.5, periodo: '2026-01-01', tendencia: 'retroceso', alerta: 'Nivel 4 en el tramo bajo (posible rezago).' },
+      ],
+    };
+    const alumnos = alumnosDeCurso(conEval, 'JAR-1', 'SG-A', HOY);
+
+    const n1 = alumnos.find((a) => a.idNino === 'NINO-1');
+    expect(n1?.nivelVigente).toBe(3);
+    expect(n1?.alerta).toBe(false);
+
+    const n2 = alumnos.find((a) => a.idNino === 'NINO-2');
+    expect(n2?.nivelVigente).toBe(4);
+    expect(n2?.alerta).toBe(true);
+  });
+});
