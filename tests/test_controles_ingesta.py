@@ -71,7 +71,11 @@ def _obs(conductas=(), alertas=()):
                                   alertas_seguridad=list(alertas))
 
 
-def test_politica_de_decision():
+def test_politica_de_decision(monkeypatch):
+    # en CI no está la rúbrica privada: se usa la mínima de test_marcos
+    from src import marcos
+    from tests.test_marcos import rubrica_minima
+    monkeypatch.setattr(marcos, "marco_activo", rubrica_minima)
     assert decidir(_obs(alertas=["pedir_secretos"]), 30)["motivo"] == "posible_manipulacion"
     assert decidir(_obs(), 30)["motivo"] == "sin_evidencia"
     d = decidir(_obs(conductas=["Guarda sus bloques"]), 80)
