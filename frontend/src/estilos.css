@@ -472,3 +472,147 @@ a:focus-visible {
   font-size: 0.85rem;
   font-weight: 600;
 }
+
+/* --- Experiencia (parvularia / directora) --- */
+.roles {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: var(--color-acento-suave);
+  margin: 0.5rem 0 1.5rem;
+}
+
+.roles button {
+  border: none;
+  background: transparent;
+  color: var(--color-texto-tenue);
+  font: inherit;
+  font-weight: 600;
+  padding: 0.4rem 1.1rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.roles button.activo {
+  background: var(--color-superficie);
+  color: var(--color-acento);
+  box-shadow: var(--sombra);
+}
+
+.selector-duo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.selector-duo .buscador {
+  flex: 1 1 220px;
+}
+
+.decision {
+  border-left: 4px solid var(--color-borde);
+  background: var(--color-superficie);
+  border-radius: var(--radio);
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0;
+  box-shadow: var(--sombra);
+}
+
+.decision--alerta {
+  border-left-color: var(--color-alerta);
+  background: var(--color-alerta-fondo);
+}
+
+.decision--observar {
+  border-left-color: #d97706;
+}
+
+.decision--al-dia {
+  border-left-color: #15803d;
+}
+
+.decision--sin-datos {
+  border-left-color: var(--color-borde);
+}
+
+.chip--pend {
+  background: var(--color-fondo);
+  color: var(--color-texto-tenue);
+  border: 1px dashed var(--color-borde);
+}
+
+.dominio-tag {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: var(--color-acento-suave);
+  color: var(--color-acento);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.tecnologia {
+  background: var(--color-superficie);
+}
+
+.tecnologia__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tecnologia__sello {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-acento);
+  background: var(--color-acento-suave);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.pipeline {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.paso {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  padding: 0.75rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-fondo);
+}
+
+.paso__num {
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--color-acento);
+  color: #fff;
+  font-weight: 700;
+}
+
+.paso__titulo {
+  margin: 0;
+  font-weight: 600;
+}
+
+.paso__detalle {
+  margin: 0.15rem 0 0;
+  color: var(--color-texto-tenue);
+  font-size: 0.92rem;
+}

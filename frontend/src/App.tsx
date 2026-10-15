@@ -5,6 +5,7 @@ import { Nino } from './pages/Nino';
 import { Jardines } from './pages/Jardines';
 import { Pendientes } from './pages/Pendientes';
 import { Sincronizacion } from './pages/Sincronizacion';
+import { Experiencia } from './pages/Experiencia';
 
 export function App() {
   return (
@@ -22,6 +23,7 @@ export function App() {
               Cursos
             </NavLink>
             <NavLink to="/jardines">Jardines</NavLink>
+            <NavLink to="/experiencia">Acompañamiento</NavLink>
             <NavLink to="/pendientes">Por verificar</NavLink>
             <NavLink to="/sincronizacion">Sincronización</NavLink>
           </nav>
@@ -35,6 +37,7 @@ export function App() {
             <Route path="/curso/:idJardin/:sala" element={<Curso />} />
             <Route path="/nino/:idNino" element={<Nino />} />
             <Route path="/jardines" element={<Jardines />} />
+            <Route path="/experiencia" element={<Experiencia />} />
             <Route path="/pendientes" element={<Pendientes />} />
             <Route path="/sincronizacion" element={<Sincronizacion />} />
             <Route path="*" element={<Navigate to="/" replace />} />
