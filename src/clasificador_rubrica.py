@@ -68,7 +68,7 @@ class _Veredicto:
             segundo: NivelLit = Field(description="Segundo nivel más plausible")
             confianza: float = Field(ge=0, le=1)
             evidencia: str = Field(description="Frase literal de la observación que sustenta el nivel")
-            justificacion: str = Field(max_length=300)
+            justificacion: str = Field(max_length=600)
         return Veredicto
 
 
@@ -113,7 +113,10 @@ class JuezRubrica:
         for intento in range(2):
             try:
                 r = converse(self.modelo, [{"text": f"<nota>\n{texto}\n</nota>"}], system=system, tool=tool, max_tokens=600)
-                v = V.model_validate(r["input"])
+                inp = dict(r.get("input") or {})
+                if inp.get("justificacion") is not None:
+                    inp["justificacion"] = str(inp["justificacion"])[:600]
+                v = V.model_validate(inp)
                 break
             except (ValidationError, ValueError):
                 if intento == 1:

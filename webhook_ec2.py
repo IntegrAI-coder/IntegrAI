@@ -26,6 +26,7 @@ from src.marco import STOPWORDS
 from src import config
 from src.clasificador import Clasificador
 from src import marco
+from src import marcos
 
 JARDIN_DEMO = os.getenv("INTEGRA_JARDIN", "JAR-0001")
 EDUCADORA_DEMO = os.getenv("INTEGRA_EDUCADORA", "EDU-DEMO")
@@ -69,6 +70,30 @@ def _a_conductas(texto: str) -> str:
     except Exception as e:  # noqa: BLE001
         print(f"[u2] fallo, uso texto original: {type(e).__name__}", flush=True)
         return texto
+_juez = None
+
+
+def _rubrica_clasificar(texto: str, tramo_id: str):
+    """Clasifica con la RÚBRICA de Integra (JuezRubrica: Claude lee la rúbrica del tramo). None si falla."""
+    global _juez
+    try:
+        if _juez is None:
+            from src.clasificador_rubrica import JuezRubrica
+            _juez = JuezRubrica()
+        r = _juez.clasificar(texto, tramo=tramo_id)
+        return r if r.get("estado") == "ok" else None
+    except Exception as e:  # noqa: BLE001
+        print(f"[rubrica] fallo: {type(e).__name__}: {e}", flush=True)
+        return None
+
+
+def _tramo_nombre(tramo_id: str) -> str:
+    try:
+        return marcos.marco_activo().tramo(tramo_id)["nombre"]
+    except Exception:  # noqa: BLE001
+        return tramo_id
+
+
 plat = Plataforma()
 try:
     clas = Clasificador(backend=BACKEND)
@@ -179,24 +204,40 @@ def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
     edad = marco.edad_meses(nin["fecha_nacimiento"], fecha) if nin.get("fecha_nacimiento") else None
     # el clasificador recibe conductas sin nombres; se guarda eso, no la nota cruda con el nombre
     texto_clas = _a_conductas(texto)
-    cl = clas.clasificar(texto_clas, edad)
-    estado = "por_verificar" if cl.requiere_revision else "auto"
+
+    # --- RÚBRICA de Integra: la edad solo elige el tramo; dentro, el nivel 1-8 ---
+    tramo = marcos.tramo_por_edad(nin["fecha_nacimiento"], fecha) if nin.get("fecha_nacimiento") else None
+    tramo_id, tramo_nom, nombre_nivel = None, "—", None
+    if tramo:
+        tramo_id, _sub = tramo
+        tramo_nom = _tramo_nombre(tramo_id)
+    rub = _rubrica_clasificar(texto_clas, tramo_id) if tramo_id else None
+    if rub:
+        nivel, nombre_nivel = rub["nivel"], rub["nombre_nivel"]
+        requiere, margen, conf, dominios, matches = rub["requiere_revision"], rub.get("margen", 0.0), rub.get("confianza", 0.0), [], []
+    else:   # sin rúbrica / fallo: ensemble (Laya+matcher) como respaldo
+        cl = clas.clasificar(texto_clas, edad)
+        nivel, requiere, margen, conf = cl.nivel, cl.requiere_revision, cl.margen, cl.confianza
+        dominios, matches = cl.dominios, cl.matches
+    estado = "por_verificar" if requiere else "auto"
 
     oid = plat.registrar_observacion(
         id_nino=res.id_nino, id_educadora=educadora, fecha=fecha, formato="texto",
-        nivel=cl.nivel, nota=texto_clas, dominios=cl.dominios,
-        manifestaciones=[m.manifestacion["id"] for m in cl.matches],
-        confianza=cl.confianza, origen="whatsapp", metodo_resolucion=res.metodo,
-        margen=cl.margen, estado=estado)
+        nivel=nivel, nota=texto_clas, dominios=dominios,
+        manifestaciones=[m.manifestacion["id"] for m in matches],
+        confianza=conf, origen="whatsapp", metodo_resolucion=res.metodo, margen=margen, estado=estado)
 
-    # El ACK SIEMPRE responde el nivel PONDERADO del niño/a (media de sus notas), no el de la nota suelta.
+    # El ACK responde el nivel PONDERADO del niño (media) + el tramo + el nivel de la rúbrica.
     pond, n_notas = _nivel_ponderado(res.id_nino)
-    ack = f"registrado ✓ — {nin.get('nombre_pila','')} · nivel {pond} (promedio de {n_notas} notas)"
+    etiqueta = f"{nivel} {nombre_nivel}" if nombre_nivel else f"nivel {nivel}"
+    ack = (f"registrado ✓ — {nin.get('nombre_pila','')} · {tramo_nom} · "
+           f"promedio {pond} ({n_notas} notas) · este registro: {etiqueta}")
     if estado != "auto":
-        ack += " · la nota quedó por confirmar en la plataforma"
-    return {"ok": True, "id_nino": res.id_nino, "nivel_nota": cl.nivel, "nivel_ponderado": pond,
-            "n_notas": n_notas, "margen": cl.margen, "metodo": res.metodo,
-            "estado_resolucion": estado, "observacion_id": oid, "ack": ack}
+        ack += " (quedó por confirmar)"
+    return {"ok": True, "id_nino": res.id_nino, "tramo": tramo_id, "tramo_nombre": tramo_nom,
+            "nivel": nivel, "nombre_nivel": nombre_nivel, "nivel_ponderado": pond, "n_notas": n_notas,
+            "margen": margen, "metodo": res.metodo, "estado_resolucion": estado,
+            "observacion_id": oid, "ack": ack}
 
 
 @app.get("/health")
