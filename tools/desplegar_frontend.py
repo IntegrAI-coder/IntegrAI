@@ -134,7 +134,8 @@ def configurar() -> None:
 def subir(build: bool = True) -> None:
     fe = RAIZ / "frontend"
     if build:
-        subprocess.run("npm ci --no-audit --no-fund && npm run build", cwd=fe, shell=True, check=True)
+        # vite.config.ts usa base '/IntegrAI/' para GitHub Pages (PR #22); en CloudFront la app vive en la raíz
+        subprocess.run("npm ci --no-audit --no-fund && npm run build -- --base=/", cwd=fe, shell=True, check=True)
     dist = fe / "dist"
     archivos = [dist / "index.html"] + sorted((dist / "assets").rglob("*")) + [dist / c for c in CSV_USADOS]
     for f in archivos:

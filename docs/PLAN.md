@@ -59,16 +59,18 @@ La arquitectura real cambió respecto del plan del 14-oct (Lambda/SQS/DynamoDB n
 |---|---|---|
 | Webhook WhatsApp oficial + resolver + cola | ✅ | ✅ |
 | U2 multimodal, video visual, conductas | ✅ | ⚠️ Parcial: depende del último despliegue |
-| **Rúbrica de Integra** (tramos 0–6 años, juez) | ✅ | ❌ **No instalada**: los niños de 3–5 años se clasifican con la escala vieja (0–36 m), que los deja altos (ver #17) |
-| Token de la API, Swagger apagado | ✅ | ❌ Sin activar (corte coordinado) |
-| CloudFront HTTPS | ✅ | ✅ Activo |
+| **Rúbrica de Integra** (tramos 0–6 años, juez) | ✅ | ✅ Instalada en `privado/` (verificado el 15-oct) |
+| Swagger apagado | ✅ | ✅ `/docs` → 404 |
+| Token de la API | ✅ | ❌ Sin activar: `/clasificar` responde sin token (corte coordinado) |
+| CloudFront HTTPS | ✅ | ✅ Activo: `/` frontend React (S3 privado), `/streamlit/` Streamlit, API |
+| GitHub Pages del frontend (PR #22) | ✅ | ❌ El workflow falla: hay que activar Pages en *Settings → Pages → GitHub Actions* (dueño del repo) |
 | Puertos 80/8000 solo vía CloudFront, servicios sin root, rol IAM mínimo, WAF, Basic auth | ✅ (scripts) | ❌ Sin ejecutar |
 
 ### 2.3 Pendientes hasta el cierre (16-oct, 10:15), en orden
 
 | # | Tarea | Responsable | Listo cuando |
 |---|---|---|---|
-| 1 | **Instalar la rúbrica en la EC2** (`tools/importar_rubrica.py <docx>` → `privado/`) y desplegar `main` | Sebastián + Mauricio | `MarcoRubrica()` carga en el servidor |
+| 1 | ~~Instalar la rúbrica en la EC2~~ ✅ hecho (15-oct) | Sebastián + Mauricio | `MarcoRubrica()` carga en el servidor |
 | 2 | En `webhook_ec2.py`: tramo con `tramo_por_edad`, **`JuezRubrica` como voto principal**, respuesta "Sala Cuna · nivel 4 Afianzando (propuesta)" | Sebastián | Un mensaje de un niño de 4 años responde con un nivel de Transición o Medio |
 | 3 | **Corte de seguridad coordinado** (`docs/SEGURIDAD.md` §3.1): token de la API, webhook → URL HTTPS, puertos solo vía CloudFront | Sebastián + Mauricio | API sin token → 401; WhatsApp sigue respondiendo |
 | 4 | Rol IAM mínimo (plantilla **o** `iam_aws.py`), servicios sin root, WAF y Basic auth del dashboard | Ivan | `tools/seguridad_aws.py auditar` y `tools/cloudfront_aws.py auditar` en OK |

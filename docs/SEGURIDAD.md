@@ -63,7 +63,7 @@ Actualizado el 15-oct-2026. Se ejecutó primero todo lo que **no interrumpe la d
 
 | # | Medida | Estado | Cómo |
 |---|---|---|---|
-| 1 | Código seguro (firma fail-closed, whitelist, token, U2, video visual) | ✅ En `main` (PR #6) + video/Pegasus en el PR de esta rama | — |
+| 1 | Código seguro (firma fail-closed, whitelist, token, U2, video visual) | ✅ En `main` y **desplegado** (verificado 15-oct: `/docs` → 404, rúbrica instalada) | — |
 | 2 | IP, ID de instancia y nombre de la llave fuera del repo | ✅ | PR #6 |
 | 3 | IMDSv2 obligatorio | ✅ (ya estaba) | — |
 | 4 | Puerto 443 cerrado (no escuchaba nada) | ✅ Aplicado | Security group |
@@ -74,6 +74,11 @@ Actualizado el 15-oct-2026. Se ejecutó primero todo lo que **no interrumpe la d
 | 9 | Webhook → CloudFront (`https`) + `WA_APP_SECRET` + `WA_WHITELIST` + token | ⏳ Sebastián | Variables del webhook |
 | 10 | Cerrar 80/8000 a internet (solo CloudFront) | ⏳ Después de 9 | `tools/seguridad_aws.py corte` (revertible con `revertir-corte`) |
 | 11 | Servicios sin root, cifrar el EBS actual | ⏳ Después de la demo | Requiere reiniciar o detener la instancia |
+| 12 | Frontend React en la web desde S3 **privado** (OAC), solo los archivos que usa | ✅ Aplicado (15-oct) | `tools/desplegar_frontend.py` |
+| 13 | Rol IAM mínimo propio (hoy la EC2 usa el rol del escritorio Kiro del evento) | ⏳ Ivan | `infra/integra-server.yaml` o `tools/iam_aws.py` (corregidos en PR #14) |
+| 14 | WAF y Basic auth en CloudFront | ⏳ Ivan | `tools/cloudfront_aws.py waf` / `auth-basica` |
+
+**Auditoría del 15-oct (tarde):** IMDSv2 ✓ · 443 cerrado ✓ · EBS por defecto cifrado ✓ · CloudFront ✓ · token en Secrets Manager ✓ · S3 frontend privado ✓ · **pendientes:** 80/8000 abiertos a internet, API sin token, servicios como root, EBS de la instancia sin cifrar, rol IAM del evento, sin WAF, sin log groups ni alarmas, sin stack de CloudFormation desplegado.
 
 ### 3.1 Corte coordinado (unos 10 minutos, con Sebastián conectado)
 

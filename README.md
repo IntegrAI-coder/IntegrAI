@@ -36,7 +36,13 @@ Una tía de jardín envía por **WhatsApp** una observación de un niño/a: **te
 
 ## Arquitectura (lo que corre hoy)
 
+**Infraestructura TI, hoy vs. objetivo** (auditada el 15-oct; se regenera con `python tools/diagramas.py`):
+
 ![Infraestructura TI](docs/img/infra_ti.png)
+
+**Flujo de una observación y gobierno de datos** (clasificación S/C/I/P de cada dato, responsable y retención; ver [`docs/GOBIERNO_DATOS.md`](docs/GOBIERNO_DATOS.md)):
+
+![Flujo de datos](docs/img/infra_datos.png)
 
 ```
 Tía (WhatsApp) ─► Meta Cloud API ─► webhook/ (firma HMAC + whitelist) ─► EC2 integra-server (webhook_ec2.py, FastAPI)

@@ -63,23 +63,23 @@ def leyenda_clases(ax, x, y):
 
 def infra_datos():
     fig, ax = lienzo("Gobierno de datos · flujo de una observación",
-                     "Responsable: Fundación Integra (DPD) · Encargados con DPA: Meta, AWS, equipo IntegrAI · Ley 21.719, 21.430")
+                     "Estado al 15-oct · Responsable: Fundación Integra (DPD) · Encargados con DPA: Meta, AWS, operador del webhook · Ley 21.719, 21.430")
     W, H = 25, 20
     fila1 = [(3, "Tía · WhatsApp", ["texto, post-it, voz, video", "código o apodo del niño/a", "nunca RUT"], "S", "Integra"),
              (32, "Meta Cloud API", ["encargado (DPA)", "medio disponible por", "tiempo limitado"], "S", "Meta"),
              (61, "Webhook (externo)", ["servidor Traefik + TLS", "firma HMAC + whitelist", "Chatwoot = tercero (DPA)"], "S", "Sebastián"),
-             (90, "Medios temporales", ["S3 cifrado (KMS)", "borrado ≤ 24 h", "nunca en el repo"], "S", "Ivan"),
-             (119, "U2 · Ingesta", ["lectura fiel + conductas", "nombre → ID, no sale", "magic bytes, ≤ 16 MB"], "S", "Mauricio"),
+             (90, "Medios temporales", ["temporal en la EC2,", "se borra al procesar ✓", "objetivo: S3 KMS 24 h"], "S", "Ivan"),
+             (119, "U2 · Ingesta", ["post-it · voz · video visual", "→ conductas sin nombres", "magic bytes, ≤ 16 MB"], "S", "Mauricio"),
              (148, "Bedrock (us-east-1)", ["encargado, sin entrenar", "transferencia: cláusulas", "tipo (arts. 27-28)"], "S", "AWS")]
     y1 = 60
     for x, t, l, c, d in fila1:
         caja(ax, x, y1, W, H, t, l, c, d)
     for i in range(len(fila1) - 1):
         flecha(ax, (fila1[i][0] + W + 0.6, y1 + H / 2), (fila1[i + 1][0] - 0.6, y1 + H / 2))
-    fila2 = [(148, "Ensemble", ["matcher + Laya", "propone nivel + evidencia", "registra versión de modelo"], "C", "Sebastián"),
-             (119, "Revisión de la tía", ["humano en el loop", "art. 8 bis: explica y", "permite corregir"], "C", "Integra"),
-             (90, "BD observaciones", ["seudónimo NINO-xxxxx", "matrícula + 1 año", "cifrada, con backup"], "C", "Ivan"),
-             (61, "Dashboard (RBAC)", ["educadora: su sala", "directora: su jardín", "login + TLS"], "C", "Santiago"),
+    fila2 = [(148, "Clasificador", ["rúbrica Integra: tramo por", "edad · 8 niveles · juez LLM", "+ ensemble · compuerta"], "C", "Sebastián"),
+             (119, "Cola por verificar", ["la tía confirma o corrige", "art. 8 bis: revisión", "humana efectiva"], "C", "Integra"),
+             (90, "BD observaciones", ["seudónimo NINO-xxxxx", "hoy: SQLite en la EC2", "objetivo: cifrada + backup"], "C", "Ivan"),
+             (61, "Dashboards", ["React (/) · Streamlit", "HTTPS ✓ · login pendiente", "objetivo: RBAC por sala"], "C", "Santiago"),
              (32, "Agregados anónimos", ["por jardín / región", "sin datos individuales", "k-anonimato ≥ 5"], "I", "Integra"),
              (3, "Datos sintéticos", ["dataset E-1, benchmarks", "únicos en el repo", "público"], "P", "Mauricio")]
     y2 = 28
@@ -98,20 +98,24 @@ def infra_datos():
 def infra_ti():
     fig, ax = lienzo("Infraestructura TI · hoy vs. objetivo",
                      "Etiqueta = responsable · borde naranjo = riesgo abierto · ✓ = ya aplicado (15-oct) · cuenta AWS del evento, us-east-1")
-    # --- HOY (auditado por SSM el 15-oct) ---
+    # --- HOY (auditado el 15-oct por SSM y la API de AWS) ---
     ax.text(3, 85, "HOY", fontsize=15, fontweight="bold", color="#B5541A")
-    caja(ax, 3, 66, 22, 14, "Internet", ["llega directo a :80 y :8000", "CloudFront TLS ✓ creado"], alerta=True)
-    caja(ax, 3, 46, 22, 14, "Webhook externo", ["Traefik TLS + Chatwoot", "→ EC2 por HTTP plano"], alerta=True, dueno="Sebastián")
-    caja(ax, 33, 46, 30, 34, "EC2 integra-server", ["IP pública · :80 y :8000 abiertos", "IMDSv2 ✓ · 443 cerrado ✓",
-                                                    "código seguro en main ✓", "falta activar token en la API",
-                                                    "servicios corren como root", "EBS sin cifrar (cuenta ✓)",
-                                                    "SQLite + Laya + Whisper"], alerta=True, dueno="Sebastián")
-    caja(ax, 33, 28, 30, 13, "Bedrock", ["Sonnet 5 · Nova · Pegasus", "sin logging de invocación ✓"], dueno="AWS")
-    caja(ax, 3, 25, 22, 16, "Repo público", ["datos sintéticos", "IP e IDs redactados ✓"], clase="P", dueno="Mauricio")
-    flecha(ax, (25.6, 73), (32.4, 70), "HTTP", color="#B5541A")
-    flecha(ax, (25.6, 53), (32.4, 53), "HTTP", color="#B5541A")
-    ax.text(14, 62.6, "Meta → HTTPS", fontsize=8, color=GRIS, ha="center")
-    flecha(ax, (48, 45.4), (48, 41.6))
+    caja(ax, 3, 63, 24, 17, "CloudFront ✓", ["HTTPS + HSTS ✓", "/ → S3 · resto → EC2", "sin WAF ni login aún"], alerta=True, dueno="Mauricio")
+    caja(ax, 3, 45, 24, 14, "S3 frontend ✓", ["React en la raíz", "privado + OAC ✓"], clase="P", dueno="Mauricio")
+    caja(ax, 3, 25, 24, 15, "Webhook externo", ["Traefik TLS + Chatwoot", "→ EC2 por HTTP plano"], alerta=True, dueno="Sebastián")
+    caja(ax, 33, 44, 33, 36, "EC2 integra-server", [":80 y :8000 abiertos a internet", "IMDSv2 ✓ · 443 cerrado ✓",
+                                                    "código seguro + rúbrica ✓", "API sin token (falta el corte)",
+                                                    "servicios como root", "EBS sin cifrar · rol IAM del evento",
+                                                    "Streamlit /streamlit · API · SQLite"], alerta=True, dueno="Sebastián")
+    caja(ax, 33, 27, 33, 13, "Bedrock", ["Sonnet 5 · Nova · Pegasus · Titan", "sin logging de invocación ✓"], dueno="AWS")
+    caja(ax, 3, 5, 31, 17, "GitHub", ["repo público · IDs redactados ✓", "CI: Gitleaks + tests + pip-audit ✓",
+                                      "Pages: falta activarlo"], clase="P", dueno="Mauricio")
+    caja(ax, 38, 5, 28, 17, "Secrets Manager", ["integrai/api-token ✓", "token de Meta: pendiente",
+                                                "EBS cifrado por defecto ✓"], dueno="Ivan")
+    flecha(ax, (27.6, 72), (32.4, 72))
+    flecha(ax, (15, 62.4), (15, 59.6))
+    flecha(ax, (27.6, 33), (32.4, 46), "HTTP", color="#B5541A")
+    flecha(ax, (49, 43.4), (49, 40.6))
     ax.plot([72, 72], [5, 88], color=BORDE, lw=1.5, ls="--")
     # --- OBJETIVO ---
     ax.text(78, 85, "OBJETIVO", fontsize=15, fontweight="bold", color="#3D7D5A")
