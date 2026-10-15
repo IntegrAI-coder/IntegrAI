@@ -19,7 +19,7 @@ Uso:
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from . import config
@@ -58,10 +58,12 @@ def _tendencia(nuevo: int, previo: int | None) -> str:
 
 
 def ejecutar(plataforma: Plataforma | None = None, dry_run: bool = False,
-             ahora: str | None = None) -> dict[str, Any]:
+             ahora: str | None = None, periodo: str | None = None) -> dict[str, Any]:
     p = plataforma or Plataforma()
     ahora = ahora or datetime.now().isoformat(timespec="seconds")
     fecha = ahora[:10]
+    # El cron corre a las 00:00 -> la evaluación refleja los datos HASTA EL DÍA ANTERIOR.
+    periodo = periodo or (datetime.fromisoformat(ahora) - timedelta(days=1)).date().isoformat()
 
     wm = int(p.get_meta(WATERMARK_KEY, "0") or 0)
     nuevas = p.observaciones_nuevas(desde_rowid=wm)
@@ -113,7 +115,7 @@ def ejecutar(plataforma: Plataforma | None = None, dry_run: bool = False,
             n_eval += 1
             if not dry_run:
                 p.guardar_evaluacion(id_nino, "global", nivel, dist.get(nivel, 0.0),
-                                     margen, periodo=fecha, tendencia=tend, alerta=alerta,
+                                     margen, periodo=periodo, tendencia=tend, alerta=alerta,
                                      generado_en=ahora)
             detalle.append({"id_nino": id_nino, "accion": "evaluacion", "nivel": nivel,
                             "margen": margen, "tendencia": tend, "alerta": alerta})
@@ -131,8 +133,9 @@ def ejecutar(plataforma: Plataforma | None = None, dry_run: bool = False,
 def main() -> None:  # pragma: no cover
     ap = argparse.ArgumentParser(description="Evaluación periódica IntegrAI (cron)")
     ap.add_argument("--dry-run", action="store_true", help="no escribe, solo reporta")
+    ap.add_argument("--periodo", default=None, help="fecha del período (YYYY-MM-DD; por defecto: ayer)")
     args = ap.parse_args()
-    r = ejecutar(dry_run=args.dry_run)
+    r = ejecutar(dry_run=args.dry_run, periodo=args.periodo)
     modo = "(dry-run) " if args.dry_run else ""
     print(f"🧠 Cron {modo}-> nuevas: {r['observaciones_nuevas']} · niños: {r['ninos']} · "
           f"evaluaciones: {r['evaluaciones']} · por_verificar: {r['pendientes']} · "
