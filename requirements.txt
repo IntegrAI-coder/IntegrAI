@@ -1,8 +1,8 @@
 # Dependencias base (core del agente + dashboard)
-boto3>=1.34.0
-streamlit>=1.31.0
-python-dotenv>=1.0.0
-pydantic>=2.6            # contrato typesafe de U2 (src/multimodal)
+boto3==1.43.114
+streamlit==1.43.2
+python-dotenv==1.1.1
+pydantic==2.11.11
 
 # --- Decision model typesafe (Laya, on-prem) — instalación aparte ---
 # No va en requirements base porque arrastra torch (pesado).

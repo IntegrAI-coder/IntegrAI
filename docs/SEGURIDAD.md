@@ -85,6 +85,22 @@ Actualizado el 15-oct-2026. Se ejecutó primero todo lo que **no interrumpe la d
 
 El dominio de CloudFront y los valores de los secretos **no se escriben en el repo**: se comparten por el canal interno del equipo.
 
+### 3.2 CloudFront y WAF como código (Ivan)
+
+La distribución TLS (ítem 7) se creó a mano desde la consola: no hay nada en el repo que la reproduzca. `tools/cloudfront_aws.py` la audita y la crea de forma idempotente, y aplica el WAF pendiente del plan F1.
+
+| Comando | Qué hace |
+|---|---|
+| `python tools/cloudfront_aws.py auditar` | Solo lectura: TLS (https-only, TLSv1.2_2021), orígenes :80 y :8000, comportamientos (`/procesar*`, `/clasificar`, `/health` → :8000), política de cabeceras (HSTS) y WAF asociado. |
+| `python tools/cloudfront_aws.py crear` | Crea la distribución con `INTEGRA_ORIGIN_DOMAIN` (DNS de la EC2): dashboard → :80 y API → :8000, `https-only`, sin caché (`Managed-CachingDisabled`), `AllViewer`, HSTS + cabeceras de seguridad. |
+| `python tools/cloudfront_aws.py waf` | Crea el WebACL (CloudFront, en us-east-1) con `AWSManagedRulesCommonRuleSet`, `AWSManagedRulesKnownBadInputsRuleSet` y rate-limit por IP, y lo asocia a la distribución. |
+| `python tools/cloudfront_aws.py revertir-waf` | Desasocia y borra el WebACL (emergencia, igual que `revertir-corte`). |
+
+Sin `/docs` ni `/openapi`: no hay comportamiento que lleve esas rutas al orígen de la API, así que caen al dashboard (404). Verificar después de crear:
+
+- `python tools/cloudfront_aws.py auditar` → todas las líneas `OK`.
+- `curl -X POST https://<dominio>/clasificar?texto=x` sin `X-Api-Key` → 401 (el WAF debe devolver 403 ante un flood).
+
 ## 4. Plan de despliegue por fases
 
 ### F0 — Antes de la demo (cierre 16-oct, 10:15)
@@ -140,8 +156,18 @@ El dominio de CloudFront y los valores de los secretos **no se escriben en el re
 | `src/seguridad/archivos.py` | `ruta_segura` (confinada a `DIR_MEDIOS`) y `validar_medio` (16 MB + magic bytes) |
 | `src/multimodal/*` | Validación previa de cada medio, nota delimitada contra prompt injection, `nino_mencionado` fuera del `detalle`, errores genéricos |
 | `tests/test_seguridad.py`, `tests/test_webhook_whatsapp.py` | 9 tests: firma, whitelist, PII en logs, path traversal, magic bytes y tamaño |
-| `tools/seguridad_aws.py` | `auditar` (estado), `corte` / `revertir-corte` (80/8000 solo desde CloudFront) |
+| `tools/seguridad_aws.py` | `auditar` (estado), `corte` / `revertir-corte` (80/8000 solo desde CloudFront; cierra 22/8501 a 0.0.0.0/0, admin por SSM) |
+| `tools/cloudfront_aws.py` | `auditar` (estado de la distribución, TLS y WAF), `crear` (distribución TLS: dashboard → :80, API → :8000, sin caché, HSTS), `waf` (reglas administradas Common/KnownBadInputs + rate-based), `revertir-waf` (emergencia), `auth-basica`/`quitar-auth` (CloudFront Function Basic auth paliativo F0) |
 | `tools/desplegar_seguridad_ec2.sh` | Activa el token desde Secrets Manager en la EC2 y lo verifica |
+| `tools/secrets_aws.py` | `auditar`/`crear` de `integrai/wa-token` y `integrai/wa-app-secret` (sin imprimir valores) |
+| `tools/iam_aws.py` | `auditar`/`crear`/`asociar` rol EC2 mínimo (Bedrock InvokeModel limitado, SSM, SecretsManager integrai/*) |
+| `tools/ebs_aws.py` | `auditar`/`plan` para migrar volúmenes EBS sin cifrar a cifrados (requerido detener instancia) |
+| `tools/endurecer_servicios_ec2.sh` | Crea usuario `integra` y drop-ins systemd para ejecutar servicios sin root |
+| `tools/observabilidad_aws.py` | `auditar`/`crear` (CloudTrail multiregión + validación, GuardDuty, Security Hub, AWS Config) |
+| `tools/kms_s3_aws.py` | `auditar`/`crear` (CMK, S3 con BPA, cifrado KMS, lifecycle 24 h, TLS-only) |
+| `tools/bedrock_aws.py` | `auditar`/`crear` (VPC endpoint bedrock-runtime, verificación logging) |
+| `tools/budgets_aws.py` | `auditar`/`crear` (alerta de gasto en Bedrock) |
+| `tools/region_audit.py` | `auditar` (residencia/región de recursos para F2) |
 
 ## 6. Variables de entorno de seguridad
 
