@@ -87,7 +87,7 @@ El dominio de CloudFront y los valores de los secretos **no se escriben en el re
 
 ### 3.2 CloudFront y WAF como código (Ivan)
 
-La distribución TLS (ítem 7) se creó a mano desde la consola: no hay nada en el repo que la reproduzca. `tools/cloudfront_aws.py` la audita y la crea de forma idempotente, y aplica el WAF pendiente del plan F1.
+La distribución TLS (ítem 7) se creó por script el 15-oct; `tools/cloudfront_aws.py` la reproduce, la audita (la encuentra por el comentario "IntegrAI", sin duplicarla) `tools/cloudfront_aws.py` la audita y la crea de forma idempotente, y aplica el WAF pendiente del plan F1.
 
 | Comando | Qué hace |
 |---|---|
@@ -157,12 +157,12 @@ Sin `/docs` ni `/openapi`: no hay comportamiento que lleve esas rutas al orígen
 | `src/multimodal/*` | Validación previa de cada medio, nota delimitada contra prompt injection, `nino_mencionado` fuera del `detalle`, errores genéricos |
 | `tests/test_seguridad.py`, `tests/test_webhook_whatsapp.py` | 9 tests: firma, whitelist, PII en logs, path traversal, magic bytes y tamaño |
 | `tools/seguridad_aws.py` | `auditar` (estado), `corte` / `revertir-corte` (80/8000 solo desde CloudFront; cierra 22/8501 a 0.0.0.0/0, admin por SSM) |
-| `tools/cloudfront_aws.py` | `auditar` (estado de la distribución, TLS y WAF), `crear` (distribución TLS: dashboard → :80, API → :8000, sin caché, HSTS), `waf` (reglas administradas Common/KnownBadInputs + rate-based), `revertir-waf` (emergencia), `auth-basica`/`quitar-auth` (CloudFront Function Basic auth paliativo F0) |
+| `tools/cloudfront_aws.py` | `auditar` (estado de la distribución, TLS y WAF), `crear` (distribución TLS: dashboard → :80, API → :8000, sin caché, HSTS), `waf` (reglas administradas Common/KnownBadInputs + rate-based), `revertir-waf` (emergencia), `auth-basica`/`quitar-auth` (Basic auth del dashboard: valida el SHA-256 de la credencial guardada en Secrets Manager `integrai/dashboard-basic-auth`; la API sigue con `X-Api-Key`) |
 | `tools/desplegar_seguridad_ec2.sh` | Activa el token desde Secrets Manager en la EC2 y lo verifica |
 | `tools/secrets_aws.py` | `auditar`/`crear` de `integrai/wa-token` y `integrai/wa-app-secret` (sin imprimir valores) |
-| `tools/iam_aws.py` | `auditar`/`crear`/`asociar` rol EC2 mínimo (Bedrock InvokeModel limitado, SSM, SecretsManager integrai/*) |
+| `tools/iam_aws.py` | `auditar`/`crear`/`asociar` rol EC2 mínimo: Bedrock solo en los 7 modelos usados (foundation-model + inference profile `us.*`), `AmazonSSMManagedInstanceCore` (sin ella se pierde SSM), Secrets Manager `integrai/*`. `asociar` **reemplaza** el perfil actual |
 | `tools/ebs_aws.py` | `auditar`/`plan` para migrar volúmenes EBS sin cifrar a cifrados (requerido detener instancia) |
-| `tools/endurecer_servicios_ec2.sh` | Crea usuario `integra` y drop-ins systemd para ejecutar servicios sin root |
+| `tools/endurecer_servicios_ec2.sh` | Usuario `integra` + drop-ins systemd sin root, con `CAP_NET_BIND_SERVICE` (Streamlit en :80), caché de modelos compartida (`HF_HOME`), verificación y `revertir` |
 | `tools/observabilidad_aws.py` | `auditar`/`crear` (CloudTrail multiregión + validación, GuardDuty, Security Hub, AWS Config) |
 | `tools/kms_s3_aws.py` | `auditar`/`crear` (CMK, S3 con BPA, cifrado KMS, lifecycle 24 h, TLS-only) |
 | `tools/bedrock_aws.py` | `auditar`/`crear` (VPC endpoint bedrock-runtime, verificación logging) |
