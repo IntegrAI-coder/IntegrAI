@@ -57,7 +57,9 @@ def auditar() -> None:
 
 
 def corte() -> None:
-    """Una sola regla 80-8000 desde el prefix list de CloudFront (dos reglas superan la cuota de 60 del SG)."""
+    """Una sola regla 80-8000 desde el prefix list de CloudFront (dos reglas superan la cuota de 60 del SG).
+    También cierra 22 y 8501 (administración por SSM).
+    """
     sg, pl = _sg(), _prefix_list()
     ec2.authorize_security_group_ingress(GroupId=sg, IpPermissions=[{
         "IpProtocol": "tcp", "FromPort": 80, "ToPort": 8000,
@@ -68,7 +70,13 @@ def corte() -> None:
                 "IpProtocol": "tcp", "FromPort": puerto, "ToPort": puerto, "IpRanges": [{"CidrIp": "0.0.0.0/0"}]}])
         except ec2.exceptions.ClientError as e:
             print(f"puerto {puerto}: {e.response['Error']['Code']}")
-    print("corte aplicado: 80 y 8000 solo accesibles vía CloudFront")
+    for puerto in (22, 8501):
+        try:
+            ec2.revoke_security_group_ingress(GroupId=sg, IpPermissions=[{
+                "IpProtocol": "tcp", "FromPort": puerto, "ToPort": puerto, "IpRanges": [{"CidrIp": "0.0.0.0/0"}]}])
+        except ec2.exceptions.ClientError as e:
+            print(f"puerto {puerto}: {e.response['Error']['Code']}")
+    print("corte aplicado: 80 y 8000 solo accesibles vía CloudFront; 22 y 8501 cerrados a 0.0.0.0/0 (admin por SSM)")
 
 
 def revertir_corte() -> None:
