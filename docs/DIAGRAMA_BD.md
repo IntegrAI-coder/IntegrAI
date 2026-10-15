@@ -102,6 +102,7 @@ erDiagram
         TEXT id_pendiente PK
         TEXT id_mensaje
         TEXT id_nino_propuesto FK
+        TEXT id_educadora FK
         TEXT candidatos
         INTEGER nivel_propuesto
         TEXT dominio
@@ -163,10 +164,11 @@ el **cron** (cuando el margen es alto) o la tía (cuando aprueba un pendiente).
 `id_evaluacion` · `id_nino` · `dominio` · `nivel` · `confianza` · `margen` · `periodo` ·
 **`tendencia`** · **`alerta`** · `generado_en`.
 
-### ⏳ `evaluaciones_pendientes` — *(0 filas)* ← **la cola "POR VERIFICAR"**
+### ⏳ `evaluaciones_pendientes` — ← **la cola "POR VERIFICAR"**
 El **human-in-the-loop**: cuando el margen es bajo, NO se decide solo → queda acá para
-que la tía apruebe/edite/rechace.
-`id_pendiente` · `id_mensaje` · `id_nino_propuesto` · `candidatos` (JSON) ·
+que la tía apruebe/edite/rechace. **`id_educadora`** = a **qué tía** se asigna (la de la
+sala del niño; fallback: quien registró) → cada tía ve solo lo suyo.
+`id_pendiente` · `id_mensaje` · `id_nino_propuesto` · **`id_educadora`** · `candidatos` (JSON) ·
 `nivel_propuesto` · `dominio` · `margen` · `motivo` · `evidencia` · **`estado`** ·
 `creado_en` · `resuelto_en` · `resuelto_por`.
 
