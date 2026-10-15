@@ -145,6 +145,44 @@ class Plataforma:
                              (id_educadora, sala, id_jardin))
         self.con.commit()
 
+    def educadoras_con_whatsapp(self) -> list[dict]:
+        """Todas las educadoras con numero de WhatsApp registrado (+ sus salas)."""
+        q = ("SELECT e.id_educadora, e.id_jardin, e.telefono_whatsapp, es.sala_grupo "
+             "FROM educadoras e LEFT JOIN educadora_salas es ON es.id_educadora=e.id_educadora "
+             "WHERE e.telefono_whatsapp IS NOT NULL AND TRIM(e.telefono_whatsapp)<>''")
+        return [dict(r) for r in self.con.execute(q).fetchall()]
+
+    def ruta_de_whatsapp(self, telefono: str) -> list[dict]:
+        """Rutea un numero entrante -> educadora(s) y su(s) sala(s).
+
+        Normaliza el telefono (solo digitos) y acepta coincidencia por sufijo
+        (ultimos 9 digitos), para tolerar diferencias de prefijo pais (56) o formato (+).
+        Si el numero no esta registrado devuelve [] (el llamador decide el fallback).
+        """
+        def _digits(s: str) -> str:
+            return "".join(ch for ch in (s or "") if ch.isdigit())
+
+        d = _digits(telefono)
+        if not d:
+            return []
+        out: list[dict] = []
+        for f in self.educadoras_con_whatsapp():
+            fd = _digits(f.get("telefono_whatsapp") or "")
+            if not fd:
+                continue
+            if fd == d or (len(fd) >= 8 and len(d) >= 8 and fd[-9:] == d[-9:]):
+                out.append(f)
+        return out
+
+    def educadora_de_sala(self, id_jardin: str | None, sala_grupo: str | None) -> str | None:
+        """Devuelve la educadora (tia) responsable de una sala -> a quien asignar la cola."""
+        if not sala_grupo:
+            return None
+        r = self.con.execute(
+            "SELECT id_educadora FROM educadora_salas WHERE id_jardin IS ? AND sala_grupo=? LIMIT 1",
+            (id_jardin, sala_grupo)).fetchone()
+        return r["id_educadora"] if r else None
+
     # ==================================================================
     # OBSERVACIONES (con estado de resolución + idempotencia)
     # ==================================================================
