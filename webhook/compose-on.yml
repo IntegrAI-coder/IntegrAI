@@ -1,0 +1,28 @@
+services:
+  integrai-webhook:
+    build: .
+    image: integrai-webhook:latest
+    container_name: integrai-webhook
+    restart: always
+    env_file: .env
+    networks:
+      - traefik-public
+    labels:
+      - traefik.enable=true
+      # --- Router STAGING (subdominio propio) ---
+      - traefik.http.routers.integrai-webhook.rule=Host(`integrai.wagnersolutionsai.com`)
+      - traefik.http.routers.integrai-webhook.entrypoints=websecure
+      - traefik.http.routers.integrai-webhook.tls=true
+      - traefik.http.routers.integrai-webhook.tls.certresolver=letsencrypt
+      - traefik.http.services.integrai-webhook.loadbalancer.server.port=8123
+      # --- Router INTERCEPTO (switch total: el webhook de Meta entra aquí) ---
+      - traefik.http.routers.integrai-intercept.rule=Host(`chat.wagnersolutionsai.com`) && PathPrefix(`/webhooks/whatsapp`)
+      - traefik.http.routers.integrai-intercept.priority=1000
+      - traefik.http.routers.integrai-intercept.entrypoints=websecure
+      - traefik.http.routers.integrai-intercept.tls=true
+      - traefik.http.routers.integrai-intercept.tls.certresolver=letsencrypt
+      - traefik.docker.network=traefik-public
+
+networks:
+  traefik-public:
+    external: true
