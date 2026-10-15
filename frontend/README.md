@@ -4,7 +4,7 @@ Interfaz de solo consulta para revisar las clasificaciones de nivel de desarroll
 (1–9) de niños y niñas a partir de las observaciones de las educadoras. No edita
 datos ni accede a ningún backend.
 
-**Demo en vivo:** https://integrai-coder.github.io/IntegrAI/
+**Demo en vivo:** https://integrai-coder.github.io/IntegrAI/ (GitHub Pages) · https://d2eg8hbkfurj9b.cloudfront.net (CloudFront, la web oficial del proyecto)
 
 ## Requisitos
 
@@ -46,6 +46,16 @@ y publica `frontend/dist` con `actions/deploy-pages` (Node 20).
 Como Pages sirve bajo el subpath `/IntegrAI/`, el proyecto usa
 `base: '/IntegrAI/'` en `vite.config.ts` y `HashRouter` (las rutas quedan como
 `/IntegrAI/#/curso/...`), de modo que recargar una vista profunda no da 404.
+
+## Despliegue (CloudFront, web oficial)
+
+La raíz de https://d2eg8hbkfurj9b.cloudfront.net sirve este mismo frontend desde un bucket S3 **privado** (solo CloudFront lo lee vía OAC). Como allí la app vive en `/` y no en `/IntegrAI/`, el build se hace con `--base=/`:
+
+```bash
+python tools/desplegar_frontend.py subir   # npm ci && npm run build -- --base=/  → S3 → invalidación
+```
+
+Solo se publican `index.html`, `assets/` y los 6 CSV que lee `src/data/cargar.ts`. Los dos despliegues (Pages y CloudFront) salen del mismo código de `main`.
 
 ## Estructura
 

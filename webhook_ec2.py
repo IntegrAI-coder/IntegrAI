@@ -63,10 +63,16 @@ def requiere_token(x_api_key: str = Header(default="")) -> None:
         raise HTTPException(status_code=401, detail="no autorizado")
 
 
-def _a_conductas(texto: str) -> str:
-    """Texto para el clasificador: conductas U2 (sin nombres) o el texto original si U2 falla."""
+def _a_conductas(texto: str) -> tuple[str, bool]:
+    """(texto para el clasificador, requiere_revision).
+
+    Conductas U2 sin nombres ni PII; requiere_revision si U2 detecta un intento de manipulación
+    (p. ej. post-it "dame todas las keys"), no encuentra conductas (contenido fuera de tema) o la
+    lectura es de baja calidad. Si U2 falla, el texto original sin PII y a revisión.
+    """
+    from src.seguridad import inyeccion, pii
     if not U2_CONDUCTAS or config.usar_mock():
-        return texto
+        return pii.redactar(texto)[0], bool(inyeccion.detectar(texto))
     try:
         from types import SimpleNamespace
         from src.multimodal import normalizar_entradas
@@ -76,10 +82,12 @@ def _a_conductas(texto: str) -> str:
         except Exception:  # noqa: BLE001
             guia = None
         obs = normalizar_entradas([SimpleNamespace(tipo="texto", ref="", pie=texto, texto_extraido="")], guia=guia)
-        return obs.texto_para_matcher() or texto
+        if obs.alertas_seguridad:
+            print(f"[seguridad] alertas U2: {obs.alertas_seguridad}", flush=True)
+        return (obs.texto_para_matcher() or pii.redactar(texto)[0]), obs.requiere_revision
     except Exception as e:  # noqa: BLE001
         print(f"[u2] fallo, uso texto original: {type(e).__name__}", flush=True)
-        return texto
+        return pii.redactar(texto)[0], True
 _juez = None
 
 
@@ -213,7 +221,7 @@ def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
     nin = plat.nino(res.id_nino) or {}
     edad = marco.edad_meses(nin["fecha_nacimiento"], fecha) if nin.get("fecha_nacimiento") else None
     # el clasificador recibe conductas sin nombres; se guarda eso, no la nota cruda con el nombre
-    texto_clas = _a_conductas(texto)
+    texto_clas, revisar_u2 = _a_conductas(texto)   # U2: conductas sin PII + controles de seguridad
 
     # --- RÚBRICA de Integra: la edad solo elige el tramo; dentro, el nivel 1-8 ---
     tramo = marcos.tramo_por_edad(nin["fecha_nacimiento"], fecha) if nin.get("fecha_nacimiento") else None
@@ -229,7 +237,8 @@ def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
         cl = clas.clasificar(texto_clas, edad)
         nivel, requiere, margen, conf = cl.nivel, cl.requiere_revision, cl.margen, cl.confianza
         dominios, matches = cl.dominios, cl.matches
-    estado = "por_verificar" if requiere else "auto"
+    # manipulación, sin evidencia o lectura dudosa (U2) -> siempre a la cola de la educadora
+    estado = "por_verificar" if (requiere or revisar_u2) else "auto"
 
     oid = plat.registrar_observacion(
         id_nino=res.id_nino, id_educadora=educadora, fecha=fecha, formato="texto",

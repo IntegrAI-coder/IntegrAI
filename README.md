@@ -67,7 +67,7 @@ Usuarios ─► CloudFront (HTTPS) ─► / React (S3) · /streamlit :80 · API 
 | `infra/`, `tools/*_aws.py` | Infraestructura como código (CloudFormation) y scripts de seguridad/operación AWS |
 | `bench/` | Benchmarks y evaluaciones reproducibles (rúbrica, contra la edad, multimodal, compuerta) |
 | `data/` | Dataset sintético E-1 (7 CSV). La rúbrica de Integra **no** está en el repo (`privado/`, ver `tools/importar_rubrica.py`) |
-| `tests/` | 43 tests offline (`pytest`), corren en CI junto con Gitleaks y pip-audit |
+| `tests/` | 67 tests offline (`pytest`), corren en CI junto con Gitleaks y pip-audit |
 
 ## Documentación
 
@@ -76,6 +76,7 @@ Usuarios ─► CloudFront (HTTPS) ─► / React (S3) · /streamlit :80 · API 
 | Plan del equipo, ruta de lo construido y pendientes | [`docs/PLAN.md`](docs/PLAN.md) |
 | Rúbrica oficial, tramos y resultados (juez 65 % exacto, 89 % en aceptados) | [`docs/MARCO_RUBRICA.md`](docs/MARCO_RUBRICA.md) |
 | Seguridad: hallazgos, avance y corte coordinado | [`docs/SEGURIDAD.md`](docs/SEGURIDAD.md) |
+| 50 pruebas multimodales + DeepEval (bordes, reales, mal escritas, fuera de tema, seguridad) | [`docs/PRUEBAS_50.md`](docs/PRUEBAS_50.md) |
 | Gobierno de datos (Ley 21.719, 21.430) | [`docs/GOBIERNO_DATOS.md`](docs/GOBIERNO_DATOS.md) |
 | Infraestructura | [`docs/INFRA.md`](docs/INFRA.md), [`infra/README.md`](infra/README.md) |
 | Arquitectura de decisión, resolver y cron | [`docs/ARQUITECTURA_DECISION.md`](docs/ARQUITECTURA_DECISION.md), [`docs/ARQUITECTURA_RESOLVER_Y_CRON.md`](docs/ARQUITECTURA_RESOLVER_Y_CRON.md) |

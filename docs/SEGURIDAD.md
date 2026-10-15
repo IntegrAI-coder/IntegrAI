@@ -77,6 +77,7 @@ Actualizado el 15-oct-2026. Se ejecutó primero todo lo que **no interrumpe la d
 | 12 | Frontend React en la web desde S3 **privado** (OAC), solo los archivos que usa | ✅ Aplicado (15-oct) | `tools/desplegar_frontend.py` |
 | 13 | Rol IAM mínimo propio (hoy la EC2 usa el rol del escritorio Kiro del evento) | ⏳ Ivan | `infra/integra-server.yaml` o `tools/iam_aws.py` (corregidos en PR #14) |
 | 14 | WAF y Basic auth en CloudFront | ⏳ Ivan | `tools/cloudfront_aws.py waf` / `auth-basica` |
+| 15 | Controles de ingesta para toda modalidad: redacción de PII, detección de manipulación, escáner de secretos, política sin nivel/a revisión, salida tipada con reintento, evidencia literal | ✅ Aplicado (16-oct) · 50/50 pruebas | `src/seguridad/{pii,inyeccion,secretos}.py`, `docs/PRUEBAS_50.md` |
 
 **Auditoría del 15-oct (tarde):** IMDSv2 ✓ · 443 cerrado ✓ · EBS por defecto cifrado ✓ · CloudFront ✓ · token en Secrets Manager ✓ · S3 frontend privado ✓ · **pendientes:** 80/8000 abiertos a internet, API sin token, servicios como root, EBS de la instancia sin cifrar, rol IAM del evento, sin WAF, sin log groups ni alarmas, sin stack de CloudFormation desplegado.
 
