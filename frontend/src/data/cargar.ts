@@ -19,7 +19,12 @@ export interface Datos {
 
 type Fila = Record<string, string>;
 
-async function leerCsv(ruta: string): Promise<Fila[]> {
+function rutaCsv(nombre: string): string {
+  return `${import.meta.env.BASE_URL}${nombre}`;
+}
+
+async function leerCsv(nombre: string): Promise<Fila[]> {
+  const ruta = rutaCsv(nombre);
   const respuesta = await fetch(ruta);
   if (!respuesta.ok) {
     throw new Error(`No se pudo cargar ${ruta} (${respuesta.status})`);
@@ -41,12 +46,12 @@ export async function cargarDatos(): Promise<Datos> {
     manifestacionesRaw,
     observacionManifestacionesRaw,
   ] = await Promise.all([
-    leerCsv('/ruta_niveles.csv'),
-    leerCsv('/jardines.csv'),
-    leerCsv('/ninos.csv'),
-    leerCsv('/observaciones.csv'),
-    leerCsv('/manifestaciones.csv'),
-    leerCsv('/observacion_manifestaciones.csv'),
+    leerCsv('ruta_niveles.csv'),
+    leerCsv('jardines.csv'),
+    leerCsv('ninos.csv'),
+    leerCsv('observaciones.csv'),
+    leerCsv('manifestaciones.csv'),
+    leerCsv('observacion_manifestaciones.csv'),
   ]);
 
   const niveles: Nivel[] = nivelesRaw.map((f) => ({
