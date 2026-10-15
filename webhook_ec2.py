@@ -30,6 +30,9 @@ from src import marco
 JARDIN_DEMO = os.getenv("INTEGRA_JARDIN", "JAR-0001")
 EDUCADORA_DEMO = os.getenv("INTEGRA_EDUCADORA", "EDU-DEMO")
 BACKEND = os.getenv("BACKEND_DECISION", "ensemble")
+SALA_DEMO = os.getenv("INTEGRA_SALA", "")          # "" = todo el jardín demo
+# 1 = número no registrado usa el jardín demo; 0 = rechaza
+FALLBACK_DEMO = os.getenv("INTEGRA_FALLBACK_DEMO", "1") == "1"
 
 API_TOKEN = os.getenv("INTEGRA_API_TOKEN", "")
 # U2: la nota pasa a conductas observables antes del ensemble (docs/EVAL_ENSEMBLE.md §5: 47 % -> 72 %)
@@ -82,6 +85,40 @@ def _filas(jardin: str) -> list[dict]:
     return _roster_cache[jardin]  # type: ignore[return-value]
 
 
+def _ctx_remitente(from_: str) -> list[dict]:
+    """Rutea el número entrante -> educadora(s) + sala(s). Sin número registrado:
+    usa la sala demo (FALLBACK_DEMO=1) o rechaza (0)."""
+    ctx = plat.ruta_de_whatsapp(from_ or "")
+    if ctx:
+        return ctx
+    if FALLBACK_DEMO:
+        return [{"id_educadora": EDUCADORA_DEMO, "id_jardin": JARDIN_DEMO,
+                 "sala_grupo": SALA_DEMO, "_fallback": True}]
+    return []
+
+
+def _filas_ctx(ctx: list[dict]) -> list[dict]:
+    """Roster unión de las salas del remitente (dedup por id_nino+nombre)."""
+    key = tuple(sorted((c.get("id_jardin"), c.get("sala_grupo")) for c in ctx))
+    if key not in _roster_cache:
+        vistos: dict = {}
+        for c in ctx:
+            for f in plat.roster_sala(id_jardin=c.get("id_jardin"), sala_grupo=c.get("sala_grupo")):
+                vistos[(f["id_nino"], f.get("nombre_pila"))] = f
+        _roster_cache[key] = list(vistos.values())
+    return _roster_cache[key]
+
+
+def _nivel_ponderado(id_nino: str) -> tuple:
+    """Nivel PONDERADO del niño/a (media de sus notas por confianza) + nº de notas."""
+    obs = [o for o in plat.observaciones_de(id_nino) if o.get("nivel")]
+    if not obs:
+        return None, 0
+    num = sum(o["nivel"] * max(float(o.get("confianza") or 0.5), 0.01) for o in obs)
+    den = sum(max(float(o.get("confianza") or 0.5), 0.01) for o in obs)
+    return round(num / den), len(obs)
+
+
 def extraer_mencion(texto: str, filas: list[dict]) -> str:
     """Heurística determinista: busca un nombre de pila del roster (o diminutivo)
     y toma el nombre + el siguiente token SOLO si es plausible apellido (no stopword)."""
@@ -117,7 +154,12 @@ class Msg(BaseModel):
 
 def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
     fecha = fecha or date.today().isoformat()
-    filas = _filas(JARDIN_DEMO)
+    ctx = _ctx_remitente(from_)
+    if not ctx:
+        return {"ok": False, "estado": "remitente_desconocido",
+                "ack": "⚠️ No reconozco este número. Pídele a tu coordinadora que lo registre."}
+    filas = _filas_ctx(ctx)
+    educadora = ctx[0]["id_educadora"]
     res = Resolver(filas).resolver(extraer_mencion(texto, filas))
 
     if res.estado != "resuelto":
@@ -133,19 +175,20 @@ def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
     estado = "por_verificar" if cl.requiere_revision else "auto"
 
     oid = plat.registrar_observacion(
-        id_nino=res.id_nino, id_educadora=EDUCADORA_DEMO, fecha=fecha, formato="texto",
+        id_nino=res.id_nino, id_educadora=educadora, fecha=fecha, formato="texto",
         nivel=cl.nivel, nota=texto_clas, dominios=cl.dominios,
         manifestaciones=[m.manifestacion["id"] for m in cl.matches],
         confianza=cl.confianza, origen="whatsapp", metodo_resolucion=res.metodo,
         margen=cl.margen, estado=estado)
 
-    if estado == "auto":
-        ack = f"registrado ✓ — {nin.get('nombre_pila','')} · nivel {cl.nivel}"
-    else:
-        ack = f"registrado ✓ — {nin.get('nombre_pila','')} · nivel {cl.nivel} (quedó por confirmar en la plataforma)"
-    return {"ok": True, "id_nino": res.id_nino, "nivel": cl.nivel, "margen": cl.margen,
-            "metodo": res.metodo, "estado_resolucion": estado, "observacion_id": oid,
-            "ack": ack}
+    # El ACK SIEMPRE responde el nivel PONDERADO del niño/a (media de sus notas), no el de la nota suelta.
+    pond, n_notas = _nivel_ponderado(res.id_nino)
+    ack = f"registrado ✓ — {nin.get('nombre_pila','')} · nivel {pond} (promedio de {n_notas} notas)"
+    if estado != "auto":
+        ack += " · la nota quedó por confirmar en la plataforma"
+    return {"ok": True, "id_nino": res.id_nino, "nivel_nota": cl.nivel, "nivel_ponderado": pond,
+            "n_notas": n_notas, "margen": cl.margen, "metodo": res.metodo,
+            "estado_resolucion": estado, "observacion_id": oid, "ack": ack}
 
 
 @app.get("/health")
