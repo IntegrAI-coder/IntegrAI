@@ -29,7 +29,7 @@ Medio Mayor y Transición **no tienen datos en el dataset**: se evalúan con los
 
 | Pieza | Archivo |
 |---|---|
-| Rúbrica .docx → JSON (**no se versiona**: material de Integra) | `tools/importar_rubrica.py "<rúbrica>.docx"` → `data/marcos/integra_identidad_autonomia.json` |
+| Rúbrica .docx → JSON (**no se versiona**: material de Integra) | `tools/importar_rubrica.py "<rúbrica>.docx"` → `privado/marcos/integra_identidad_autonomia.json` (fuera de `data/`, que el frontend publica) |
 | Marco intercambiable (`MARCO=integra_iya` por defecto, `dataset_e1` para regresión) | `src/marcos.py`: `tramo_por_edad`, `niveles`, `nombre_nivel`, `descripcion_nivel`, `anclas`, `dimensiones_observables` |
 | Matcher con anclas externas, filtro por tramo y leave-one-out (compatible con lo anterior) | `src/matcher.py` (`Matcher(anclas=…)`, `matchear(…, tramo=, excluir=)`) |
 | Clasificador base por rúbrica (la línea base que el ensemble debe superar) | `src/clasificador_rubrica.py` |
@@ -94,5 +94,9 @@ Los ejemplos de la rúbrica muestran **qué separa un nivel de otro**. La v1 lo 
 5. Usar **`JuezRubrica`** (65 % exacto, 89 % en aceptados) como voto principal. `ClasificadorRubrica` (matcher) y Laya quedan como votos de apoyo y para detectar discrepancias.
 
 **Santiago (dashboard):** mostrar tramo + nombre del nivel. Alerta de rezago: "nivel bajo para su subtramo"; el umbral se define con Integra.
+
+**Choques revisados con `main` (PR #10 y #11):**
+- El frontend publica `data/` completo (`vite.config.ts: publicDir: '../data'`). Por eso la rúbrica vive en `privado/`, que no se versiona ni se publica. **Santiago:** servir los datos por una API con autenticación (hallazgo H16 de `SEGURIDAD.md`).
+- `docs/METRICAS_GATE.md` (umbral 0,15, 98 % en aceptados) se midió sobre la escala vieja de 9 niveles **con la edad como pista**, que con el dataset predice el nivel en el 98,5 % de los casos. Con la rúbrica, la compuerta debe recalibrarse sobre `bench/casos_rubrica.jsonl`. Con el juez, confianza < 0,6 deja 26 % a revisión y 89 % de exactitud en los aceptados.
 
 **Integra (pendiente):** los otros 9 núcleos; validar el crosswalk; confirmar si la rúbrica puede publicarse; definir el umbral de rezago por subtramo.

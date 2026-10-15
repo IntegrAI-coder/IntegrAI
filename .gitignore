@@ -59,6 +59,7 @@ samples/
 medios_tmp/
 
 # Rúbrica oficial de Integra: material entregado para la hackathon, no se publica (ver tools/importar_rubrica.py)
+privado/
 data/marcos/integra_*.json
 *.docx
 bench/casos_rubrica.jsonl

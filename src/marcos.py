@@ -12,12 +12,15 @@ Sala Cuna 0–2 años, Nivel Medio 2–4, Transición 4–6. Dentro de un tramo 
 from __future__ import annotations
 
 import json
+import os
 from datetime import date
 from functools import lru_cache
+from pathlib import Path
 
 from . import config
 
-ARCHIVO_RUBRICA = config.DATA / "marcos" / "integra_identidad_autonomia.json"
+# Fuera de data/: el frontend publica data/ completo (vite publicDir). La rúbrica es material privado de Integra.
+ARCHIVO_RUBRICA = Path(os.getenv("RUBRICA_JSON", str(config.RAIZ / "privado" / "marcos" / "integra_identidad_autonomia.json")))
 
 
 # --------------------------------------------------------------------------- tramos

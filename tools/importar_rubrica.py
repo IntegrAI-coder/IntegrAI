@@ -2,7 +2,7 @@
 """Convierte la rúbrica oficial de Integra (.docx) en el marco JSON que usa el sistema.
 
     python tools/importar_rubrica.py "Rúbrica progresión Identidad y Autonomía.docx"
-    → data/marcos/integra_identidad_autonomia.json   (NO se versiona: material de Integra)
+    → privado/marcos/integra_identidad_autonomia.json   (NO se versiona ni se publica: material de Integra)
 
 El docx trae 3 tablas (Sala Cuna, Nivel Medio, Transición) de 8 filas:
   "N. Nombre" | descripción del nivel | "• Conducta: … • Ejemplo: … • Ejemplo: …"
@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
-SALIDA = RAIZ / "data" / "marcos" / "integra_identidad_autonomia.json"
+SALIDA = RAIZ / "privado" / "marcos" / "integra_identidad_autonomia.json"   # fuera de data/ (el frontend la publica)
 
 # Tramos oficiales (ChileAtiende, ficha 1786): edad al 31 de marzo del año escolar
 TRAMOS = [
