@@ -104,7 +104,10 @@ def ejecutar(plataforma: Plataforma | None = None, dry_run: bool = False,
 
         if margen < umbral:
             n_pend += 1
-            if not dry_run:
+            ya_en_cola = p.con.execute(
+                "SELECT 1 FROM evaluaciones_pendientes WHERE id_nino_propuesto=? AND estado='pendiente' LIMIT 1",
+                (id_nino,)).fetchone()
+            if not dry_run and not ya_en_cola:
                 p.encolar_pendiente(id_nino, [str(l) for l in dist], nivel, "global",
                                     confianza=dist.get(nivel, 0.0), margen=margen,
                                     motivo="margen_bajo", evidencia=evidencia, creado_en=ahora,
