@@ -616,3 +616,127 @@ a:focus-visible {
   color: var(--color-texto-tenue);
   font-size: 0.92rem;
 }
+
+.foco {
+  border-left: 4px solid var(--color-alerta);
+}
+
+.lista-alertas {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.lista-alertas button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-fondo);
+  text-align: left;
+  cursor: pointer;
+}
+
+.lista-alertas button:hover {
+  border-color: var(--color-acento);
+}
+
+.lista-alertas button.activo {
+  border-color: var(--color-acento);
+  background: var(--color-acento-suave);
+}
+
+.lista-alertas__id {
+  font-weight: 600;
+}
+
+.lista-alertas__meta {
+  color: var(--color-texto-tenue);
+  font-size: 0.9rem;
+  margin-right: auto;
+}
+
+.estado-dominios {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.estado-dominios li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.estado-dominios__dato {
+  color: var(--color-texto-tenue);
+  font-size: 0.9rem;
+}
+
+.estado-dominios li.sin-evidencia {
+  opacity: 0.7;
+}
+
+.estado-dominios li.sin-evidencia .estado-dominios__dato {
+  color: var(--color-alerta);
+}
+
+.estimulo__lista {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+  counter-reset: estimulo;
+}
+
+.estimulo__item {
+  padding: 0.75rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-fondo);
+}
+
+.estimulo__dominio {
+  margin: 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.estimulo__motivo {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-acento);
+  background: var(--color-acento-suave);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.estimulo__acciones {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
+  color: var(--color-texto-tenue);
+  font-size: 0.92rem;
+}
+
+.estimulo__acciones strong {
+  color: var(--color-texto);
+}

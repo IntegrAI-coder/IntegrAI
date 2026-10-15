@@ -21,6 +21,8 @@ import {
   nombreDominio,
   resumenTrayectorias,
 } from '../domain/experiencia';
+import { estadoManifestaciones, planEstimulacion } from '../domain/estimulacion';
+import { DOMINIOS } from '../domain/experiencia';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Tarjeta } from '../components/Tarjeta';
 import { BadgeNivel } from '../components/BadgeNivel';
@@ -105,6 +107,9 @@ function PanelParvularia({ datos, cursos }: { datos: Datos; cursos: ResumenCurso
   const fichasSala = ninosSala
     .map((n) => fichaNino(datos, n.idNino, HOY))
     .filter((f): f is FichaNino => f !== null);
+  const fichasFoco = fichasSala
+    .filter((f) => f.alerta)
+    .sort((a, b) => (a.brecha ?? 0) - (b.brecha ?? 0));
 
   const ninoActivo =
     (ninoSel && fichasSala.some((f) => f.nino.idNino === ninoSel) ? ninoSel : undefined) ??
@@ -150,6 +155,41 @@ function PanelParvularia({ datos, cursos }: { datos: Datos; cursos: ResumenCurso
         </div>
       </div>
 
+      <section className="panel foco" aria-label="Niños y niñas que requieren apoyo">
+        <h3 className="seccion__titulo">Foco de apoyo en esta sala</h3>
+        {fichasFoco.length === 0 ? (
+          <p className="ficha-descripcion">
+            Ningún niño/a de esta sala está por debajo de lo esperado. Mantén el registro
+            para sostener la trayectoria.
+          </p>
+        ) : (
+          <>
+            <p className="ficha-descripcion">
+              {fichasFoco.length} de {fichasSala.length} niños/as requieren apoyo. El
+              registro automático te devuelve horas cada semana: enfócalas aquí.
+            </p>
+            <ul className="lista-alertas">
+              {fichasFoco.map((f) => (
+                <li key={f.nino.idNino}>
+                  <button
+                    type="button"
+                    className={f.nino.idNino === ninoActivo ? 'activo' : undefined}
+                    onClick={() => setNinoSel(f.nino.idNino)}
+                  >
+                    <span className="lista-alertas__id">{f.nino.idNino}</span>
+                    <span className="lista-alertas__meta">
+                      Nivel {f.nivelVigente ?? '—'} · esperado {f.nivelEsperado ?? '—'}
+                      {f.rezagoRelativo ? ' · bajo el promedio de la sala' : ''}
+                    </span>
+                    <BadgeAlerta activa />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </section>
+
       {!ficha ? (
         <Vacio mensaje="Esta sala no tiene niños/as registrados." />
       ) : (
@@ -169,6 +209,8 @@ function FichaAcompanamiento({ datos, ficha }: { datos: Datos; ficha: FichaNino 
     fecha: o.fechaObservacion,
     nivel: o.nivelEstimado,
   }));
+  const estadoMan = estadoManifestaciones(ficha);
+  const plan = planEstimulacion(ficha);
 
   return (
     <>
@@ -205,6 +247,35 @@ function FichaAcompanamiento({ datos, ficha }: { datos: Datos; ficha: FichaNino 
         <p>{diag.detalle}</p>
       </section>
 
+      {ficha.alerta && plan.length > 0 && (
+        <section aria-label="Acciones para estimular" className="panel estimulo">
+          <h3 className="seccion__titulo">Acciones para estimular</h3>
+          <p className="ficha-descripcion">
+            Ideas para acompañar su desarrollo en la sala. Se priorizan los dominios sin
+            evidencia o con el nivel más bajo; son sugerencias, no indicaciones clínicas.
+          </p>
+          <ol className="estimulo__lista">
+            {plan.map((p) => (
+              <li key={p.dominio} className="estimulo__item">
+                <p className="estimulo__dominio">
+                  {p.nombre}{' '}
+                  <span className="estimulo__motivo">
+                    {p.motivo === 'sin-evidencia' ? 'sin evidencia' : 'nivel más bajo'}
+                  </span>
+                </p>
+                <ul className="estimulo__acciones">
+                  {p.acciones.map((a) => (
+                    <li key={a.titulo}>
+                      <strong>{a.titulo}.</strong> {a.detalle}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
       <section aria-label="Trayectoria del nivel" className="panel">
         {trayectoria.length === 0 ? (
           <>
@@ -219,6 +290,26 @@ function FichaAcompanamiento({ datos, ficha }: { datos: Datos; ficha: FichaNino 
             Nivel {nivelInfo.nivel}: {nivelInfo.nombreNivel}. {nivelInfo.descripcion}
           </p>
         )}
+      </section>
+
+      <section aria-label="Estado de las manifestaciones" className="panel">
+        <h3 className="seccion__titulo">Estado de las manifestaciones</h3>
+        <p className="ficha-descripcion">
+          {estadoMan.total} manifestaciones observadas en {ficha.observaciones.length}{' '}
+          {ficha.observaciones.length === 1 ? 'observación' : 'observaciones'}.
+        </p>
+        <ul className="estado-dominios">
+          {estadoMan.porDominio.map((d) => (
+            <li key={d.dominio} className={d.observadas === 0 ? 'sin-evidencia' : undefined}>
+              <span className="dominio-tag">{d.nombre}</span>
+              <span className="estado-dominios__dato">
+                {d.observadas === 0
+                  ? 'sin evidencia'
+                  : `${d.observadas} obs · nivel ${d.nivelPromedio?.toFixed(1)}`}
+              </span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section aria-label="Focos de observación" className="panel">
