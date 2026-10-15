@@ -34,7 +34,7 @@ rechazar) → la decisión se escribe en `evaluaciones`.
 
 ```bash
 # cada tía ve SOLO lo suyo (se identifica por su número)
-curl "http://44.204.243.156:8000/pendientes?from=56958947607"
+curl -H "x-api-key: $INTEGRA_API_TOKEN" "http://44.204.243.156:8000/pendientes?from=56958947607"
 
 # aprobar | editar (con nivel) | rechazar
 /opt/integra/.venv/bin/python tools/test_cola_htl.py

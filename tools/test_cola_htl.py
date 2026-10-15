@@ -24,13 +24,19 @@ import urllib.request
 DB = os.getenv("DB_PATH", "/opt/integra/plataforma.db")
 
 
+def _hdr() -> dict:
+    tok = os.getenv("INTEGRA_API_TOKEN", "")
+    return {"x-api-key": tok} if tok else {}
+
+
 def _get(url: str, path: str) -> dict:
-    return json.load(urllib.request.urlopen(url + path, timeout=30))
+    req = urllib.request.Request(url + path, headers=_hdr())
+    return json.load(urllib.request.urlopen(req, timeout=30))
 
 
 def _post(url: str, path: str, body: dict) -> dict:
     req = urllib.request.Request(url + path, data=json.dumps(body).encode(),
-                                 headers={"Content-Type": "application/json"}, method="POST")
+                                 headers={"Content-Type": "application/json", **_hdr()}, method="POST")
     return json.load(urllib.request.urlopen(req, timeout=30))
 
 
