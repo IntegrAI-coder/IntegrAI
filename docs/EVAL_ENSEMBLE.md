@@ -45,3 +45,23 @@ En el dataset sintético **el nivel está casi determinado por la edad**: el niv
 - Armar un set de evaluación **"contra la edad"**: observaciones donde el `nivel_estimado` difiere del nivel típico de la edad, más casos sintéticos de rezago (por ejemplo, un niño de 24 meses con conductas de nivel 5). Medir exacto, ±1 y **recall de alerta de rezago**.
 - Separar el set de ajuste (pesos 0,6/0,4, umbral 0,15) del set de reporte.
 - Usar la etapa 2 de U2 (nota → conductas) delante del ensemble: con el mismo texto sube el ±1 de 90 % a 97 % y baja la revisión de 20 % a 10 %. El efecto del matcher solo es mayor (ver `bench/reporte_sint.md`).
+
+## 5. Set "contra la edad" (`bench/casos_contra_edad.jsonl`, 60 casos)
+
+Armado con `python -m bench.contra_edad`. Tiene 20 observaciones reales con nivel ≠ típico de su edad (en el dataset todas están 1 nivel bajo lo típico), 20 rezagos sintéticos de 2–3 niveles, 10 adelantos de 1–2 niveles y 10 controles en el nivel típico. Evaluado con `python -m bench.eval_api --casos casos_contra_edad.jsonl --conductas`.
+
+| Variante | Exacto | ±1 | A revisión | Exactos en aceptados | Exacto adelanto | Exacto control | Exacto real (−1) | Exacto rezago (−2/−3) | Recall alerta rezago | Precisión alerta |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Solo edad (sin texto) | 17 % | 62 % | 0 % | 10/60 | 0 % | 100 % | 0 % | 0 % | 0 % | — |
+| Ensemble con edad (desplegado) | 47 % | 73 % | 38 % | **17/37** | 30 % | 80 % | 45 % | 40 % | 50 % | 95 % |
+| Ensemble sin edad | 48 % | 70 % | 50 % | 19/30 | 20 % | 30 % | 70 % | 50 % | 78 % | 76 % |
+| **Ensemble con edad + conductas U2** | **72 %** | **88 %** | **23 %** | **37/46** | **70 %** | **90 %** | 65 % | **70 %** | **80 %** | **97 %** |
+
+**Lectura:**
+1. Cuando el niño no calza con su edad, el ensemble desplegado baja a **47 %** exacto y detecta **la mitad** de los rezagos.
+2. **La compuerta no protege en estos casos:** de los 37 que aceptó sin revisión, solo 17 eran correctos. El prior de edad le da confianza alta a respuestas equivocadas: el sistema "aprueba" justo los casos de rezago que debería mandar a la tía.
+3. **Poner la etapa 2 de U2 (nota → conductas) delante del ensemble** sube el exacto de 47 % a 72 % y el recall de rezago de 50 % a 80 %, con 97 % de precisión. Además baja la revisión de 38 % a 23 %. Es el cambio de mayor impacto y no toca el ensemble.
+
+**Recomendaciones para la compuerta:**
+- Mandar a revisión siempre que la predicción del texto y el prior de edad discrepen (por ejemplo, si el voto del híbrido sin edad está a ≥ 2 niveles del nivel típico), aunque el margen sea alto.
+- Calibrar el umbral de margen **en este set**, no en el aleatorio.
