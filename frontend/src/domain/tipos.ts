@@ -1,4 +1,4 @@
-export type FormatoCaptura = 'texto' | 'audio' | 'video';
+export type FormatoCaptura = 'texto' | 'foto' | 'audio' | 'video';
 
 export interface Nivel {
   nivel: number;
