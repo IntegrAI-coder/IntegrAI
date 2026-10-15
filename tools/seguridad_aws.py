@@ -3,6 +3,7 @@
 
     python tools/seguridad_aws.py auditar          # solo lectura: estado actual
     python tools/seguridad_aws.py corte            # 80/8000 SOLO desde CloudFront (rompe el acceso directo por IP)
+    python tools/seguridad_aws.py corte --cerrar-admin   # además cierra 22/8501 (admin solo por SSM)
     python tools/seguridad_aws.py revertir-corte   # vuelve a abrir 80/8000 a internet (emergencia)
 
 Requiere INTEGRA_INSTANCE_ID (no se versiona el ID: repo público).
@@ -70,13 +71,17 @@ def corte() -> None:
                 "IpProtocol": "tcp", "FromPort": puerto, "ToPort": puerto, "IpRanges": [{"CidrIp": "0.0.0.0/0"}]}])
         except ec2.exceptions.ClientError as e:
             print(f"puerto {puerto}: {e.response['Error']['Code']}")
-    for puerto in (22, 8501):
-        try:
-            ec2.revoke_security_group_ingress(GroupId=sg, IpPermissions=[{
-                "IpProtocol": "tcp", "FromPort": puerto, "ToPort": puerto, "IpRanges": [{"CidrIp": "0.0.0.0/0"}]}])
-        except ec2.exceptions.ClientError as e:
-            print(f"puerto {puerto}: {e.response['Error']['Code']}")
-    print("corte aplicado: 80 y 8000 solo accesibles vía CloudFront; 22 y 8501 cerrados a 0.0.0.0/0 (admin por SSM)")
+    # 22 y 8501: hoy están limitados a una IP (/32), no abiertos a internet. Solo se cierran del todo
+    # con --cerrar-admin (administración únicamente por SSM); confirmar antes con quien use esa IP.
+    if "--cerrar-admin" in sys.argv:
+        grupo = ec2.describe_security_groups(GroupIds=[sg])["SecurityGroups"][0]
+        for p in grupo["IpPermissions"]:
+            if p.get("FromPort") in (22, 8501) and p.get("IpRanges"):
+                ec2.revoke_security_group_ingress(GroupId=sg, IpPermissions=[{
+                    "IpProtocol": p["IpProtocol"], "FromPort": p["FromPort"], "ToPort": p["ToPort"], "IpRanges": p["IpRanges"]}])
+                print(f"puerto {p['FromPort']} cerrado ({[r['CidrIp'] for r in p['IpRanges']]})")
+    print("corte aplicado: 80 y 8000 solo accesibles vía CloudFront"
+          + ("; 22 y 8501 cerrados (admin solo por SSM)" if "--cerrar-admin" in sys.argv else "; 22/8501 sin cambios (usa --cerrar-admin)"))
 
 
 def revertir_corte() -> None:

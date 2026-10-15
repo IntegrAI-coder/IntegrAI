@@ -44,41 +44,36 @@ def _assume_role_doc() -> str:
 }"""
 
 
+# Modelos que usa el sistema (src/config.py, src/matcher.py, bench/). Con inference profiles "us.*" Bedrock
+# exige permiso sobre el PROFILE y sobre el foundation-model de cada región a la que enruta.
+MODELOS = [
+    "anthropic.claude-sonnet-5",            # U2 conductas, OCR post-it, juez de la rúbrica
+    "anthropic.claude-haiku-4-5",           # generación de casos de evaluación
+    "amazon.nova-pro-v1",                   # OCR del servicio y respaldo de video
+    "amazon.nova-2-lite-v1",                # router de imagen y verificación del post-it
+    "amazon.nova-lite-v1",
+    "twelvelabs.pegasus-1-2",               # análisis visual de video
+    "amazon.titan-embed-text-v2",           # embeddings del matcher (sin inference profile)
+]
+POLITICA_SSM = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"   # sin ella se pierde el acceso por SSM
+
+
 def _policy_doc() -> str:
-    return """{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ssm:GetParameter",
-        "ssm:GetParameters",
-        "ssm:StartSession",
-        "ssm:DescribeInstanceInformation"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "secretsmanager:GetSecretValue"
-      ],
-      "Resource": [
-        "arn:aws:secretsmanager:*:*:secret:integrai/*"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "bedrock:InvokeModel"
-      ],
-      "Resource": [
-        "arn:aws:bedrock:*::foundation-model/us.anthropic.claude-sonnet-5*",
-        "arn:aws:bedrock:*::foundation-model/us.amazon.nova-pro-v1*"
-      ]
-    }
-  ]
-}"""
+    import json
+    recursos = []
+    for m in MODELOS:
+        recursos.append(f"arn:aws:bedrock:*::foundation-model/{m}*")
+        recursos.append(f"arn:aws:bedrock:*:*:inference-profile/us.{m}*")
+    return json.dumps({
+        "Version": "2012-10-17",
+        "Statement": [
+            {"Sid": "SecretosIntegrAI", "Effect": "Allow", "Action": ["secretsmanager:GetSecretValue"],
+             "Resource": ["arn:aws:secretsmanager:*:*:secret:integrai/*"]},
+            {"Sid": "BedrockModelosUsados", "Effect": "Allow",
+             "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
+             "Resource": recursos},
+        ],
+    }, indent=1)
 
 
 def auditar() -> None:
@@ -123,13 +118,21 @@ def crear() -> None:
         iam.create_policy(PolicyName=POLICY_NAME, PolicyDocument=_policy_doc())
         print("creada política:", POLICY_NAME)
     except iam.exceptions.EntityAlreadyExistsException:
-        print("política ya existe:", POLICY_NAME)
+        arn_existente = f"arn:aws:iam::{_get_account_id()}:policy/{POLICY_NAME}"
+        versiones = iam.list_policy_versions(PolicyArn=arn_existente)["Versions"]
+        if len(versiones) >= 5:   # IAM permite 5 versiones: borrar la más antigua no vigente
+            vieja = sorted((v for v in versiones if not v["IsDefaultVersion"]), key=lambda v: v["CreateDate"])[0]
+            iam.delete_policy_version(PolicyArn=arn_existente, VersionId=vieja["VersionId"])
+        iam.create_policy_version(PolicyArn=arn_existente, PolicyDocument=_policy_doc(), SetAsDefault=True)
+        print("política ya existía: actualizada a la versión vigente del repo")
     arn = f"arn:aws:iam::{_get_account_id()}:policy/{POLICY_NAME}"
     try:
         iam.attach_role_policy(RoleName=ROLE_NAME, PolicyArn=arn)
         print("attach:", arn)
     except Exception as e:
         print("attach err:", e)
+    iam.attach_role_policy(RoleName=ROLE_NAME, PolicyArn=POLITICA_SSM)
+    print("attach:", POLITICA_SSM)
 
 
 def _get_account_id() -> str:
@@ -141,10 +144,18 @@ def _get_account_id() -> str:
 def asociar() -> None:
     if not IID:
         sys.exit("define INTEGRA_INSTANCE_ID")
-    _ec2().associate_iam_instance_profile(
-        IamInstanceProfile={"Name": INSTANCE_PROFILE}, InstanceId=IID
-    )
-    print("asociado a", IID)
+    ec2 = _ec2()
+    actuales = ec2.describe_iam_instance_profile_associations(
+        Filters=[{"Name": "instance-id", "Values": [IID]}, {"Name": "state", "Values": ["associated"]}]
+    )["IamInstanceProfileAssociations"]
+    if actuales:
+        ec2.replace_iam_instance_profile_association(
+            IamInstanceProfile={"Name": INSTANCE_PROFILE}, AssociationId=actuales[0]["AssociationId"])
+        print("perfil reemplazado en", IID, "(antes:", actuales[0]["IamInstanceProfile"]["Arn"].split("/")[-1] + ")")
+    else:
+        ec2.associate_iam_instance_profile(IamInstanceProfile={"Name": INSTANCE_PROFILE}, InstanceId=IID)
+        print("asociado a", IID)
+    print("Verifica en la EC2: Bedrock (clasificar), SSM y Secrets Manager. Para revertir, vuelve a asociar el perfil anterior.")
 
 
 if __name__ == "__main__":

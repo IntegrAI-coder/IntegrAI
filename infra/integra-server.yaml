@@ -17,9 +17,10 @@ Parameters:
         --filters Name=prefix-list-name,Values=com.amazonaws.global.cloudfront.origin-facing
         --query "PrefixLists[0].PrefixListId" --output text
   InstanceId:
-    Type: AWS::EC2::Instance::Id
+    Type: String
     Default: ""
-    Description: ID de integra-server (opcional; habilita las alarmas de la instancia).
+    AllowedPattern: "^$|^i-[0-9a-f]{8,17}$"
+    Description: ID de integra-server (opcional; habilita las alarmas de la instancia). String porque el tipo AWS::EC2::Instance::Id no admite vacío.
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: VPC de integra-server.
@@ -36,7 +37,8 @@ Parameters:
     Default: 30
   AuditLogRetentionDays:
     Type: Number
-    Default: 730
+    Default: 731   # ~2 años; CloudWatch no acepta 730 (valores válidos: ..., 545, 731, 1096, ...)
+    AllowedValues: [1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1096, 1827]
   BackupSchedule:
     Type: String
     Default: "cron(0 5 * * ? *)"
@@ -50,25 +52,17 @@ Conditions:
 
 Resources:
   # --- Security group: ingreso 80/8000 solo desde CloudFront ---
-  IngressDashboard:
+  # UNA sola regla 80-8000: cada referencia al prefix list de CloudFront pesa ~55 reglas y el
+  # security group admite 60 por defecto; dos reglas (80 y 8000) hacen fallar la creación del stack.
+  IngressCloudFront:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       GroupId: !Ref SecurityGroupId
       IpProtocol: tcp
       FromPort: 80
-      ToPort: 80
-      SourcePrefixListId: !Ref CloudFrontPrefixListId
-      Description: "Dashboard :80 solo desde CloudFront (IntegrAI)"
-
-  IngressApi:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !Ref SecurityGroupId
-      IpProtocol: tcp
-      FromPort: 8000
       ToPort: 8000
       SourcePrefixListId: !Ref CloudFrontPrefixListId
-      Description: "API :8000 solo desde CloudFront (IntegrAI)"
+      Description: "Dashboard :80 y API :8000 solo desde CloudFront (IntegrAI)"
 
   # --- Rol IAM de minimo privilegio + instance profile ---
   InstanceRole:
@@ -83,6 +77,9 @@ Resources:
             Principal:
               Service: ec2.amazonaws.com
             Action: sts:AssumeRole
+      # Sin AmazonSSMManagedInstanceCore el agente SSM pierde la conexión: nadie podría administrar la EC2.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
       Policies:
         - PolicyName: integrai-ec2-minimo
           PolicyDocument:
@@ -101,13 +98,27 @@ Resources:
                 Action:
                   - secretsmanager:GetSecretValue
                 Resource: "arn:aws:secretsmanager:*:*:secret:integrai/*"
+              # Modelos usados (igual que tools/iam_aws.py MODELOS). Con inference profiles "us.*" Bedrock exige
+              # permiso sobre el profile Y sobre el foundation-model de cada región a la que enruta.
               - Sid: Bedrock
                 Effect: Allow
                 Action:
                   - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
                 Resource:
-                  - "arn:aws:bedrock:*::foundation-model/us.anthropic.claude-sonnet-5*"
-                  - "arn:aws:bedrock:*::foundation-model/us.amazon.nova-pro-v1*"
+                  - "arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-5*"
+                  - "arn:aws:bedrock:*:*:inference-profile/us.anthropic.claude-sonnet-5*"
+                  - "arn:aws:bedrock:*::foundation-model/anthropic.claude-haiku-4-5*"
+                  - "arn:aws:bedrock:*:*:inference-profile/us.anthropic.claude-haiku-4-5*"
+                  - "arn:aws:bedrock:*::foundation-model/amazon.nova-pro-v1*"
+                  - "arn:aws:bedrock:*:*:inference-profile/us.amazon.nova-pro-v1*"
+                  - "arn:aws:bedrock:*::foundation-model/amazon.nova-2-lite-v1*"
+                  - "arn:aws:bedrock:*:*:inference-profile/us.amazon.nova-2-lite-v1*"
+                  - "arn:aws:bedrock:*::foundation-model/amazon.nova-lite-v1*"
+                  - "arn:aws:bedrock:*:*:inference-profile/us.amazon.nova-lite-v1*"
+                  - "arn:aws:bedrock:*::foundation-model/twelvelabs.pegasus-1-2*"
+                  - "arn:aws:bedrock:*:*:inference-profile/us.twelvelabs.pegasus-1-2*"
+                  - "arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v2*"
 
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
