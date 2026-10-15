@@ -1,4 +1,4 @@
-# IntegrAI — Plan de equipo (v2)
+# IntegrAI — Plan de equipo (v3, 15-oct)
 
 Desafío 1 de Fundación Integra, Breaking Barriers 2026 (14–16 oct). Repo: <https://github.com/IntegrAI-coder/IntegrAI>
 
@@ -30,29 +30,58 @@ Tía (WhatsApp) → U1 Gateway (firma + whitelist) → SQS → Worker
 | 9 | Python 3.12, SAM | Se mantiene. Lambda `python3.12`, Pydantic v2 empaquetado con `sam build --use-container`, o en una capa con wheels `manylinux` | `pydantic_core` es binario; un build desde Windows sin contenedor falla en Lambda. |
 | 10 | Presupuesto Kiro "10,000" | Con **Kiro Pro** ya activo, son créditos, no tokens. El reparto por unidad sigue igual | Aclara la duda que quedó abierta en el plan de Kiro. |
 
-## 2. Equipo, responsabilidades y ramas (actualizado 15-oct)
+## 2. Estado y ruta de lo construido (actualizado 15-oct, 15:00)
 
-La arquitectura real cambió respecto del plan del 14-oct: el clasificador corre como **ensemble (matcher híbrido + Laya) en EC2 `integra-server`**, con WhatsApp ya conectado ahí. Los roles quedan así:
+🌐 **Web (HTTPS):** https://d2eg8hbkfurj9b.cloudfront.net — dashboard + API de decisión detrás de CloudFront.
 
-| Persona | A cargo de | Rama de trabajo | Estado |
+La arquitectura real cambió respecto del plan del 14-oct (Lambda/SQS/DynamoDB no se construyeron). Lo que corre es un **servicio FastAPI en la EC2 `integra-server`** (`webhook_ec2.py`) con WhatsApp oficial, U2 multimodal, clasificador y cola "por verificar", y un dashboard Streamlit, todo detrás de CloudFront.
+
+### 2.1 Ruta de lo que ya existe (17 PR fusionados)
+
+| Área | PR | Qué quedó | Dónde |
 |---|---|---|---|
-| **Ivan** | **Infraestructura AWS**: qué servicios usar y cómo desplegar (EC2 actual vs. serverless, IaC, secretos, logs, costos) | `Ivan` | Decisión en `docs/INFRA.md`; plantilla en `infra/` (`integra-server.yaml`); logs/alarmas y respaldos en `tools/cloudwatch_aws.py` y `tools/backup_aws.py` |
-| **Sebastián** | **Conexión WhatsApp + clasificador** (ensemble, compuerta, resolución del niño/a por nombre) | `shiva/arquitectura-decision` → nueva `whatsapp-clasificador` | Operativo en `integra-server`; **el código del servidor aún no está en el repo** |
-| **Santiago** | **Frontend** (dashboard Vite + React + TS de consulta de niveles) | `frontend` (hoy el commit está en `shiva/arquitectura-decision`, sin PR) | Construido; falta PR a `main` |
-| **Mauricio** | **Modelo multimodal (U2) + medidas de seguridad** | `u2-eval-despliegue` (PR #3) y `seguridad` (por crear) | U2 y evaluación listos en PR #3 |
+| **Base** | #1, #4 | Dataset sintético, plan y roles del equipo | `data/`, `docs/PLAN.md` |
+| **Decisión** (Sebastián) | #2, #5, #17 | Matcher híbrido + Laya (ensemble), resolver determinista nombre → niño/a, ruteo por número de la tía → su sala, ACK con nivel ponderado, cron de evaluación periódica, simulador de trayectorias | `src/`, `webhook_ec2.py`, `docs/ARQUITECTURA_*.md` |
+| **WhatsApp** (Sebastián) | #5, #6 | Webhook oficial (Meta Cloud API) con firma fail-closed, whitelist y logs sin PII | `webhook/` |
+| **Human-in-the-loop** (Sebastián) | #10, #13 | Compuerta por margen (métricas), cola "por verificar" de los 4 cursos | `docs/METRICAS_GATE.md`, `docs/HITL_COLA_EQUIPO.md` |
+| **Evaluación del modelo** (Sebastián) | #7, #16 | Held-out de Laya; el Laya afinado no mejora el ensemble (plan B descartado) | `docs/EVAL_LAYA_HELDOUT.md`, `docs/EVAL_ENSEMBLE_LAYA.md` |
+| **Multimodal U2** (Mauricio) | #3, #9 | Post-it literal + verificación (0 % → 83 %), Whisper, **video visual con Pegasus** (probado), conductas con cita (Pydantic) | `src/multimodal/`, `bench/` |
+| **Rúbrica oficial** (Mauricio) | #12 | Rúbrica de Integra como marco principal (3 tramos × 8 niveles, 0–6 años, regla del 31 de marzo), MM v2, **juez LLM 65 % exacto / 89 % en aceptados**, set de 168 casos | `src/marcos.py`, `src/clasificador_rubrica.py`, `docs/MARCO_RUBRICA.md` |
+| **Evaluación honesta** (Mauricio) | #3 | La edad predecía el nivel en el 98,5 % del dataset: set "contra la edad" | `docs/EVAL_ENSEMBLE.md` |
+| **Seguridad** (Mauricio, Ivan) | #6, #9, #14, #15 | Plan F0/F1/F2 + gobierno de datos (Ley 21.719); CloudFront TLS, token en Secrets Manager, puerto 443 cerrado, EBS cifrado por defecto; scripts IAM/WAF/auth/sin root **corregidos**; CI bloqueante (Gitleaks + pytest + pip-audit) | `docs/SEGURIDAD.md`, `docs/GOBIERNO_DATOS.md`, `tools/*_aws.py`, `.github/` |
+| **Infraestructura** (Ivan) | #15, #14 | CloudFormation (SG, rol mínimo, logs, alarmas, backup), CloudWatch, backups | `infra/`, `docs/INFRA.md` |
+| **Frontend** (Santiago) | #11 | Dashboard React (Vite + TS) de consulta de niveles | `frontend/` |
+| **Datos** (Sebastián) | #8 | Diagrama relacional de la BD + guía UI/UX | `docs/DIAGRAMA_BD.md` |
 
-### Tareas hasta el cierre (16-oct, 10:15)
+### 2.2 Qué está desplegado vs. qué está solo en el repo
 
-| Persona | Tareas | Listo cuando |
+| | En `main` | En `integra-server` |
 |---|---|---|
-| **Ivan** | 1) Decidir la infraestructura de la demo y de producción (recomendado: mantener EC2 para la demo; documentar el camino serverless para Integra). 2) Infraestructura como código del servidor (instance profile, security group, systemd). 3) Secretos de Meta en Secrets Manager, no en el disco. 4) Logs y alarmas básicas (CloudWatch). | `docs/INFRA.md` + plantilla en `infra/`, desplegable por otra persona — entregado en la rama `Ivan` (`docs/INFRA.md`, `infra/integra-server.yaml`, `infra/README.md`, `tools/secrets_aws.py`, `tools/cloudwatch_aws.py`, `tools/backup_aws.py`, `tools/endurecer_servicios_ec2.sh`) |
-| **Sebastián** | 1) **Subir al repo el código que corre en `integra-server`** (API `/procesar`, `/procesar_media`, `/clasificar`, webhook). 2) Llamar a U2 (`normalizar_entradas()`) antes del ensemble: sube el acierto de 47 % a 72 % en casos difíciles (ver `docs/EVAL_ENSEMBLE.md`). 3) Evaluar el ensemble con `bench/casos_contra_edad.jsonl` además del set aleatorio. | PR con el código del servidor; `python -m bench.eval_api --casos casos_contra_edad.jsonl` muestra la mejora |
-| **Santiago** | 1) Abrir el PR de `frontend/` a `main`. 2) Mostrar en la ficha del niño/a la transcripción, las conductas y las advertencias que entrega U2. 3) Marcar los casos "pendiente de revisión" de la compuerta. | Dashboard en `main` y desplegado |
-| **Mauricio** | 1) Fusionar PR #3 (U2 + evaluación). 2) Medir audio (Whisper small vs. large-v3-turbo) y video con medios del equipo. 3) **Seguridad**: cerrar puertos 22/8000/8501 (solo SSM y 80/443), autenticación en la API, validar la firma `X-Hub-Signature-256` del webhook, whitelist de teléfonos, borrar medios después de procesar, no registrar nombres de niños/as en logs. 4) Completar el `[__ %]` de audio y video en la presentación. | Checklist de seguridad en `docs/SEGURIDAD.md`, cumplido en el servidor |
+| Webhook WhatsApp oficial + resolver + cola | ✅ | ✅ |
+| U2 multimodal, video visual, conductas | ✅ | ⚠️ Parcial: depende del último despliegue |
+| **Rúbrica de Integra** (tramos 0–6 años, juez) | ✅ | ✅ Instalada en `privado/` (verificado el 15-oct) |
+| Swagger apagado | ✅ | ✅ `/docs` → 404 |
+| Token de la API | ✅ | ❌ Sin activar: `/clasificar` responde sin token (corte coordinado) |
+| CloudFront HTTPS | ✅ | ✅ Activo: `/` frontend React (S3 privado), `/streamlit/` Streamlit, API |
+| GitHub Pages del frontend (PR #22) | ✅ | ❌ El workflow falla: hay que activar Pages en *Settings → Pages → GitHub Actions* (dueño del repo) |
+| Puertos 80/8000 solo vía CloudFront, servicios sin root, rol IAM mínimo, WAF, Basic auth | ✅ (scripts) | ❌ Sin ejecutar |
 
-**Ramas:** cada persona trabaja en su rama y abre un PR a `main`; nadie hace push directo a `main`. Para crear ramas en `IntegrAI-coder/IntegrAI` hace falta rol **Write** en el repo: el dueño de la cuenta debe agregar a Ivan, Santiago y Mauricio (`mauriciovalenzuela742`) en *Settings → Collaborators*. Mientras tanto, los cambios llegan por fork + PR.
+### 2.3 Pendientes hasta el cierre (16-oct, 10:15), en orden
 
-> Las tablas de la sección 3 son el plan original del 14-oct (unidades U1–U5 y personas P1–P4). Quedan como referencia; la asignación vigente es la de esta sección.
+| # | Tarea | Responsable | Listo cuando |
+|---|---|---|---|
+| 1 | ~~Instalar la rúbrica en la EC2~~ ✅ hecho (15-oct) | Sebastián + Mauricio | `MarcoRubrica()` carga en el servidor |
+| 2 | En `webhook_ec2.py`: tramo con `tramo_por_edad`, **`JuezRubrica` como voto principal**, respuesta "Sala Cuna · nivel 4 Afianzando (propuesta)" | Sebastián | Un mensaje de un niño de 4 años responde con un nivel de Transición o Medio |
+| 3 | **Corte de seguridad coordinado** (`docs/SEGURIDAD.md` §3.1): token de la API, webhook → URL HTTPS, puertos solo vía CloudFront | Sebastián + Mauricio | API sin token → 401; WhatsApp sigue respondiendo |
+| 4 | Rol IAM mínimo (plantilla **o** `iam_aws.py`), servicios sin root, WAF y Basic auth del dashboard | Ivan | `tools/seguridad_aws.py auditar` y `tools/cloudfront_aws.py auditar` en OK |
+| 5 | Recalibrar la compuerta con la rúbrica (juez: confianza < 0,6 → cola) | Sebastián | % a revisión y exactitud en aceptados medidos sobre `casos_rubrica.jsonl` |
+| 6 | Frontend: no publicar `data/` (`publicDir`), mostrar tramo + nombre del nivel | Santiago | Build sin CSV públicos |
+| 7 | Grabar medios del equipo (voz, post-its, videos actuados) y medir audio/video; completar el `[__ %]` de la presentación | Mauricio + equipo | `bench/reporte_*.md` con audio y video reales |
+| 8 | Ensayo de la demo ×2 y congelar el código 2 h antes | Todos | — |
+
+**Ramas:** cada persona trabaja en su rama y abre un PR a `main`; la CI (Gitleaks + pytest + pip-audit) debe pasar.
+
+> Las tablas de la sección 3 son el plan original del 14-oct (unidades U1–U5 y personas P1–P4). Quedan como referencia.
 
 ## 3. Plan original por día (14-oct, referencia)
 

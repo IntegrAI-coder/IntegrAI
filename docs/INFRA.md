@@ -12,18 +12,23 @@
 
 La demo **no** crea infraestructura serverless nueva: reutiliza lo que existe. El camino serverless queda documentado como plan (§6) para que Integra lo despliegue sin reescribir la lógica.
 
-## 2. Componentes y estado
+## 2. Componentes y estado (auditado el 15-oct, tarde)
+
+![Infraestructura TI: hoy vs. objetivo](img/infra_ti.png)
 
 | Componente | Hoy | IaC |
 |---|---|---|
 | EC2 `integra-server` | En ejecución (`/opt/integra`) | No se recrea; se endurece (§4) |
 | Security group | 80/8000 abiertos a `0.0.0.0/0`; 22/8501 a 1 IP | `infra/integra-server.yaml` (80/8000 solo desde CloudFront; 22/8501 sin ingreso) |
 | Rol IAM de la instancia | Rol del escritorio Kiro (amplio) | `infra/integra-server.yaml` (mínimo privilegio) |
-| CloudFront + WAF | Creado | `tools/cloudfront_aws.py` (`crear`, `waf`, `auth-basica`) |
+| CloudFront | ✅ Creado: `/` frontend React, `/streamlit*` Streamlit, API → :8000 · **sin WAF** | `tools/cloudfront_aws.py` (`crear`, `waf`, `auth-basica`) |
 | Secretos (Meta + token API) | Parcial en Secrets Manager | `tools/secrets_aws.py`, `tools/desplegar_seguridad_ec2.sh` |
 | Cifrado EBS | Cuenta con cifrado por defecto; volumen actual sin cifrar | `tools/ebs_aws.py` (plan; requiere detener la instancia) |
 | Logs y alarmas | ❌ Sin configurar | `infra/integra-server.yaml` + `tools/cloudwatch_aws.py` |
 | Respaldos EBS | ❌ Sin configurar | `infra/integra-server.yaml` + `tools/backup_aws.py` |
+| Frontend (S3) | ✅ Bucket privado `integrai-frontend-<cuenta>` (BPA, cifrado, solo CloudFront vía OAC) | `tools/desplegar_frontend.py` |
+| GitHub Pages | ❌ Workflow `pages.yml` falla: Pages no está activado en el repo | Activar en *Settings → Pages → GitHub Actions* |
+| Stack CloudFormation | ❌ No desplegado | `infra/integra-server.yaml` (corregido en PR #14) |
 
 ## 3. Despliegue de la plantilla (por otra persona)
 

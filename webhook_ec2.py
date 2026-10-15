@@ -9,14 +9,20 @@ La verificación humana en la plataforma queda SOLO para el nivel de la rúbrica
 """
 from __future__ import annotations
 
+import asyncio
 import base64
+import csv
+import json
 import os
 import tempfile
-from datetime import date
+from datetime import date, datetime
+from pathlib import Path
 
 import hmac
 import os as _os
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -25,11 +31,16 @@ from src.resolver import Resolver, DIMINUTIVOS, normalizar
 from src.marco import STOPWORDS
 from src import config
 from src.clasificador import Clasificador
+from src.evaluacion_periodica import consolidar_nino
 from src import marco
+from src import marcos
 
 JARDIN_DEMO = os.getenv("INTEGRA_JARDIN", "JAR-0001")
 EDUCADORA_DEMO = os.getenv("INTEGRA_EDUCADORA", "EDU-DEMO")
 BACKEND = os.getenv("BACKEND_DECISION", "ensemble")
+SALA_DEMO = os.getenv("INTEGRA_SALA", "")          # "" = todo el jardín demo
+# 1 = número no registrado usa el jardín demo; 0 = rechaza
+FALLBACK_DEMO = os.getenv("INTEGRA_FALLBACK_DEMO", "1") == "1"
 
 API_TOKEN = os.getenv("INTEGRA_API_TOKEN", "")
 # U2: la nota pasa a conductas observables antes del ensemble (docs/EVAL_ENSEMBLE.md §5: 47 % -> 72 %)
@@ -39,6 +50,33 @@ _docs = os.getenv("INTEGRA_DOCS", "0") == "1"   # Swagger solo en desarrollo
 
 app = FastAPI(title="IntegrAI · decisión (EC2)", docs_url="/docs" if _docs else None,
               redoc_url=None, openapi_url="/openapi.json" if _docs else None)
+
+# CORS: el dashboard estático (GitHub Pages / CloudFront) consume /api/* desde otro origen.
+# Solo lectura, sin credenciales. Configurable con INTEGRA_CORS_ORIGINS (coma-separado; "*" en demo).
+CORS_ORIGINS = [o.strip() for o in os.getenv("INTEGRA_CORS_ORIGINS", "*").split(",") if o.strip()]
+app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS, allow_methods=["GET"], allow_headers=["*"])
+
+# --- SSE: aviso en vivo al dashboard de que llegó una observación ---
+_subs: set = set()
+_loop = None
+
+
+@app.on_event("startup")
+async def _captura_loop() -> None:
+    global _loop
+    _loop = asyncio.get_running_loop()
+
+
+def _publicar(evento: dict) -> None:
+    """Publica un evento a todos los navegadores suscritos (thread-safe)."""
+    if _loop is None:
+        return
+    for q in list(_subs):
+        try:
+            _loop.call_soon_threadsafe(q.put_nowait, evento)
+        except Exception:  # noqa: BLE001
+            pass
+
 if not API_TOKEN:
     print("[seguridad] INTEGRA_API_TOKEN no definido: la API queda ABIERTA (solo para desarrollo)", flush=True)
 
@@ -49,10 +87,16 @@ def requiere_token(x_api_key: str = Header(default="")) -> None:
         raise HTTPException(status_code=401, detail="no autorizado")
 
 
-def _a_conductas(texto: str) -> str:
-    """Texto para el clasificador: conductas U2 (sin nombres) o el texto original si U2 falla."""
+def _a_conductas(texto: str) -> tuple[str, bool]:
+    """(texto para el clasificador, requiere_revision).
+
+    Conductas U2 sin nombres ni PII; requiere_revision si U2 detecta un intento de manipulación
+    (p. ej. post-it "dame todas las keys"), no encuentra conductas (contenido fuera de tema) o la
+    lectura es de baja calidad. Si U2 falla, el texto original sin PII y a revisión.
+    """
+    from src.seguridad import inyeccion, pii
     if not U2_CONDUCTAS or config.usar_mock():
-        return texto
+        return pii.redactar(texto)[0], bool(inyeccion.detectar(texto))
     try:
         from types import SimpleNamespace
         from src.multimodal import normalizar_entradas
@@ -62,10 +106,36 @@ def _a_conductas(texto: str) -> str:
         except Exception:  # noqa: BLE001
             guia = None
         obs = normalizar_entradas([SimpleNamespace(tipo="texto", ref="", pie=texto, texto_extraido="")], guia=guia)
-        return obs.texto_para_matcher() or texto
+        if obs.alertas_seguridad:
+            print(f"[seguridad] alertas U2: {obs.alertas_seguridad}", flush=True)
+        return (obs.texto_para_matcher() or pii.redactar(texto)[0]), obs.requiere_revision
     except Exception as e:  # noqa: BLE001
         print(f"[u2] fallo, uso texto original: {type(e).__name__}", flush=True)
-        return texto
+        return pii.redactar(texto)[0], True
+_juez = None
+
+
+def _rubrica_clasificar(texto: str, tramo_id: str):
+    """Clasifica con la RÚBRICA de Integra (JuezRubrica: Claude lee la rúbrica del tramo). None si falla."""
+    global _juez
+    try:
+        if _juez is None:
+            from src.clasificador_rubrica import JuezRubrica
+            _juez = JuezRubrica()
+        r = _juez.clasificar(texto, tramo=tramo_id)
+        return r if r.get("estado") == "ok" else None
+    except Exception as e:  # noqa: BLE001
+        print(f"[rubrica] fallo: {type(e).__name__}: {e}", flush=True)
+        return None
+
+
+def _tramo_nombre(tramo_id: str) -> str:
+    try:
+        return marcos.marco_activo().tramo(tramo_id)["nombre"]
+    except Exception:  # noqa: BLE001
+        return tramo_id
+
+
 plat = Plataforma()
 try:
     clas = Clasificador(backend=BACKEND)
@@ -82,17 +152,59 @@ def _filas(jardin: str) -> list[dict]:
     return _roster_cache[jardin]  # type: ignore[return-value]
 
 
+def _ctx_remitente(from_: str) -> list[dict]:
+    """Rutea el número entrante -> educadora(s) + sala(s). Sin número registrado:
+    usa la sala demo (FALLBACK_DEMO=1) o rechaza (0)."""
+    ctx = plat.ruta_de_whatsapp(from_ or "")
+    if ctx:
+        return ctx
+    if FALLBACK_DEMO:
+        return [{"id_educadora": EDUCADORA_DEMO, "id_jardin": JARDIN_DEMO,
+                 "sala_grupo": SALA_DEMO, "_fallback": True}]
+    return []
+
+
+def _filas_ctx(ctx: list[dict]) -> list[dict]:
+    """Roster unión de las salas del remitente (dedup por id_nino+nombre)."""
+    key = tuple(sorted((c.get("id_jardin"), c.get("sala_grupo")) for c in ctx))
+    if key not in _roster_cache:
+        vistos: dict = {}
+        for c in ctx:
+            for f in plat.roster_sala(id_jardin=c.get("id_jardin"), sala_grupo=c.get("sala_grupo")):
+                vistos[(f["id_nino"], f.get("nombre_pila"))] = f
+        _roster_cache[key] = list(vistos.values())
+    return _roster_cache[key]
+
+
+def _nivel_ponderado(id_nino: str) -> tuple:
+    """Nivel PONDERADO del niño/a (media de sus notas por confianza) + nº de notas."""
+    obs = [o for o in plat.observaciones_de(id_nino) if o.get("nivel")]
+    if not obs:
+        return None, 0
+    num = sum(o["nivel"] * max(float(o.get("confianza") or 0.5), 0.01) for o in obs)
+    den = sum(max(float(o.get("confianza") or 0.5), 0.01) for o in obs)
+    return round(num / den), len(obs)
+
+
+def _es_apellido_del_roster(cand: str, aps: list[str]) -> bool:
+    """¿`cand` coincide con (o es prefijo de) algún apellido del roster?"""
+    return any(a == cand or a.startswith(cand + " ") or cand.startswith(a) for a in aps if a)
+
+
 def extraer_mencion(texto: str, filas: list[dict]) -> str:
     """Heurística determinista: busca un nombre de pila del roster (o diminutivo)
-    y toma el nombre + el siguiente token SOLO si es plausible apellido (no stopword)."""
+    y toma el nombre + los tokens siguientes SOLO si son **apellidos del roster**
+    (evita confundir el verbo de la frase con un apellido). Máx. 2 apellidos."""
     toks = normalizar(texto).split()
     pila = {normalizar(f["nombre_pila"]) for f in filas if f.get("nombre_pila")}
+    aps = [normalizar(f.get("apellidos") or "") for f in filas if f.get("apellidos")]
     aliases = set(DIMINUTIVOS.keys())
     for i, t in enumerate(toks):
         if t in pila or t in aliases:
             nombre = [t]
-            if i + 1 < len(toks) and toks[i + 1] not in STOPWORDS and len(toks[i + 1]) > 1:
-                nombre.append(toks[i + 1])   # apellido plausible
+            j = i + 1
+            while j < len(toks) and len(nombre) < 3 and _es_apellido_del_roster(toks[j], aps):
+                nombre.append(toks[j]); j += 1
             return " ".join(nombre)
     return toks[0] if toks else ""
 
@@ -117,7 +229,12 @@ class Msg(BaseModel):
 
 def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
     fecha = fecha or date.today().isoformat()
-    filas = _filas(JARDIN_DEMO)
+    ctx = _ctx_remitente(from_)
+    if not ctx:
+        return {"ok": False, "estado": "remitente_desconocido",
+                "ack": "⚠️ No reconozco este número. Pídele a tu coordinadora que lo registre."}
+    filas = _filas_ctx(ctx)
+    educadora = ctx[0]["id_educadora"]
     res = Resolver(filas).resolver(extraer_mencion(texto, filas))
 
     if res.estado != "resuelto":
@@ -128,30 +245,157 @@ def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
     nin = plat.nino(res.id_nino) or {}
     edad = marco.edad_meses(nin["fecha_nacimiento"], fecha) if nin.get("fecha_nacimiento") else None
     # el clasificador recibe conductas sin nombres; se guarda eso, no la nota cruda con el nombre
-    texto_clas = _a_conductas(texto)
-    cl = clas.clasificar(texto_clas, edad)
-    estado = "por_verificar" if cl.requiere_revision else "auto"
+    texto_clas, revisar_u2 = _a_conductas(texto)   # U2: conductas sin PII + controles de seguridad
+
+    # --- RÚBRICA de Integra: la edad solo elige el tramo; dentro, el nivel 1-8 ---
+    tramo = marcos.tramo_por_edad(nin["fecha_nacimiento"], fecha) if nin.get("fecha_nacimiento") else None
+    tramo_id, tramo_nom, nombre_nivel = None, "—", None
+    if tramo:
+        tramo_id, _sub = tramo
+        tramo_nom = _tramo_nombre(tramo_id)
+    rub = _rubrica_clasificar(texto_clas, tramo_id) if tramo_id else None
+    if rub:
+        nivel, nombre_nivel = rub["nivel"], rub["nombre_nivel"]
+        requiere, margen, conf = rub["requiere_revision"], rub.get("margen", 0.0), rub.get("confianza", 0.0)
+        # Evidencia: aunque decida la rúbrica, el matcher da las conductas observables (manifestaciones).
+        try:
+            matches = clas.matcher.matchear(texto_clas)
+            dominios = sorted({m.manifestacion["dominio"] for m in matches})
+        except Exception:  # noqa: BLE001
+            matches, dominios = [], []
+    else:   # sin rúbrica / fallo: ensemble (Laya+matcher) como respaldo
+        cl = clas.clasificar(texto_clas, edad)
+        nivel, requiere, margen, conf = cl.nivel, cl.requiere_revision, cl.margen, cl.confianza
+        dominios, matches = cl.dominios, cl.matches
+    # manipulación, sin evidencia o lectura dudosa (U2) -> siempre a la cola de la educadora
+    estado = "por_verificar" if (requiere or revisar_u2) else "auto"
 
     oid = plat.registrar_observacion(
-        id_nino=res.id_nino, id_educadora=EDUCADORA_DEMO, fecha=fecha, formato="texto",
-        nivel=cl.nivel, nota=texto_clas, dominios=cl.dominios,
-        manifestaciones=[m.manifestacion["id"] for m in cl.matches],
-        confianza=cl.confianza, origen="whatsapp", metodo_resolucion=res.metodo,
-        margen=cl.margen, estado=estado)
+        id_nino=res.id_nino, id_educadora=educadora, fecha=fecha, formato="texto",
+        nivel=nivel, nota=texto_clas, dominios=dominios,
+        manifestaciones=[m.manifestacion["id"] for m in matches],
+        confianza=conf, origen="whatsapp", metodo_resolucion=res.metodo, margen=margen, estado=estado)
 
-    if estado == "auto":
-        ack = f"registrado ✓ — {nin.get('nombre_pila','')} · nivel {cl.nivel}"
-    else:
-        ack = f"registrado ✓ — {nin.get('nombre_pila','')} · nivel {cl.nivel} (quedó por confirmar en la plataforma)"
-    return {"ok": True, "id_nino": res.id_nino, "nivel": cl.nivel, "margen": cl.margen,
-            "metodo": res.metodo, "estado_resolucion": estado, "observacion_id": oid,
-            "ack": ack}
+    # Adelanto en vivo: reconsolida la evaluación del niño y avisa al dashboard (best-effort).
+    try:
+        consolidar_nino(plat, res.id_nino, periodo=fecha)
+    except Exception as e:  # noqa: BLE001
+        print(f"[live] consolidar falló: {type(e).__name__}: {e}", flush=True)
+    _publicar({"evento": "observacion", "id_nino": res.id_nino,
+               "id_jardin": nin.get("id_jardin"), "sala_grupo": nin.get("sala_grupo"),
+               "nivel": nivel, "estado": estado})
+
+    # El ACK responde el nivel PONDERADO del niño (media) + el tramo + el nivel de la rúbrica.
+    pond, n_notas = _nivel_ponderado(res.id_nino)
+    etiqueta = f"{nivel} {nombre_nivel}" if nombre_nivel else f"nivel {nivel}"
+    ack = (f"registrado ✓ — {nin.get('nombre_pila','')} · {tramo_nom} · "
+           f"promedio {pond} ({n_notas} notas) · este registro: {etiqueta}")
+    if estado != "auto":
+        ack += " (quedó por confirmar)"
+    return {"ok": True, "id_nino": res.id_nino, "tramo": tramo_id, "tramo_nombre": tramo_nom,
+            "nivel": nivel, "nombre_nivel": nombre_nivel, "nivel_ponderado": pond, "n_notas": n_notas,
+            "margen": margen, "metodo": res.metodo, "estado_resolucion": estado,
+            "observacion_id": oid, "ack": ack}
 
 
 @app.get("/health")
 def health() -> dict:
     # sin jardín ni tamaño del roster (no exponer datos operativos sin autenticación)
     return {"ok": True}
+
+
+# --------------------------------------------------------------------------- #
+# API DE LECTURA (solo consulta) para el dashboard — datos VIVOS de la BD.
+# Privacidad: NUNCA expone nombres/apellidos ni la nota; solo códigos y niveles.
+# --------------------------------------------------------------------------- #
+API_DIR = Path(os.getenv("INTEGRA_HOME", str(Path(__file__).resolve().parent))) / "data"
+
+
+def _catalogo(nombre: str) -> list[dict]:
+    """Catálogo del repo (ruta_niveles / manifestaciones). Prioriza el CSV (mismas columnas
+    que el frontend), pero cae al JSON si el CSV no está — la EC2 tiene los `.json`."""
+    csv_fp = API_DIR / f"{nombre}.csv"
+    if csv_fp.exists():
+        with csv_fp.open(encoding="utf-8") as fh:
+            return list(csv.DictReader(fh))
+    json_fp = API_DIR / f"{nombre}.json"
+    if not json_fp.exists():
+        return []
+    data = json.loads(json_fp.read_text(encoding="utf-8"))
+    if nombre == "manifestaciones":   # {id,nivel,dominio,texto} -> columnas del CSV
+        return [{"id_manifestacion": d.get("id"), "nivel": d.get("nivel"),
+                 "dominio": d.get("dominio"), "texto_observable": d.get("texto")} for d in data]
+    return data   # ruta_niveles.json ya trae las claves que usa el frontend
+
+
+def _sql_filas(consulta: str) -> list[dict]:
+    return [dict(r) for r in plat.con.execute(consulta).fetchall()]
+
+
+@app.get("/api/datos")
+def api_datos() -> dict:
+    """Dataset completo para el dashboard (MISMAS columnas que los CSV que ya lee),
+    pero leído de la BD viva: incluye JAR-EQUIPO y las observaciones de WhatsApp."""
+    return {
+        "ruta_niveles": _catalogo("ruta_niveles"),
+        "manifestaciones": _catalogo("manifestaciones"),
+        "jardines": _sql_filas(
+            "SELECT id_jardin,nombre_fantasia,comuna,region FROM jardines ORDER BY id_jardin"),
+        "ninos": _sql_filas(
+            "SELECT id_nino,fecha_nacimiento,id_jardin,sala_grupo,fecha_ingreso FROM ninos ORDER BY id_nino"),
+        "observaciones": _sql_filas(
+            "SELECT id_observacion,id_nino,fecha_observacion,formato_captura,nivel_estimado "
+            "FROM observaciones ORDER BY id_observacion"),
+        "observacion_manifestaciones": _sql_filas(
+            "SELECT id_observacion,id_manifestacion FROM observacion_manifestaciones"),
+        # nivel CONSOLIDADO + alerta (rubric-aware) que produce el cron
+        "evaluaciones": _sql_filas(
+            "SELECT id_nino,dominio,nivel,margen,periodo,tendencia,alerta "
+            "FROM evaluaciones ORDER BY id_nino, periodo"),
+    }
+
+
+@app.get("/api/eventos")
+async def api_eventos(request: Request) -> StreamingResponse:
+    """Stream SSE: emite un evento cada vez que llega una observación (tiempo real)."""
+    cola: asyncio.Queue = asyncio.Queue()
+    _subs.add(cola)
+
+    async def gen():
+        try:
+            yield "data: {\"evento\": \"hola\"}\n\n"
+            while True:
+                if await request.is_disconnected():
+                    break
+                try:
+                    ev = await asyncio.wait_for(cola.get(), timeout=20)
+                    yield f"data: {json.dumps(ev)}\n\n"
+                except asyncio.TimeoutError:
+                    yield ": keep-alive\n\n"
+        finally:
+            _subs.discard(cola)
+
+    return StreamingResponse(gen(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@app.get("/api/resumen")
+def api_resumen() -> dict:
+    """Conteos rápidos (cabecera/estado del dashboard)."""
+    return {"ok": True, **plat.resumen()}
+
+
+@app.get("/api/pendientes")
+def api_pendientes(estado: str = "pendiente", limit: int = 300) -> dict:
+    """Cola POR VERIFICAR (todas las tías), con su curso. Solo consulta; sin nombres."""
+    filas = [dict(r) for r in plat.con.execute(
+        "SELECT p.id_pendiente, p.id_nino_propuesto, p.id_educadora, p.nivel_propuesto, "
+        "p.dominio, p.margen, p.motivo, substr(p.evidencia,1,140) AS evidencia, p.estado, "
+        "p.creado_en, n.id_jardin, n.sala_grupo "
+        "FROM evaluaciones_pendientes p LEFT JOIN ninos n ON n.id_nino = p.id_nino_propuesto "
+        "WHERE p.estado = ? ORDER BY p.creado_en DESC LIMIT ?",
+        (estado, int(limit))).fetchall()]
+    return {"ok": True, "n": len(filas), "pendientes": filas}
 
 
 @app.post("/procesar", dependencies=[Depends(requiere_token)])
@@ -165,6 +409,44 @@ def procesar(m: Msg) -> dict:
 def clasificar(texto: str, edad_meses: int | None = None) -> dict:
     cl = clas.clasificar(texto, edad_meses)
     return cl.to_dict()
+
+
+# --------------------------------------------------------------------------- #
+# COLA "POR VERIFICAR" (human-in-the-loop) — la tía consulta y resuelve SU cola
+# --------------------------------------------------------------------------- #
+@app.get("/pendientes", dependencies=[Depends(requiere_token)])
+def pendientes(from_: str = Query("", alias="from")) -> dict:
+    """La cola de verificación de la tía identificada por su número de WhatsApp."""
+    ctx = _ctx_remitente(from_ or "")
+    educadora = ctx[0]["id_educadora"] if ctx else None
+    items = plat.pendientes_de(educadora) if educadora else []
+    return {"ok": True, "educadora": educadora, "n": len(items),
+            "pendientes": [{k: it.get(k) for k in
+                            ("id_pendiente", "id_nino_propuesto", "nivel_propuesto", "margen",
+                             "motivo", "evidencia", "estado", "creado_en")} for it in items]}
+
+
+class ResolverPendiente(BaseModel):
+    id_pendiente: str
+    accion: str                      # aprobado | editado | rechazado
+    nivel: int | None = None         # requerido si accion=editado
+    resuelto_por: str | None = None
+
+
+@app.post("/pendiente/resolver", dependencies=[Depends(requiere_token)])
+def pendiente_resolver(m: ResolverPendiente) -> dict:
+    """Aprueba / edita / rechaza un pendiente. Aprobar o editar ESCRIBE en `evaluaciones`."""
+    row = plat.con.execute("SELECT * FROM evaluaciones_pendientes WHERE id_pendiente=?",
+                           (m.id_pendiente,)).fetchone()
+    if not row:
+        return {"ok": False, "error": "pendiente no encontrado"}
+    d = dict(row)
+    nivel = m.nivel if m.nivel is not None else d.get("nivel_propuesto")
+    plat.resolver_pendiente(m.id_pendiente, m.accion, m.resuelto_por or d.get("id_educadora") or "tia",
+                            id_nino=d.get("id_nino_propuesto"), nivel=nivel,
+                            dominio=d.get("dominio"), cuando=datetime.now().isoformat(timespec="seconds"))
+    return {"ok": True, "id_pendiente": m.id_pendiente, "accion": m.accion,
+            "id_nino": d.get("id_nino_propuesto"), "nivel": nivel}
 
 
 # --------------------------------------------------------------------------- #

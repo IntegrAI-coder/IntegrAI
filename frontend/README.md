@@ -4,6 +4,8 @@ Interfaz de solo consulta para revisar las clasificaciones de nivel de desarroll
 (1–9) de niños y niñas a partir de las observaciones de las educadoras. No edita
 datos ni accede a ningún backend.
 
+**Demo en vivo:** https://integrai-coder.github.io/IntegrAI/ (GitHub Pages) · https://d2eg8hbkfurj9b.cloudfront.net (CloudFront, la web oficial del proyecto)
+
 ## Requisitos
 
 - Node.js 18+ y npm.
@@ -23,13 +25,37 @@ Abre la URL que imprime Vite (por defecto http://localhost:5173).
 ## Datos
 
 Los CSV viven en `../data` (raíz del repo) y **no se copian** a este proyecto.
-`vite.config.ts` usa `publicDir: '../data'`, así que se sirven en la raíz del
-sitio y se leen con `fetch('/ninos.csv')`, `fetch('/observaciones.csv')`, etc.
+`vite.config.ts` usa `publicDir: '../data'`, así que Vite los sirve (en dev) y los
+incluye en `dist/` (en build). Las rutas se arman con `import.meta.env.BASE_URL`
+(`src/data/cargar.ts`), para que funcionen tanto en local (`/ninos.csv`) como bajo
+el subpath de GitHub Pages (`/IntegrAI/ninos.csv`).
 
 Cada CSV se carga **una sola vez** al iniciar la app en `DatosProvider`
 (`src/data/DatosContext.tsx`) y se comparte entre las tres vistas mediante React
 Context. Así ~2.950 observaciones y ~500 niños se parsean una vez y no en cada
 navegación.
+
+## Despliegue (GitHub Pages)
+
+El sitio se publica automáticamente en
+https://integrai-coder.github.io/IntegrAI/ mediante
+`.github/workflows/pages.yml`: en cada push a `main` que toque `frontend/**` o
+`data/**`, la CI corre `npm ci && npm test && npm run build` dentro de `frontend/`
+y publica `frontend/dist` con `actions/deploy-pages` (Node 20).
+
+Como Pages sirve bajo el subpath `/IntegrAI/`, el proyecto usa
+`base: '/IntegrAI/'` en `vite.config.ts` y `HashRouter` (las rutas quedan como
+`/IntegrAI/#/curso/...`), de modo que recargar una vista profunda no da 404.
+
+## Despliegue (CloudFront, web oficial)
+
+La raíz de https://d2eg8hbkfurj9b.cloudfront.net sirve este mismo frontend desde un bucket S3 **privado** (solo CloudFront lo lee vía OAC). Como allí la app vive en `/` y no en `/IntegrAI/`, el build se hace con `--base=/`:
+
+```bash
+python tools/desplegar_frontend.py subir   # npm ci && npm run build -- --base=/  → S3 → invalidación
+```
+
+Solo se publican `index.html`, `assets/` y los 6 CSV que lee `src/data/cargar.ts`. Los dos despliegues (Pages y CloudFront) salen del mismo código de `main`.
 
 ## Estructura
 

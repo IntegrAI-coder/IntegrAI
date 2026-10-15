@@ -1,7 +1,9 @@
-import { Navigate, Route, Routes, Link, NavLink } from 'react-router-dom';
+import { Navigate, NavLink, Route, Routes, Link } from 'react-router-dom';
 import { Cursos } from './pages/Cursos';
 import { Curso } from './pages/Curso';
 import { Nino } from './pages/Nino';
+import { Jardines } from './pages/Jardines';
+import { Pendientes } from './pages/Pendientes';
 import { Sincronizacion } from './pages/Sincronizacion';
 
 export function App() {
@@ -15,10 +17,12 @@ export function App() {
             </Link>
           </h1>
           <p>Dashboard de apoyo pedagógico</p>
-          <nav className="cabecera__nav" aria-label="Navegación principal">
+          <nav className="navegacion" aria-label="Navegación principal">
             <NavLink to="/" end>
               Cursos
             </NavLink>
+            <NavLink to="/jardines">Jardines</NavLink>
+            <NavLink to="/pendientes">Por verificar</NavLink>
             <NavLink to="/sincronizacion">Sincronización</NavLink>
           </nav>
         </div>
@@ -30,6 +34,8 @@ export function App() {
             <Route path="/" element={<Cursos />} />
             <Route path="/curso/:idJardin/:sala" element={<Curso />} />
             <Route path="/nino/:idNino" element={<Nino />} />
+            <Route path="/jardines" element={<Jardines />} />
+            <Route path="/pendientes" element={<Pendientes />} />
             <Route path="/sincronizacion" element={<Sincronizacion />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

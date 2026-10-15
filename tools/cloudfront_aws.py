@@ -5,6 +5,8 @@
     python tools/cloudfront_aws.py crear         # crea la distribución TLS (dashboard :80, API :8000)
     python tools/cloudfront_aws.py waf           # crea/asocia el WebACL (reglas administradas + rate limit)
     python tools/cloudfront_aws.py revertir-waf  # desasocia y borra el WebACL (emergencia)
+    python tools/cloudfront_aws.py auth-basica   # Basic auth real en el dashboard (credencial en Secrets Manager)
+    python tools/cloudfront_aws.py quitar-auth   # desasocia el Basic auth
 
 Variables (no se versionan: el repo es público):
     INTEGRA_ORIGIN_DOMAIN      DNS público de la EC2 (origen). Obligatoria para `crear` y `waf`.
@@ -343,88 +345,106 @@ def revertir_waf() -> None:
         print("no había WAF asociado")
 
 
-def _auth_function() -> dict:
-    return {
-        "Name": "integrai-basic-auth",
-        "Comment": "IntegrAI: Basic auth paliativo (F0)",
-        "Runtime": "cloudfront-js-2.0",
-        "KeyValueStoreAssociations": {"Quantity": 0},
-        "FunctionConfig": {
-            "Comment": "Basic auth viewer-request",
-            "Runtime": "cloudfront-js-2.0",
-        },
-        "FunctionCode": """function handler(event) {
-  var request = event.request;
-  var headers = request.headers;
-  var auth = headers['authorization'];
-  if (!auth) {
-    return {
-      statusCode: 401,
-      statusDescription: 'Unauthorized',
-      headers: {
-        'www-authenticate': { value: 'Basic realm=\"IntegrAI\"' }
-      }
-    };
-  }
-  return request;
-}
-""",
-    }
+FUNCION_AUTH = "integrai-basic-auth"
+SECRETO_AUTH = "integrai/dashboard-basic-auth"   # {"usuario": ..., "clave": ...}; nunca en el repo
+
+
+def _credencial() -> tuple[str, str]:
+    """Lee (o crea con clave aleatoria) la credencial del dashboard en Secrets Manager."""
+    import json
+    import secrets as _s
+    import boto3
+    sm = boto3.client("secretsmanager", region_name=REGION)
+    try:
+        d = json.loads(sm.get_secret_value(SecretId=SECRETO_AUTH)["SecretString"])
+    except sm.exceptions.ResourceNotFoundException:
+        d = {"usuario": "integra", "clave": _s.token_urlsafe(18)}
+        sm.create_secret(Name=SECRETO_AUTH, SecretString=json.dumps(d),
+                         Description="Basic auth del dashboard IntegrAI (CloudFront Function)")
+        print(f"credencial creada en Secrets Manager: {SECRETO_AUTH} (el valor no se imprime)")
+    return d["usuario"], d["clave"]
+
+
+def _hash_cabecera(usuario: str, clave: str) -> str:
+    """SHA-256 de la cabecera exacta que manda el navegador: 'Basic base64(usuario:clave)'."""
+    import base64
+    import hashlib
+    valor = "Basic " + base64.b64encode(f"{usuario}:{clave}".encode()).decode()
+    return hashlib.sha256(valor.encode()).hexdigest()
+
+
+def _codigo_auth(hash_esperado: str, spa: bool = False) -> str:
+    """CloudFront Function (cloudfront-js-2.0): solo guarda el HASH, nunca la clave.
+
+    spa=True agrega la reescritura del frontend React (rutas sin extensión -> /index.html): CloudFront
+    admite UNA función viewer-request por comportamiento, así que auth y SPA van juntas en la raíz.
+    """
+    if len(hash_esperado) != 64 or any(c not in "0123456789abcdef" for c in hash_esperado):
+        raise ValueError("hash inválido")
+    reescritura = "    if (r.uri.indexOf('.') === -1) { r.uri = '/index.html'; }\n" if spa else ""
+    return ("const crypto = require('crypto');\n"
+            f"var ESPERADO = '{hash_esperado}';\n"
+            "function handler(event) {\n"
+            "  var r = event.request;\n"
+            "  var h = r.headers['authorization'];\n"
+            "  if (h && crypto.createHash('sha256').update(h.value).digest('hex') === ESPERADO) {\n"
+            + reescritura +
+            "    return r;\n"
+            "  }\n"
+            "  return {\n"
+            "    statusCode: 401,\n"
+            "    statusDescription: 'Unauthorized',\n"
+            "    headers: { 'www-authenticate': { value: 'Basic realm=\"IntegrAI\"' } }\n"
+            "  };\n"
+            "}\n")
+
+
+def _publicar(cf, nombre: str, codigo: str, comentario: str) -> str:
+    config = {"Comment": comentario, "Runtime": "cloudfront-js-2.0"}
+    try:
+        etag = cf.describe_function(Name=nombre, Stage="DEVELOPMENT")["ETag"]
+        etag = cf.update_function(Name=nombre, IfMatch=etag, FunctionConfig=config, FunctionCode=codigo.encode())["ETag"]
+    except cf.exceptions.NoSuchFunctionExists:
+        etag = cf.create_function(Name=nombre, FunctionConfig=config, FunctionCode=codigo.encode())["ETag"]
+    return cf.publish_function(Name=nombre, IfMatch=etag)["FunctionSummary"]["FunctionMetadata"]["FunctionARN"]
 
 
 def auth_basica() -> None:
+    """Basic auth REAL en el frontend (raíz, con reescritura SPA) y en /streamlit*. La API usa X-Api-Key."""
     cf = _cloudfront()
-    # Intenta crear función (idempotente por nombre: AWS no permite duplicado si existe)
-    try:
-        resp = cf.create_function(Name="integrai-basic-auth", FunctionConfig=_auth_function()["FunctionConfig"], FunctionCode=_auth_function()["FunctionCode"])
-        fn = resp["FunctionSummary"]
-        print("función creada:", fn["Name"], fn["FunctionARN"])
-    except Exception as e:
-        print("crear función err (puede ya existir):", e)
+    h = _hash_cabecera(*_credencial())
+    arn_spa = _publicar(cf, FUNCION_AUTH + "-spa", _codigo_auth(h, spa=True), "IntegrAI: Basic auth + SPA (raíz)")
+    arn = _publicar(cf, FUNCION_AUTH, _codigo_auth(h), "IntegrAI: Basic auth (/streamlit*)")
+    print("funciones publicadas (LIVE)")
     dist = _distribucion(cf)
     resp = cf.get_distribution_config(Id=dist["Id"])
     cfg = resp["DistributionConfig"]
-    try:
-        # Asociar a default cache behavior (viewer-request)
-        cfg["DefaultCacheBehavior"]["FunctionAssociations"] = {
-            "Quantity": 1,
-            "Items": [{"EventType": "viewer-request", "FunctionARN": _fn_arn("integrai-basic-auth", cf)}],
-        }
-    except Exception as e:
-        print("asociar err:", e)
-    try:
-        cf.update_distribution(Id=dist["Id"], IfMatch=resp["ETag"], DistributionConfig=cfg)
-        print("auth básica asociada (viewer-request)")
-    except Exception as e:
-        print("update err:", e)
-
-
-def _fn_arn(name: str, cf):
-    # Buscar ARN de función existente
-    try:
-        for page in [cf.list_functions()]:
-            for item in page.get("FunctionList", {}).get("Items", []):
-                if item["Name"] == name:
-                    return item["FunctionARN"]
-    except Exception:
-        pass
-    raise SystemExit("no se encontró función; revísala en CloudFront Functions")
+    asociar = lambda a: {"Quantity": 1, "Items": [{"EventType": "viewer-request", "FunctionARN": a}]}
+    cfg["DefaultCacheBehavior"]["FunctionAssociations"] = asociar(arn_spa)
+    for b in cfg.get("CacheBehaviors", {}).get("Items", []):
+        if b["PathPattern"] == "/streamlit*":
+            b["FunctionAssociations"] = asociar(arn)
+    cf.update_distribution(Id=dist["Id"], IfMatch=resp["ETag"], DistributionConfig=cfg)
+    print("auth básica asociada al frontend y a /streamlit*. Verifica: sin credencial -> 401; con la de "
+          f"{SECRETO_AUTH} -> 200. La API (/procesar*, /clasificar, /health) no cambia.")
 
 
 def quitar_auth() -> None:
+    """Quita el Basic auth; la raíz vuelve a la reescritura SPA sola (tools/desplegar_frontend.py)."""
     cf = _cloudfront()
     dist = _distribucion(cf)
     resp = cf.get_distribution_config(Id=dist["Id"])
     cfg = resp["DistributionConfig"]
     try:
-        cfg["DefaultCacheBehavior"]["FunctionAssociations"] = {"Quantity": 0, "Items": []}
-    except Exception:
-        pass
-    try:
-        cf.update_distribution(Id=dist["Id"], IfMatch=resp["ETag"], DistributionConfig=cfg)
-        print("auth básica desasociada")
-    except Exception as e:
-        print("update err:", e)
+        arn_spa = cf.describe_function(Name="integrai-spa-rewrite", Stage="LIVE")["FunctionSummary"]["FunctionMetadata"]["FunctionARN"]
+        cfg["DefaultCacheBehavior"]["FunctionAssociations"] = {"Quantity": 1, "Items": [{"EventType": "viewer-request", "FunctionARN": arn_spa}]}
+    except cf.exceptions.NoSuchFunctionExists:
+        cfg["DefaultCacheBehavior"]["FunctionAssociations"] = {"Quantity": 0}
+    for b in cfg.get("CacheBehaviors", {}).get("Items", []):
+        if b["PathPattern"] == "/streamlit*":
+            b["FunctionAssociations"] = {"Quantity": 0}
+    cf.update_distribution(Id=dist["Id"], IfMatch=resp["ETag"], DistributionConfig=cfg)
+    print("auth básica desasociada")
 
 
 if __name__ == "__main__":

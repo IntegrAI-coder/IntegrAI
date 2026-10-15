@@ -70,6 +70,15 @@ def normalizar_entradas(entradas, etapa2: bool = True, guia=None) -> Observacion
     for e in entradas:
         segmentos.extend(_etapa1(e.tipo, e.ref, e.pie, e.texto_extraido))
     segmentos = [s for s in segmentos if s.texto or s.advertencias]
+    # Seguridad, para TODA modalidad (el texto ya viene de la nota, el post-it, el audio o el video):
+    # 1) intentos de inyección/abuso -> revisión humana; 2) RUT/teléfono/correo/URL fuera antes del LLM.
+    from ..seguridad import inyeccion, pii, secretos
+    alertas = inyeccion.detectar("\n".join(s.texto for s in segmentos if s.texto))
+    redactados: set[str] = set()
+    for s in segmentos:
+        if s.texto:
+            s.texto, tipos = pii.redactar(s.texto)
+            redactados.update(tipos)
     transcripcion = "\n".join(s.texto for s in segmentos if s.texto)
     adv = [a for s in segmentos for a in s.advertencias]
     modelos = {s.fuente: s.modelo for s in segmentos if s.modelo}
@@ -81,9 +90,20 @@ def normalizar_entradas(entradas, etapa2: bool = True, guia=None) -> Observacion
         conductas, nino, adv2 = extraer([(s.fuente, s.texto) for s in segmentos if s.texto], guia=guia)
         adv += adv2
         modelos["conductas"] = config.MODELO_CONDUCTAS
+    # 3) ninguna salida puede contener secretos (si un modelo "obedeciera" una inyección)
+    fugas = secretos.escanear(transcripcion + " ".join(c.texto for c in conductas))
+    if fugas:
+        conductas = []
+        alertas.append("secreto_en_salida")
+    if alertas:
+        adv.append("posible intento de manipulación: la observación queda para revisión de la educadora")
+    if redactados:
+        adv.append("se ocultaron datos personales: " + ", ".join(sorted(redactados)))
     con_texto = [s for s in segmentos if s.texto]
     calidad = min((s.calidad for s in con_texto), default=0.0)
+    revisar = bool(alertas) or not transcripcion or calidad < 0.5 or (etapa2 and not conductas)
     return ObservacionNormalizada(
         transcripcion=transcripcion, conductas=conductas, nino_mencionado=nino,
         calidad=round(calidad, 3), advertencias=adv, modelos=modelos,
-        latencia_ms=int((time.perf_counter() - t0) * 1000), segmentos=segmentos)
+        latencia_ms=int((time.perf_counter() - t0) * 1000), segmentos=segmentos,
+        alertas_seguridad=alertas, pii_redactada=sorted(redactados), requiere_revision=revisar)

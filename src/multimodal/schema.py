@@ -49,6 +49,10 @@ class ObservacionNormalizada(BaseModel):
     modelos: dict[str, str] = {}
     latencia_ms: int = 0
     segmentos: list[Segmento] = []
+    # controles de seguridad (src/seguridad): no bloquean, mandan a revisión humana
+    alertas_seguridad: list[str] = []       # p. ej. ["ignorar_instrucciones", "pedir_secretos"]
+    pii_redactada: list[str] = []           # tipos redactados antes del LLM: rut, telefono, correo, url
+    requiere_revision: bool = False         # inyección, sin conductas, baja calidad o sin texto
 
     def texto_para_matcher(self) -> str:
         """Lo que consume Matcher.matchear(): conductas unidas, o la transcripción si no hay."""

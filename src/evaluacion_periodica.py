@@ -19,7 +19,7 @@ Uso:
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from . import config
@@ -58,10 +58,12 @@ def _tendencia(nuevo: int, previo: int | None) -> str:
 
 
 def ejecutar(plataforma: Plataforma | None = None, dry_run: bool = False,
-             ahora: str | None = None) -> dict[str, Any]:
+             ahora: str | None = None, periodo: str | None = None) -> dict[str, Any]:
     p = plataforma or Plataforma()
     ahora = ahora or datetime.now().isoformat(timespec="seconds")
     fecha = ahora[:10]
+    # El cron corre a las 00:00 -> la evaluación refleja los datos HASTA EL DÍA ANTERIOR.
+    periodo = periodo or (datetime.fromisoformat(ahora) - timedelta(days=1)).date().isoformat()
 
     wm = int(p.get_meta(WATERMARK_KEY, "0") or 0)
     nuevas = p.observaciones_nuevas(desde_rowid=wm)
@@ -96,19 +98,24 @@ def ejecutar(plataforma: Plataforma | None = None, dry_run: bool = False,
         doms = sorted({d for o in obs for d in (o.get("dominios") or "").split(",") if d})
         evidencia = f"{len(obs)} obs nuevas · dominios: {', '.join(doms) or '—'} · dist={dist}"
 
+        # ¿A QUÉ TÍA se asigna la cola? La de la sala del niño; si no, quien registró.
+        nin = p.nino(id_nino) or {}
+        tia = p.educadora_de_sala(nin.get("id_jardin"), nin.get("sala_grupo")) or obs[-1].get("id_educadora")
+
         if margen < umbral:
             n_pend += 1
             if not dry_run:
                 p.encolar_pendiente(id_nino, [str(l) for l in dist], nivel, "global",
                                     confianza=dist.get(nivel, 0.0), margen=margen,
-                                    motivo="margen_bajo", evidencia=evidencia, creado_en=ahora)
+                                    motivo="margen_bajo", evidencia=evidencia, creado_en=ahora,
+                                    id_educadora=tia)
             detalle.append({"id_nino": id_nino, "accion": "pendiente", "nivel": nivel,
-                            "margen": margen, "tendencia": tend})
+                            "margen": margen, "tendencia": tend, "tia": tia})
         else:
             n_eval += 1
             if not dry_run:
                 p.guardar_evaluacion(id_nino, "global", nivel, dist.get(nivel, 0.0),
-                                     margen, periodo=fecha, tendencia=tend, alerta=alerta,
+                                     margen, periodo=periodo, tendencia=tend, alerta=alerta,
                                      generado_en=ahora)
             detalle.append({"id_nino": id_nino, "accion": "evaluacion", "nivel": nivel,
                             "margen": margen, "tendencia": tend, "alerta": alerta})
@@ -123,11 +130,48 @@ def ejecutar(plataforma: Plataforma | None = None, dry_run: bool = False,
             "watermark": max_rid, "detalle": detalle}
 
 
+def consolidar_nino(plataforma: Plataforma, id_nino: str, ahora: str | None = None,
+                    periodo: str | None = None) -> dict[str, Any]:
+    """Reconsolida la evaluación de UN niño/a a partir de sus observaciones del período.
+
+    Es el "adelanto en vivo": se llama tras registrar una observación (WhatsApp) para
+    que el nivel y la alerta queden al día SIN esperar al cron. Escribe `evaluaciones`
+    solo si el margen alcanza (auto); si no, la observación queda `por_verificar`
+    (entra a la cola en la próxima corrida del cron). Best-effort: no rompe el flujo.
+    """
+    p = plataforma
+    ahora = ahora or datetime.now().isoformat(timespec="seconds")
+    periodo = periodo or ahora[:10]
+    obs = [o for o in p.observaciones_de(id_nino) if o.get("fecha") == periodo]
+    if not obs:
+        return {"ok": False, "motivo": "sin_observaciones_periodo"}
+    nivel, margen, dist = _consolidar(obs)
+    if nivel is None:
+        return {"ok": False, "motivo": "sin_nivel"}
+    tray = p.trayectoria(id_nino) or {}
+    prev = p.ultima_evaluacion(id_nino, "global")
+    tend = _tendencia(nivel, prev["nivel"] if prev else None)
+    alerta = None
+    if tend == "retroceso" and prev:
+        alerta = f"Retroceso: {prev['nivel']} -> {nivel} (período {periodo})."
+    elif tray.get("alertas"):
+        alerta = "; ".join(tray["alertas"])
+    umbral = getattr(config, "GATE_MARGEN", 0.15)
+    escrito = False
+    if margen >= umbral:
+        p.guardar_evaluacion(id_nino, "global", nivel, dist.get(nivel, 0.0), margen,
+                             periodo=periodo, tendencia=tend, alerta=alerta, generado_en=ahora)
+        escrito = True
+    return {"ok": True, "escrito": escrito, "nivel": nivel, "margen": margen,
+            "tendencia": tend, "alerta": alerta}
+
+
 def main() -> None:  # pragma: no cover
     ap = argparse.ArgumentParser(description="Evaluación periódica IntegrAI (cron)")
     ap.add_argument("--dry-run", action="store_true", help="no escribe, solo reporta")
+    ap.add_argument("--periodo", default=None, help="fecha del período (YYYY-MM-DD; por defecto: ayer)")
     args = ap.parse_args()
-    r = ejecutar(dry_run=args.dry_run)
+    r = ejecutar(dry_run=args.dry_run, periodo=args.periodo)
     modo = "(dry-run) " if args.dry_run else ""
     print(f"🧠 Cron {modo}-> nuevas: {r['observaciones_nuevas']} · niños: {r['ninos']} · "
           f"evaluaciones: {r['evaluaciones']} · por_verificar: {r['pendientes']} · "

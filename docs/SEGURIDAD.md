@@ -51,7 +51,7 @@ Tres revisiones en paralelo (código del repo, infraestructura vista desde fuera
 | H13 | Errores internos (`repr(e)`) devueltos al usuario | Media | ✅ Mensajes genéricos; el detalle va a logs |
 | H14 | Temporales con `mktemp`, nunca borrados | Media | ✅ `NamedTemporaryFile` + borrado en `finally` |
 | H15 | Dashboard Streamlit **sin login** | Alta | ⏳ Santiago + Ivan (F1, o F0 con auth básica detrás de CloudFront) |
-| H16 | Frontend publica todo `data/` como estático (`publicDir: '../data'`) | Alta | ⏳ Santiago: servir por API con autenticación |
+| H16 | Frontend publica todo `data/` como estático (`publicDir: '../data'`) | Alta | ✅ Mitigado (15-oct): el despliegue (`tools/desplegar_frontend.py`) publica **solo** `index.html`, `assets/` y los 6 CSV que usa la app (datos sintéticos, ya públicos en el repo), desde un S3 **privado** con OAC. El resto de `data/` da 403. Para datos reales: servirlos por una API autenticada |
 | H17 | **IDOR**: `EDUCADORA_DEMO` fija; no se verifica que la educadora pertenezca al jardín del niño | Alta | ⏳ Sebastián: mapear teléfono → educadora → salas (tabla `educadora_salas` ya existe) |
 | H18 | **Chatwoot (fan-out)** guarda las conversaciones en un tercero sin DPA | Alta (legal) | ⏳ Integra/Sebastián: apagar `CHATWOOT_FANOUT` o firmar DPA |
 | H19 | Dependencias sin versión fija (`>=`), sin `pip-audit` | Baja | ⏳ CI |
@@ -63,17 +63,23 @@ Actualizado el 15-oct-2026. Se ejecutó primero todo lo que **no interrumpe la d
 
 | # | Medida | Estado | Cómo |
 |---|---|---|---|
-| 1 | Código seguro (firma fail-closed, whitelist, token, U2, video visual) | ✅ En `main` (PR #6) + video/Pegasus en el PR de esta rama | — |
+| 1 | Código seguro (firma fail-closed, whitelist, token, U2, video visual) | ✅ En `main` y **desplegado** (verificado 15-oct: `/docs` → 404, rúbrica instalada) | — |
 | 2 | IP, ID de instancia y nombre de la llave fuera del repo | ✅ | PR #6 |
 | 3 | IMDSv2 obligatorio | ✅ (ya estaba) | — |
 | 4 | Puerto 443 cerrado (no escuchaba nada) | ✅ Aplicado | Security group |
 | 5 | Cifrado EBS por defecto en la cuenta | ✅ Aplicado | Discos nuevos cifrados; el actual sigue sin cifrar (requiere detener la instancia) |
 | 6 | Token de la API en **Secrets Manager** (`integrai/api-token`) | ✅ Creado | Nadie lo ve en texto; la EC2 lo lee al desplegar |
-| 7 | **CloudFront con TLS** delante de la EC2 | ✅ Creado | Dashboard → :80, `/procesar*`, `/clasificar`, `/health` → :8000. Sin caché, cabeceras de seguridad (HSTS) |
+| 7 | **CloudFront con TLS** delante de la EC2 | ✅ Creado. Desde el 15-oct: `/` → frontend React (S3 privado + OAC), `/streamlit*` → Streamlit, API sin cambios | Dashboard → :80, `/procesar*`, `/clasificar`, `/health` → :8000. Sin caché, cabeceras de seguridad (HSTS) |
 | 8 | Activar el token en la API | ⏳ Corte coordinado | `tools/desplegar_seguridad_ec2.sh` |
 | 9 | Webhook → CloudFront (`https`) + `WA_APP_SECRET` + `WA_WHITELIST` + token | ⏳ Sebastián | Variables del webhook |
 | 10 | Cerrar 80/8000 a internet (solo CloudFront) | ⏳ Después de 9 | `tools/seguridad_aws.py corte` (revertible con `revertir-corte`) |
 | 11 | Servicios sin root, cifrar el EBS actual | ⏳ Después de la demo | Requiere reiniciar o detener la instancia |
+| 12 | Frontend React en la web desde S3 **privado** (OAC), solo los archivos que usa | ✅ Aplicado (15-oct) | `tools/desplegar_frontend.py` |
+| 13 | Rol IAM mínimo propio (hoy la EC2 usa el rol del escritorio Kiro del evento) | ⏳ Ivan | `infra/integra-server.yaml` o `tools/iam_aws.py` (corregidos en PR #14) |
+| 14 | WAF y Basic auth en CloudFront | ⏳ Ivan | `tools/cloudfront_aws.py waf` / `auth-basica` |
+| 15 | Controles de ingesta para toda modalidad: redacción de PII, detección de manipulación, escáner de secretos, política sin nivel/a revisión, salida tipada con reintento, evidencia literal | ✅ Aplicado (16-oct) · 50/50 pruebas | `src/seguridad/{pii,inyeccion,secretos}.py`, `docs/PRUEBAS_50.md` |
+
+**Auditoría del 15-oct (tarde):** IMDSv2 ✓ · 443 cerrado ✓ · EBS por defecto cifrado ✓ · CloudFront ✓ · token en Secrets Manager ✓ · S3 frontend privado ✓ · **pendientes:** 80/8000 abiertos a internet, API sin token, servicios como root, EBS de la instancia sin cifrar, rol IAM del evento, sin WAF, sin log groups ni alarmas, sin stack de CloudFormation desplegado.
 
 ### 3.1 Corte coordinado (unos 10 minutos, con Sebastián conectado)
 
@@ -83,11 +89,11 @@ Actualizado el 15-oct-2026. Se ejecutó primero todo lo que **no interrumpe la d
 4. **Cerrar el acceso directo:** `INTEGRA_INSTANCE_ID=<id> python tools/seguridad_aws.py corte`. A partir de aquí, el dashboard solo se abre por la URL de CloudFront.
 5. **Si algo falla:** `python tools/seguridad_aws.py revertir-corte` y borrar `/etc/systemd/system/integra-webapi.service.d/seguridad.conf` + `systemctl daemon-reload && systemctl restart integra-webapi`.
 
-El dominio de CloudFront y los valores de los secretos **no se escriben en el repo**: se comparten por el canal interno del equipo.
+El dominio de CloudFront se publica en el README por decisión del equipo (datos sintéticos). Los **valores de los secretos nunca** se escriben en el repo.
 
 ### 3.2 CloudFront y WAF como código (Ivan)
 
-La distribución TLS (ítem 7) se creó a mano desde la consola: no hay nada en el repo que la reproduzca. `tools/cloudfront_aws.py` la audita y la crea de forma idempotente, y aplica el WAF pendiente del plan F1.
+La distribución TLS (ítem 7) se creó por script el 15-oct; `tools/cloudfront_aws.py` la reproduce, la audita (la encuentra por el comentario "IntegrAI", sin duplicarla) `tools/cloudfront_aws.py` la audita y la crea de forma idempotente, y aplica el WAF pendiente del plan F1.
 
 | Comando | Qué hace |
 |---|---|
@@ -157,12 +163,12 @@ Sin `/docs` ni `/openapi`: no hay comportamiento que lleve esas rutas al orígen
 | `src/multimodal/*` | Validación previa de cada medio, nota delimitada contra prompt injection, `nino_mencionado` fuera del `detalle`, errores genéricos |
 | `tests/test_seguridad.py`, `tests/test_webhook_whatsapp.py` | 9 tests: firma, whitelist, PII en logs, path traversal, magic bytes y tamaño |
 | `tools/seguridad_aws.py` | `auditar` (estado), `corte` / `revertir-corte` (80/8000 solo desde CloudFront; cierra 22/8501 a 0.0.0.0/0, admin por SSM) |
-| `tools/cloudfront_aws.py` | `auditar` (estado de la distribución, TLS y WAF), `crear` (distribución TLS: dashboard → :80, API → :8000, sin caché, HSTS), `waf` (reglas administradas Common/KnownBadInputs + rate-based), `revertir-waf` (emergencia), `auth-basica`/`quitar-auth` (CloudFront Function Basic auth paliativo F0) |
+| `tools/cloudfront_aws.py` | `auditar` (estado de la distribución, TLS y WAF), `crear` (distribución TLS: dashboard → :80, API → :8000, sin caché, HSTS), `waf` (reglas administradas Common/KnownBadInputs + rate-based), `revertir-waf` (emergencia), `auth-basica`/`quitar-auth` (Basic auth del dashboard: valida el SHA-256 de la credencial guardada en Secrets Manager `integrai/dashboard-basic-auth`; la API sigue con `X-Api-Key`) |
 | `tools/desplegar_seguridad_ec2.sh` | Activa el token desde Secrets Manager en la EC2 y lo verifica |
 | `tools/secrets_aws.py` | `auditar`/`crear` de `integrai/wa-token` y `integrai/wa-app-secret` (sin imprimir valores) |
-| `tools/iam_aws.py` | `auditar`/`crear`/`asociar` rol EC2 mínimo (Bedrock InvokeModel limitado, SSM, SecretsManager integrai/*) |
+| `tools/iam_aws.py` | `auditar`/`crear`/`asociar` rol EC2 mínimo: Bedrock solo en los 7 modelos usados (foundation-model + inference profile `us.*`), `AmazonSSMManagedInstanceCore` (sin ella se pierde SSM), Secrets Manager `integrai/*`. `asociar` **reemplaza** el perfil actual |
 | `tools/ebs_aws.py` | `auditar`/`plan` para migrar volúmenes EBS sin cifrar a cifrados (requerido detener instancia) |
-| `tools/endurecer_servicios_ec2.sh` | Crea usuario `integra` y drop-ins systemd para ejecutar servicios sin root |
+| `tools/endurecer_servicios_ec2.sh` | Usuario `integra` + drop-ins systemd sin root, con `CAP_NET_BIND_SERVICE` (Streamlit en :80), caché de modelos compartida (`HF_HOME`), verificación y `revertir` |
 | `tools/observabilidad_aws.py` | `auditar`/`crear` (CloudTrail multiregión + validación, GuardDuty, Security Hub, AWS Config) |
 | `tools/kms_s3_aws.py` | `auditar`/`crear` (CMK, S3 con BPA, cifrado KMS, lifecycle 24 h, TLS-only) |
 | `tools/bedrock_aws.py` | `auditar`/`crear` (VPC endpoint bedrock-runtime, verificación logging) |

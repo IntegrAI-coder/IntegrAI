@@ -1,6 +1,7 @@
 # Secrets — never commit (public repo)
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 secrets*.json

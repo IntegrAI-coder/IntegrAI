@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS evaluaciones_pendientes (
     id_pendiente TEXT PRIMARY KEY, id_mensaje TEXT, id_nino_propuesto TEXT,
     candidatos TEXT, nivel_propuesto INTEGER, dominio TEXT, confianza REAL, margen REAL,
     motivo TEXT, evidencia TEXT, estado TEXT DEFAULT 'pendiente',
-    creado_en TEXT, resuelto_en TEXT, resuelto_por TEXT);
+    creado_en TEXT, resuelto_en TEXT, resuelto_por TEXT, id_educadora TEXT);
 CREATE TABLE IF NOT EXISTS evaluaciones (
     id_evaluacion TEXT PRIMARY KEY, id_nino TEXT, dominio TEXT, nivel INTEGER,
     confianza REAL, margen REAL, periodo TEXT, tendencia TEXT, alerta TEXT, generado_en TEXT);
@@ -65,6 +65,7 @@ _MIGRACIONES = [
     ("observaciones", "margen", "REAL"),
     ("observaciones", "estado", "TEXT DEFAULT 'auto'"),
     ("observaciones", "id_mensaje", "TEXT"),
+    ("evaluaciones_pendientes", "id_educadora", "TEXT"),
 ]
 
 
@@ -145,6 +146,44 @@ class Plataforma:
                              (id_educadora, sala, id_jardin))
         self.con.commit()
 
+    def educadoras_con_whatsapp(self) -> list[dict]:
+        """Todas las educadoras con numero de WhatsApp registrado (+ sus salas)."""
+        q = ("SELECT e.id_educadora, e.id_jardin, e.telefono_whatsapp, es.sala_grupo "
+             "FROM educadoras e LEFT JOIN educadora_salas es ON es.id_educadora=e.id_educadora "
+             "WHERE e.telefono_whatsapp IS NOT NULL AND TRIM(e.telefono_whatsapp)<>''")
+        return [dict(r) for r in self.con.execute(q).fetchall()]
+
+    def ruta_de_whatsapp(self, telefono: str) -> list[dict]:
+        """Rutea un numero entrante -> educadora(s) y su(s) sala(s).
+
+        Normaliza el telefono (solo digitos) y acepta coincidencia por sufijo
+        (ultimos 9 digitos), para tolerar diferencias de prefijo pais (56) o formato (+).
+        Si el numero no esta registrado devuelve [] (el llamador decide el fallback).
+        """
+        def _digits(s: str) -> str:
+            return "".join(ch for ch in (s or "") if ch.isdigit())
+
+        d = _digits(telefono)
+        if not d:
+            return []
+        out: list[dict] = []
+        for f in self.educadoras_con_whatsapp():
+            fd = _digits(f.get("telefono_whatsapp") or "")
+            if not fd:
+                continue
+            if fd == d or (len(fd) >= 8 and len(d) >= 8 and fd[-9:] == d[-9:]):
+                out.append(f)
+        return out
+
+    def educadora_de_sala(self, id_jardin: str | None, sala_grupo: str | None) -> str | None:
+        """Devuelve la educadora (tia) responsable de una sala -> a quien asignar la cola."""
+        if not sala_grupo:
+            return None
+        r = self.con.execute(
+            "SELECT id_educadora FROM educadora_salas WHERE id_jardin IS ? AND sala_grupo=? LIMIT 1",
+            (id_jardin, sala_grupo)).fetchone()
+        return r["id_educadora"] if r else None
+
     # ==================================================================
     # OBSERVACIONES (con estado de resolución + idempotencia)
     # ==================================================================
@@ -215,22 +254,29 @@ class Plataforma:
     def encolar_pendiente(self, id_nino_propuesto: str | None, candidatos: list[str] | None,
                           nivel_propuesto: int | None, dominio: str | None, confianza: float,
                           margen: float, motivo: str, evidencia: str,
-                          id_mensaje: str | None = None, creado_en: str | None = None) -> str:
+                          id_mensaje: str | None = None, creado_en: str | None = None,
+                          id_educadora: str | None = None) -> str:
         n = self.con.execute("SELECT COUNT(*) c FROM evaluaciones_pendientes").fetchone()["c"]
         pid = f"PEND-{90000 + n + 1}"
         import json as _json
         self.con.execute(
             "INSERT INTO evaluaciones_pendientes (id_pendiente,id_mensaje,id_nino_propuesto,candidatos,"
-            "nivel_propuesto,dominio,confianza,margen,motivo,evidencia,estado,creado_en) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,'pendiente',?)",
+            "nivel_propuesto,dominio,confianza,margen,motivo,evidencia,estado,creado_en,id_educadora) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,'pendiente',?,?)",
             (pid, id_mensaje, id_nino_propuesto, _json.dumps(candidatos or []), nivel_propuesto,
-             dominio, confianza, margen, motivo, evidencia, creado_en))
+             dominio, confianza, margen, motivo, evidencia, creado_en, id_educadora))
         self.con.commit()
         return pid
 
     def pendientes(self, estado: str = "pendiente") -> list[dict]:
         return [dict(r) for r in self.con.execute(
             "SELECT * FROM evaluaciones_pendientes WHERE estado=? ORDER BY creado_en", (estado,)).fetchall()]
+
+    def pendientes_de(self, id_educadora: str, estado: str = "pendiente") -> list[dict]:
+        """La cola POR VERIFICAR de UNA tía (lo que ella debe confirmar)."""
+        return [dict(r) for r in self.con.execute(
+            "SELECT * FROM evaluaciones_pendientes WHERE estado=? AND id_educadora=? ORDER BY creado_en",
+            (estado, id_educadora)).fetchall()]
 
     def resolver_pendiente(self, id_pendiente: str, accion: str, resuelto_por: str,
                            id_nino: str | None = None, nivel: int | None = None,

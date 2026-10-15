@@ -56,3 +56,26 @@ def test_wacl_tiene_reglas_administradas_y_rate_limit():
         if "ManagedRuleGroupStatement" in r["Statement"]
     }
     assert grupos == {"AWSManagedRulesCommonRuleSet", "AWSManagedRulesKnownBadInputsRuleSet"}
+
+
+def test_auth_basica_valida_hash_y_no_guarda_la_clave():
+    h = cf._hash_cabecera("integra", "clave-super-secreta")
+    codigo = cf._codigo_auth(h)
+    assert h in codigo and "clave-super-secreta" not in codigo
+    assert "createHash('sha256')" in codigo and "=== ESPERADO" in codigo
+    # la cabecera esperada es la que manda el navegador
+    import base64, hashlib
+    esperado = "Basic " + base64.b64encode(b"integra:clave-super-secreta").decode()
+    assert h == hashlib.sha256(esperado.encode()).hexdigest()
+
+
+def test_auth_basica_rechaza_hash_malformado():
+    import pytest
+    with pytest.raises(ValueError):
+        cf._codigo_auth("'; return event.request; //")
+
+
+def test_auth_spa_incluye_reescritura_solo_en_la_raiz():
+    h = cf._hash_cabecera("integra", "x")
+    assert "/index.html" in cf._codigo_auth(h, spa=True)
+    assert "/index.html" not in cf._codigo_auth(h)
