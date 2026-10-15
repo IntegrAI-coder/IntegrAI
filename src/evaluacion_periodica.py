@@ -96,14 +96,19 @@ def ejecutar(plataforma: Plataforma | None = None, dry_run: bool = False,
         doms = sorted({d for o in obs for d in (o.get("dominios") or "").split(",") if d})
         evidencia = f"{len(obs)} obs nuevas · dominios: {', '.join(doms) or '—'} · dist={dist}"
 
+        # ¿A QUÉ TÍA se asigna la cola? La de la sala del niño; si no, quien registró.
+        nin = p.nino(id_nino) or {}
+        tia = p.educadora_de_sala(nin.get("id_jardin"), nin.get("sala_grupo")) or obs[-1].get("id_educadora")
+
         if margen < umbral:
             n_pend += 1
             if not dry_run:
                 p.encolar_pendiente(id_nino, [str(l) for l in dist], nivel, "global",
                                     confianza=dist.get(nivel, 0.0), margen=margen,
-                                    motivo="margen_bajo", evidencia=evidencia, creado_en=ahora)
+                                    motivo="margen_bajo", evidencia=evidencia, creado_en=ahora,
+                                    id_educadora=tia)
             detalle.append({"id_nino": id_nino, "accion": "pendiente", "nivel": nivel,
-                            "margen": margen, "tendencia": tend})
+                            "margen": margen, "tendencia": tend, "tia": tia})
         else:
             n_eval += 1
             if not dry_run:

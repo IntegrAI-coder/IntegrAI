@@ -12,11 +12,11 @@ from __future__ import annotations
 import base64
 import os
 import tempfile
-from datetime import date
+from datetime import date, datetime
 
 import hmac
 import os as _os
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -208,6 +208,44 @@ def procesar(m: Msg) -> dict:
 def clasificar(texto: str, edad_meses: int | None = None) -> dict:
     cl = clas.clasificar(texto, edad_meses)
     return cl.to_dict()
+
+
+# --------------------------------------------------------------------------- #
+# COLA "POR VERIFICAR" (human-in-the-loop) — la tía consulta y resuelve SU cola
+# --------------------------------------------------------------------------- #
+@app.get("/pendientes", dependencies=[Depends(requiere_token)])
+def pendientes(from_: str = Query("", alias="from")) -> dict:
+    """La cola de verificación de la tía identificada por su número de WhatsApp."""
+    ctx = _ctx_remitente(from_ or "")
+    educadora = ctx[0]["id_educadora"] if ctx else None
+    items = plat.pendientes_de(educadora) if educadora else []
+    return {"ok": True, "educadora": educadora, "n": len(items),
+            "pendientes": [{k: it.get(k) for k in
+                            ("id_pendiente", "id_nino_propuesto", "nivel_propuesto", "margen",
+                             "motivo", "evidencia", "estado", "creado_en")} for it in items]}
+
+
+class ResolverPendiente(BaseModel):
+    id_pendiente: str
+    accion: str                      # aprobado | editado | rechazado
+    nivel: int | None = None         # requerido si accion=editado
+    resuelto_por: str | None = None
+
+
+@app.post("/pendiente/resolver", dependencies=[Depends(requiere_token)])
+def pendiente_resolver(m: ResolverPendiente) -> dict:
+    """Aprueba / edita / rechaza un pendiente. Aprobar o editar ESCRIBE en `evaluaciones`."""
+    row = plat.con.execute("SELECT * FROM evaluaciones_pendientes WHERE id_pendiente=?",
+                           (m.id_pendiente,)).fetchone()
+    if not row:
+        return {"ok": False, "error": "pendiente no encontrado"}
+    d = dict(row)
+    nivel = m.nivel if m.nivel is not None else d.get("nivel_propuesto")
+    plat.resolver_pendiente(m.id_pendiente, m.accion, m.resuelto_por or d.get("id_educadora") or "tia",
+                            id_nino=d.get("id_nino_propuesto"), nivel=nivel,
+                            dominio=d.get("dominio"), cuando=datetime.now().isoformat(timespec="seconds"))
+    return {"ok": True, "id_pendiente": m.id_pendiente, "accion": m.accion,
+            "id_nino": d.get("id_nino_propuesto"), "nivel": nivel}
 
 
 # --------------------------------------------------------------------------- #
