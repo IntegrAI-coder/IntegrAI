@@ -30,18 +30,31 @@ Tía (WhatsApp) → U1 Gateway (firma + whitelist) → SQS → Worker
 | 9 | Python 3.12, SAM | Se mantiene. Lambda `python3.12`, Pydantic v2 empaquetado con `sam build --use-container`, o en una capa con wheels `manylinux` | `pydantic_core` es binario; un build desde Windows sin contenedor falla en Lambda. |
 | 10 | Presupuesto Kiro "10,000" | Con **Kiro Pro** ya activo, son créditos, no tokens. El reparto por unidad sigue igual | Aclara la duda que quedó abierta en el plan de Kiro. |
 
-## 2. Equipo y responsabilidades
+## 2. Equipo, responsabilidades y ramas (actualizado 15-oct)
 
-Reemplazar P1–P4 por los nombres reales.
+La arquitectura real cambió respecto del plan del 14-oct: el clasificador corre como **ensemble (matcher híbrido + Laya) en EC2 `integra-server`**, con WhatsApp ya conectado ahí. Los roles quedan así:
 
-| Persona | Rol | Unidades | Además |
+| Persona | A cargo de | Rama de trabajo | Estado |
 |---|---|---|---|
-| **P1** (¿Santiago?) | Lead y conductor AI-DLC | **U3 Clasificador** | Steering files, aprobación de gates, presupuesto Kiro, pitch |
-| **P2** | Integración | **U1 Gateway** + **U4 Conversación** | App de Meta y número de prueba, webhook, botones, máquina de estados |
-| **P3** | Multimodal | **U2 Normalización** | Transcribe, prompt de visión para post-its, video con Nova, medios de prueba |
-| **P4** | Datos, infraestructura y QA | **U5 Datos, commit y evaluación** | Stack SAM, DynamoDB, seed, evaluación de 200 casos, runbook, dashboard (stretch) |
+| **Ivan** | **Infraestructura AWS**: qué servicios usar y cómo desplegar (EC2 actual vs. serverless, IaC, secretos, logs, costos) | `infra/aws` (por crear) | Por empezar: decidir la arquitectura de despliegue final |
+| **Sebastián** | **Conexión WhatsApp + clasificador** (ensemble, compuerta, resolución del niño/a por nombre) | `shiva/arquitectura-decision` → nueva `whatsapp-clasificador` | Operativo en `integra-server`; **el código del servidor aún no está en el repo** |
+| **Santiago** | **Frontend** (dashboard Vite + React + TS de consulta de niveles) | `frontend` (hoy el commit está en `shiva/arquitectura-decision`, sin PR) | Construido; falta PR a `main` |
+| **Mauricio** | **Modelo multimodal (U2) + medidas de seguridad** | `u2-eval-despliegue` (PR #3) y `seguridad` (por crear) | U2 y evaluación listos en PR #3 |
 
-## 3. Tareas por persona y por día
+### Tareas hasta el cierre (16-oct, 10:15)
+
+| Persona | Tareas | Listo cuando |
+|---|---|---|
+| **Ivan** | 1) Decidir la infraestructura de la demo y de producción (recomendado: mantener EC2 para la demo; documentar el camino serverless para Integra). 2) Infraestructura como código del servidor (instance profile, security group, systemd). 3) Secretos de Meta en Secrets Manager, no en el disco. 4) Logs y alarmas básicas (CloudWatch). | `docs/INFRA.md` + plantilla en `infra/`, desplegable por otra persona |
+| **Sebastián** | 1) **Subir al repo el código que corre en `integra-server`** (API `/procesar`, `/procesar_media`, `/clasificar`, webhook). 2) Llamar a U2 (`normalizar_entradas()`) antes del ensemble: sube el acierto de 47 % a 72 % en casos difíciles (ver `docs/EVAL_ENSEMBLE.md`). 3) Evaluar el ensemble con `bench/casos_contra_edad.jsonl` además del set aleatorio. | PR con el código del servidor; `python -m bench.eval_api --casos casos_contra_edad.jsonl` muestra la mejora |
+| **Santiago** | 1) Abrir el PR de `frontend/` a `main`. 2) Mostrar en la ficha del niño/a la transcripción, las conductas y las advertencias que entrega U2. 3) Marcar los casos "pendiente de revisión" de la compuerta. | Dashboard en `main` y desplegado |
+| **Mauricio** | 1) Fusionar PR #3 (U2 + evaluación). 2) Medir audio (Whisper small vs. large-v3-turbo) y video con medios del equipo. 3) **Seguridad**: cerrar puertos 22/8000/8501 (solo SSM y 80/443), autenticación en la API, validar la firma `X-Hub-Signature-256` del webhook, whitelist de teléfonos, borrar medios después de procesar, no registrar nombres de niños/as en logs. 4) Completar el `[__ %]` de audio y video en la presentación. | Checklist de seguridad en `docs/SEGURIDAD.md`, cumplido en el servidor |
+
+**Ramas:** cada persona trabaja en su rama y abre un PR a `main`; nadie hace push directo a `main`. Para crear ramas en `IntegrAI-coder/IntegrAI` hace falta rol **Write** en el repo: el dueño de la cuenta debe agregar a Ivan, Santiago y Mauricio (`mauriciovalenzuela742`) en *Settings → Collaborators*. Mientras tanto, los cambios llegan por fork + PR.
+
+> Las tablas de la sección 3 son el plan original del 14-oct (unidades U1–U5 y personas P1–P4). Quedan como referencia; la asignación vigente es la de esta sección.
+
+## 3. Plan original por día (14-oct, referencia)
 
 ### Martes 14-oct (tarde/noche) — Inception, ~3 h, los 4 juntos
 
