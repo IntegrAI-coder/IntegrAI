@@ -67,7 +67,7 @@ def infra_datos():
     W, H = 25, 20
     fila1 = [(3, "Tía · WhatsApp", ["texto, post-it, voz, video", "código o apodo del niño/a", "nunca RUT"], "S", "Integra"),
              (32, "Meta Cloud API", ["encargado (DPA)", "medio disponible por", "tiempo limitado"], "S", "Meta"),
-             (61, "Webhook", ["firma X-Hub-Signature-256", "whitelist de teléfonos", "desconocido = descartado"], None, "Sebastián"),
+             (61, "Webhook (externo)", ["servidor Traefik + TLS", "firma HMAC + whitelist", "Chatwoot = tercero (DPA)"], "S", "Sebastián"),
              (90, "Medios temporales", ["S3 cifrado (KMS)", "borrado ≤ 24 h", "nunca en el repo"], "S", "Ivan"),
              (119, "U2 · Ingesta", ["lectura fiel + conductas", "nombre → ID, no sale", "magic bytes, ≤ 16 MB"], "S", "Mauricio"),
              (148, "Bedrock (us-east-1)", ["encargado, sin entrenar", "transferencia: cláusulas", "tipo (arts. 27-28)"], "S", "AWS")]
@@ -100,8 +100,8 @@ def infra_ti():
                      "Etiqueta = responsable · borde naranjo = riesgo actual · cuenta AWS del evento, us-east-1")
     # --- HOY ---
     ax.text(3, 85, "HOY", fontsize=15, fontweight="bold", color="#B5541A")
-    caja(ax, 3, 66, 22, 14, "Internet", ["cualquiera", "sin autenticación"], alerta=True)
-    caja(ax, 3, 46, 22, 14, "WhatsApp (Meta)", ["webhook sin validar", "firma ni teléfono"], alerta=True, dueno="Sebastián")
+    caja(ax, 3, 66, 22, 14, "Internet", ["cualquiera llega", "a la API sin token"], alerta=True)
+    caja(ax, 3, 46, 22, 14, "Webhook externo", ["Traefik TLS + Chatwoot", "→ EC2 por HTTP plano"], alerta=True, dueno="Sebastián")
     caja(ax, 33, 46, 30, 34, "EC2 integra-server", ["IP pública, HTTP :80 y :8000", "API /procesar /clasificar", "sin token · Swagger público",
                                                     "/health expone el roster", "Streamlit sin login", "SQLite + Laya + Whisper",
                                                     "llaves STS del evento"], alerta=True, dueno="Sebastián")
@@ -109,12 +109,13 @@ def infra_ti():
     caja(ax, 3, 25, 22, 16, "Repo público", ["datos sintéticos", "IP redactada (PR seguridad)"], clase="P", dueno="Mauricio")
     flecha(ax, (25.6, 73), (32.4, 70), "HTTP", color="#B5541A")
     flecha(ax, (25.6, 53), (32.4, 53), "HTTP", color="#B5541A")
+    ax.text(14, 62.6, "Meta → HTTPS", fontsize=8, color=GRIS, ha="center")
     flecha(ax, (48, 45.4), (48, 41.6))
     ax.plot([72, 72], [5, 88], color=BORDE, lw=1.5, ls="--")
     # --- OBJETIVO ---
     ax.text(78, 85, "OBJETIVO", fontsize=15, fontweight="bold", color="#3D7D5A")
     caja(ax, 78, 66, 20, 15, "Tías / directoras", ["login Cognito (MFA)", "RBAC por sala/jardín"], dueno="Santiago")
-    caja(ax, 78, 47, 20, 15, "WhatsApp", ["firma HMAC +", "whitelist teléfonos"], dueno="Sebastián")
+    caja(ax, 78, 47, 20, 15, "Webhook", ["firma fail-closed", "whitelist + token"], dueno="Sebastián")
     caja(ax, 104, 58, 22, 22, "CloudFront + WAF", ["TLS (ACM)", "reglas administradas", "rate limit", "sin /docs ni /openapi"], dueno="Ivan")
     ax.add_patch(FancyBboxPatch((131, 22), 46, 60, boxstyle="round,pad=0.4,rounding_size=2", fc="#EEF1F6", ec="#9AA8BF", lw=1.2, ls="--"))
     ax.text(132.5, 80.5, "VPC · subred privada", fontsize=10, fontweight="bold", color=GRIS, va="top")
