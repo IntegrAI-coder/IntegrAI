@@ -14,8 +14,9 @@ import os
 import tempfile
 from datetime import date
 
+import hmac
 import os as _os
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -30,7 +31,36 @@ JARDIN_DEMO = os.getenv("INTEGRA_JARDIN", "JAR-0001")
 EDUCADORA_DEMO = os.getenv("INTEGRA_EDUCADORA", "EDU-DEMO")
 BACKEND = os.getenv("BACKEND_DECISION", "ensemble")
 
-app = FastAPI(title="IntegrAI · decisión (EC2)")
+API_TOKEN = os.getenv("INTEGRA_API_TOKEN", "")
+# U2: la nota pasa a conductas observables antes del ensemble (docs/EVAL_ENSEMBLE.md §5: 47 % -> 72 %)
+U2_CONDUCTAS = os.getenv("U2_CONDUCTAS", "1") == "1"
+MAX_MEDIA = int(os.getenv("MAX_MEDIA_BYTES", str(16 * 1024 * 1024)))
+_docs = os.getenv("INTEGRA_DOCS", "0") == "1"   # Swagger solo en desarrollo
+
+app = FastAPI(title="IntegrAI · decisión (EC2)", docs_url="/docs" if _docs else None,
+              redoc_url=None, openapi_url="/openapi.json" if _docs else None)
+if not API_TOKEN:
+    print("[seguridad] INTEGRA_API_TOKEN no definido: la API queda ABIERTA (solo para desarrollo)", flush=True)
+
+
+def requiere_token(x_api_key: str = Header(default="")) -> None:
+    """Token compartido con el webhook. Ley 21.459: la barrera de acceso debe existir."""
+    if API_TOKEN and not hmac.compare_digest(x_api_key, API_TOKEN):
+        raise HTTPException(status_code=401, detail="no autorizado")
+
+
+def _a_conductas(texto: str) -> str:
+    """Texto para el clasificador: conductas U2 (sin nombres) o el texto original si U2 falla."""
+    if not U2_CONDUCTAS or config.usar_mock():
+        return texto
+    try:
+        from types import SimpleNamespace
+        from src.multimodal import normalizar_entradas
+        obs = normalizar_entradas([SimpleNamespace(tipo="texto", ref="", pie=texto, texto_extraido="")])
+        return obs.texto_para_matcher() or texto
+    except Exception as e:  # noqa: BLE001
+        print(f"[u2] fallo, uso texto original: {type(e).__name__}", flush=True)
+        return texto
 plat = Plataforma()
 try:
     clas = Clasificador(backend=BACKEND)
@@ -92,12 +122,14 @@ def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
 
     nin = plat.nino(res.id_nino) or {}
     edad = marco.edad_meses(nin["fecha_nacimiento"], fecha) if nin.get("fecha_nacimiento") else None
-    cl = clas.clasificar(texto, edad)
+    # el clasificador recibe conductas sin nombres; se guarda eso, no la nota cruda con el nombre
+    texto_clas = _a_conductas(texto)
+    cl = clas.clasificar(texto_clas, edad)
     estado = "por_verificar" if cl.requiere_revision else "auto"
 
     oid = plat.registrar_observacion(
         id_nino=res.id_nino, id_educadora=EDUCADORA_DEMO, fecha=fecha, formato="texto",
-        nivel=cl.nivel, nota=texto, dominios=cl.dominios,
+        nivel=cl.nivel, nota=texto_clas, dominios=cl.dominios,
         manifestaciones=[m.manifestacion["id"] for m in cl.matches],
         confianza=cl.confianza, origen="whatsapp", metodo_resolucion=res.metodo,
         margen=cl.margen, estado=estado)
@@ -113,28 +145,25 @@ def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
 
 @app.get("/health")
 def health() -> dict:
-    return {"ok": True, "jardin": JARDIN_DEMO, "backend": clas.decisor.nombre,
-            "ninos_roster": len(_filas(JARDIN_DEMO))}
+    # sin jardín ni tamaño del roster (no exponer datos operativos sin autenticación)
+    return {"ok": True}
 
 
-@app.post("/procesar")
+@app.post("/procesar", dependencies=[Depends(requiere_token)])
 def procesar(m: Msg) -> dict:
     return _procesar(m.from_, m.texto, m.fecha)
 
-
-@app.get("/procesar")
-def procesar_get(from_: str, texto: str, fecha: str | None = None) -> dict:
-    return _procesar(from_, texto, fecha)
+# GET /procesar eliminado: ponía la nota (datos de menores) en la URL y en los logs de acceso.
 
 
-@app.post("/clasificar")
+@app.post("/clasificar", dependencies=[Depends(requiere_token)])
 def clasificar(texto: str, edad_meses: int | None = None) -> dict:
     cl = clas.clasificar(texto, edad_meses)
     return cl.to_dict()
 
 
 # --------------------------------------------------------------------------- #
-def extraer_texto_ocr(img_bytes: bytes) -> str:
+def extraer_texto_ocr(img_bytes: bytes, fmt: str = "jpeg") -> str:
     """OCR literal con Amazon Nova Pro (Bedrock). Devuelve el texto transcrito."""
     try:
         import boto3
@@ -145,24 +174,30 @@ def extraer_texto_ocr(img_bytes: bytes) -> str:
         r = cliente.converse(
             modelId="us.amazon.nova-pro-v1:0",
             messages=[{"role": "user", "content": [
-                {"image": {"format": "jpeg", "source": {"bytes": img_bytes}}},
+                {"image": {"format": fmt, "source": {"bytes": img_bytes}}},
                 {"text": prompt}]}],
             inferenceConfig={"maxTokens": 250, "temperature": 0.0})
         return r["output"]["message"]["content"][0]["text"].strip()
     except Exception as e:  # noqa: BLE001
-        print(f"[ocr] error: {e!r}", flush=True)
+        print(f"[ocr] error: {type(e).__name__}", flush=True)
         return ""
 
 
-def transcribir_audio_bytes(data: bytes, ext: str = ".ogg") -> str:
+def transcribir_audio_bytes(data: bytes, ext: str = ".ogg", video: bool = False) -> str:
+    """Escribe a un temporal seguro, transcribe (video: su pista de audio) y BORRA el archivo."""
+    f = None
     try:
-        from src.procesadores import transcribir_audio
-        f = tempfile.mktemp(suffix=ext)
-        open(f, "wb").write(data)
-        return transcribir_audio(f)
+        from src.procesadores import extraer_audio_video, transcribir_audio
+        with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as t:
+            t.write(data)
+            f = t.name
+        return extraer_audio_video(f) if video else transcribir_audio(f)
     except Exception as e:  # noqa: BLE001
-        print(f"[whisper] error: {e!r}", flush=True)
+        print(f"[whisper] error: {type(e).__name__}", flush=True)
         return ""
+    finally:
+        if f and _os.path.exists(f):
+            _os.unlink(f)
 
 
 class MediaMsg(BaseModel):
@@ -175,23 +210,32 @@ class MediaMsg(BaseModel):
         populate_by_name = True
 
 
-@app.post("/procesar_media")
+@app.post("/procesar_media", dependencies=[Depends(requiere_token)])
 def procesar_media(m: MediaMsg) -> dict:
+    from src.seguridad.archivos import tipo_real
+    invalido = {"ok": False, "estado": "media_invalida",
+                "ack": "\u26a0\ufe0f No pude procesar el archivo recibido (tipo o tama\u00f1o no permitido)."}
+    if len(m.media_b64) > MAX_MEDIA * 4 // 3 + 16:   # tope antes de decodificar
+        return invalido
     try:
-        data = base64.b64decode(m.media_b64)
+        data = base64.b64decode(m.media_b64, validate=True)
     except Exception:
-        return {"ok": False, "estado": "media_invalida",
-                "ack": "\u26a0\ufe0f No pude decodificar el archivo recibido."}
-    if m.tipo == "audio":
-        texto = transcribir_audio_bytes(data)
-    else:  # image / video -> OCR
-        texto = extraer_texto_ocr(data)
+        return invalido
+    real = tipo_real(data[:16])   # magic bytes, no la extensi\u00f3n ni lo que diga el cliente
+    if m.tipo == "audio" and real in ("ogg", "mp3", "wav", "mp4"):
+        texto = transcribir_audio_bytes(data, ext=f".{real}")
+    elif m.tipo == "video" and real in ("mp4", "webm"):
+        texto = transcribir_audio_bytes(data, ext=f".{real}", video=True)
+    elif m.tipo == "image" and real in ("jpeg", "png", "webp", "gif"):
+        texto = extraer_texto_ocr(data, fmt=real)
+    else:
+        return invalido
     texto = (texto + " " + (m.caption or "")).strip()
     if not texto:
         return {"ok": False, "estado": "sin_texto",
                 "ack": "\u26a0\ufe0f Recib\u00ed el archivo pero no pude leer un nombre en \u00e9l. "
                        "Reenv\u00eda con el nombre del ni\u00f1o/a (o escr\u00edbelo en el mensaje)."}
-    print(f"[ocr-texto] {texto!r}", flush=True)
+    print(f"[media] {m.tipo} -> {len(texto)} chars", flush=True)   # sin el texto (PII)
     return _procesar(m.from_, texto)
 
 

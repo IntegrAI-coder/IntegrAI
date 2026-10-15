@@ -4,10 +4,12 @@
 uso:  python3 tools/ssm.py "comando; otro"
       echo "cmd" | python3 tools/ssm.py -
 """
-import sys, time, boto3
+import os, sys, time, boto3
 
-REGION = "us-east-1"
-IID = "i-0226f28f9b99716f2"
+REGION = os.getenv("AWS_REGION", "us-east-1")
+IID = os.getenv("INTEGRA_INSTANCE_ID", "")   # no se versiona el ID de la instancia (repo público)
+if not IID:
+    sys.exit("define INTEGRA_INSTANCE_ID con el ID de la EC2")
 
 
 def run(script: str, timeout: int = 120) -> tuple[str, str]:

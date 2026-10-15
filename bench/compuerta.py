@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from types import SimpleNamespace as N
 
@@ -18,7 +19,7 @@ from src.compuerta import Compuerta
 
 AQUI = Path(__file__).parent
 CACHE = AQUI / ".cache" / "api_respuestas.json"
-URL = "http://44.204.243.156:8000"
+URL = os.getenv("INTEGRAI_API_URL", "")
 
 
 def _cargar_casos() -> list[dict]:
@@ -57,6 +58,8 @@ def _respuestas(casos: list[dict]) -> dict:
 
 def main() -> None:
     import collections, csv
+    if not URL and not CACHE.exists():
+        raise SystemExit("define la variable INTEGRAI_API_URL")
     casos = _cargar_casos()
     resp = _respuestas(casos)
     # nivel típico por edad (todo el dataset)

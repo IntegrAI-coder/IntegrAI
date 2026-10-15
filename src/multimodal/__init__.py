@@ -7,16 +7,37 @@ El resultado alimenta Matcher.matchear() vía ObservacionNormalizada.texto_para_
 """
 from __future__ import annotations
 
+import logging
 import time
 from pathlib import Path
 
 from .schema import Conducta, ObservacionNormalizada, Segmento
+
+log = logging.getLogger(__name__)
+_CATEGORIA = {"audio": "audio", "imagen": "imagen", "foto": "imagen", "video": "video"}
+
+
+def _medio_seguro(tipo: str, ref: str) -> tuple[str | None, str | None]:
+    """(ruta validada, None) o (None, advertencia segura para el usuario)."""
+    from ..seguridad.archivos import MedioInvalido, ruta_segura, validar_medio
+    try:
+        p = ruta_segura(ref)
+        validar_medio(p, _CATEGORIA[tipo])
+        return str(p), None
+    except MedioInvalido as e:
+        log.warning("medio rechazado (%s): %s", tipo, e)
+        return None, str(e)
 
 __all__ = ["normalizar_entradas", "ObservacionNormalizada", "Conducta", "Segmento"]
 
 
 def _etapa1(tipo: str, ref: str, pie: str, texto_extraido: str) -> list[Segmento]:
     t = (tipo or "").lower()
+    if t in _CATEGORIA and ref:
+        ref, adv = _medio_seguro(t, ref)
+        if adv:
+            segs = [Segmento(fuente="texto", texto=pie, modelo="directo")] if pie else []
+            return segs + [Segmento(fuente="texto", texto="", calidad=0.0, advertencias=[adv])]
     if t in ("texto", "nota"):
         txt = pie or texto_extraido
         return [Segmento(fuente="texto", texto=txt, modelo="directo")] if txt else []
@@ -28,7 +49,7 @@ def _etapa1(tipo: str, ref: str, pie: str, texto_extraido: str) -> list[Segmento
         return [seg]
     if t in ("imagen", "foto"):
         from .imagen import procesar_imagen
-        segs = [procesar_imagen(ref)] if ref and Path(ref).exists() else []
+        segs = [procesar_imagen(ref)] if ref else []
         if pie:
             segs.insert(0, Segmento(fuente="texto", texto=pie, modelo="directo"))
         return segs

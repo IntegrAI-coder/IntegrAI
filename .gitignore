@@ -51,3 +51,9 @@ bench/medios/
 bench/.cache/
 bench/detalle_*.jsonl
 models/
+
+# Seguridad: bases locales, medios y temporales con datos de niños/as
+*.db-journal
+*.sqlite*
+samples/
+medios_tmp/
