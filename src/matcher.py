@@ -95,20 +95,27 @@ def _cos(a: list[float], b: list[float]) -> float:
 
 
 class Matcher:
-    def __init__(self, usar_semantico: bool = True, alfa: float = 0.6) -> None:
-        """alfa = peso del componente semántico (el resto es léxico)."""
+    def __init__(self, usar_semantico: bool = True, alfa: float = 0.6,
+                 anclas: list[dict] | None = None, nombre_cache: str = "emb_manifestaciones.json") -> None:
+        """alfa = peso del componente semántico (el resto es léxico).
+
+        anclas: textos de referencia de otro marco (src/marcos.py, p. ej. la rúbrica de Integra),
+        cada uno con id, nivel, dominio, texto y opcionalmente tramo. Por defecto, las 90
+        manifestaciones del dataset (comportamiento original).
+        """
         self.alfa = alfa
         self.embedder = Embedder() if usar_semantico else Embedder()
         if not usar_semantico:
             self.embedder.disponible = False
-        self.man = list(marco.manifestaciones())
+        self.man = list(anclas) if anclas is not None else list(marco.manifestaciones())
+        self._nombre_cache = nombre_cache
         self._tok = [(_tokens(m["texto"]), m) for m in self.man]
         self._emb: list[list[float] | None] = []
         self._cargar_o_calcular_embeddings()
 
     # -- cache de embeddings ------------------------------------------
     def _cache_path(self):
-        return config.RAIZ / "models" / "emb_manifestaciones.json"
+        return config.RAIZ / "models" / self._nombre_cache
 
     def _cargar_o_calcular_embeddings(self) -> None:
         # intenta cache
@@ -135,16 +142,20 @@ class Matcher:
     SEM_LO, SEM_HI = 0.15, 0.55
 
     def matchear(self, texto: str, top_k: int = 8, umbral: float = 0.25,
-                 ratio: float = 0.65) -> list[Match]:
+                 ratio: float = 0.65, tramo: str | None = None,
+                 excluir: set[str] | None = None) -> list[Match]:
         """Híbrido: score = alfa*semantico_reescalado + (1-alfa)*lexico.
 
         Usa umbral **relativo** (una fracción del mejor score) para no depender de
-        la escala absoluta de los embeddings.
+        la escala absoluta de los embeddings. `tramo` restringe a las anclas de ese tramo;
+        `excluir` deja fuera ids de anclas (evaluación leave-one-out).
         """
         q_tok = _tokens(texto)
         q_emb = self.embedder.embed(texto) if self.embedder.disponible else None
         scored: list[Match] = []
         for i, (tok, m) in enumerate(self._tok):
+            if (tramo and m.get("tramo") != tramo) or (excluir and m["id"] in excluir):
+                continue
             lex = max(_jaccard(q_tok, tok), 0.6 * _contencion(q_tok, tok))
             sem = _cos(q_emb, self._emb[i]) if (q_emb and self._emb and self._emb[i]) else 0.0
             sem_r = max(0.0, min(1.0, (sem - self.SEM_LO) / (self.SEM_HI - self.SEM_LO)))

@@ -16,9 +16,11 @@ from pathlib import Path
 from .. import config
 from .schema import Fuente, Segmento
 
-PROMPT_VOCAB = ("Observación de una educadora de párvulos en Chile. Sala cuna, nivel medio, "
+PROMPT_VOCAB = ("Observación de una educadora de párvulos en Chile. Sala cuna, nivel medio, transición, "
                 "la tía, el niño, la niña, gatea, balbucea, apila bloques, hace pinza, "
-                "se para con apoyo, camina, señala, nombra, imita, juega, comparte.")
+                "se para con apoyo, camina, señala, nombra, imita, juega, comparte, "
+                "colación, babero, siesta, asamblea, espera su turno, se despide, "
+                "dijo «mío», «lo logré», «mira lo que hice», sin recordatorio, solito.")
 
 log = logging.getLogger(__name__)
 _modelos: dict[str, object] = {}

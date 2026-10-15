@@ -27,7 +27,8 @@ PROMPT_LITERAL = ("Transcribe EXACTAMENTE el texto manuscrito de la imagen, en e
 
 PROMPT_ESCENA = ("Eres una educadora de párvulos observando esta imagen. Describe en 2 a 4 frases cortas, "
                  "en presente y tercera persona, SOLO las conductas observables del niño o niña "
-                 "(postura, movimiento, manipulación de objetos, mirada, interacción, comunicación). "
+                 "(postura, movimiento, manipulación de objetos, mirada, interacción, comunicación, "
+                 "expresión emocional, autonomía en rutinas como comer o vestirse, si actúa solo o con ayuda). "
                  "No nombres a nadie, no describas rasgos físicos ni ropa, no estimes edad ni nivel.")
 
 

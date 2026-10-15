@@ -36,9 +36,40 @@ TOOL = {"name": "registrar_conductas",
         "description": "Registra las conductas observables extraídas de la observación.",
         "inputSchema": {"json": _Salida.model_json_schema()}}
 
+# MM v2: lo que separa un nivel de otro en la rúbrica de Integra (Identidad y Autonomía) y que la v1 perdía.
+# Los ejemplos son PROPIOS (no de la rúbrica) para no filtrar la evaluación, que se construye desde ella.
+REGLAS_V2 = (
+    "\n\nReglas adicionales, MUY importantes para evaluar el desarrollo:\n"
+    "8) Lo que el niño/a DICE se conserva textual entre comillas dentro de la conducta y en 'dicho_nino' "
+    "(ej: Dice \"¡es mío!\" cuando otro niño toma su pelota).\n"
+    "9) Conserva SIEMPRE el grado de apoyo: 'con ayuda del adulto', 'con recordatorio', 'sin que se lo pidan', "
+    "'por iniciativa propia', 'solo/a'. Nunca lo omitas ni lo cambies.\n"
+    "10) Conserva el contexto en la misma frase: rutina (alimentación, siesta, higiene, vestirse, guardar), "
+    "conflicto con un par, frente al espejo, al separarse del adulto, juego simbólico, actividad grupal o proyecto.\n"
+    "11) Conserva cómo expresa o regula sus emociones y si explica el motivo.\n"
+    "Ejemplos de estilo:\n"
+    "- Nota: 'la Cata hoy se sacó el delantal solita y lo colgó sin que le dijera nada' → "
+    "'Se saca el delantal y lo cuelga en su lugar sin que se lo pidan (rutina de vestirse).'\n"
+    "- Nota: 'el Joaco se enojó porque no le pasaban el balde y dijo que él lo tenía primero, después esperó' → "
+    "'En un conflicto por un juguete dice \"yo lo tenía primero\" y luego espera su turno.'\n"
+    "- Nota: 'cuando la mamá se fue lloró un ratito pero se calmó cuando le mostré los autos' → "
+    "'Al separarse de su madre llora brevemente y se calma con apoyo del adulto.'\n")
 
-def extraer(bloques: list[tuple[str, str]], modelo: str | None = None) -> tuple[list[Conducta], str | None, list[str]]:
-    """bloques = [(fuente, texto)]. Devuelve (conductas válidas, niño mencionado, advertencias)."""
+
+def system_para(guia=None) -> str:
+    """v1 = SYSTEM; v2 = SYSTEM + reglas de la rúbrica + dimensiones observables del marco activo."""
+    if guia is None:
+        return SYSTEM
+    dims = "; ".join(guia.dimensiones_observables())
+    return SYSTEM + REGLAS_V2 + f"Presta atención especial a: {dims}."
+
+
+def extraer(bloques: list[tuple[str, str]], modelo: str | None = None,
+            guia=None) -> tuple[list[Conducta], str | None, list[str]]:
+    """bloques = [(fuente, texto)]. Devuelve (conductas válidas, niño mencionado, advertencias).
+
+    guia: marco (src/marcos.py) cuyas dimensiones guían la extracción (MM v2). None = v1.
+    """
     bloques = [(f, t) for f, t in bloques if t and t.strip()]
     if not bloques:
         return [], None, []
@@ -49,7 +80,7 @@ def extraer(bloques: list[tuple[str, str]], modelo: str | None = None) -> tuple[
     modelo = modelo or config.MODELO_CONDUCTAS
     for intento in range(2):
         try:
-            r = converse(modelo, [{"text": entrada}], system=SYSTEM, tool=TOOL, max_tokens=1200)
+            r = converse(modelo, [{"text": entrada}], system=system_para(guia), tool=TOOL, max_tokens=1200)
             salida = _Salida.model_validate(r["input"])
             break
         except (ValidationError, ValueError):

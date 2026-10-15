@@ -57,3 +57,9 @@ models/
 *.sqlite*
 samples/
 medios_tmp/
+
+# Rúbrica oficial de Integra: material entregado para la hackathon, no se publica (ver tools/importar_rubrica.py)
+data/marcos/integra_*.json
+*.docx
+bench/casos_rubrica.jsonl
+bench/detalle_rubrica*.jsonl
