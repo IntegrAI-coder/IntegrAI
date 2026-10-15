@@ -1,0 +1,259 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  IntegrAI - servidor de la demo (Ivan). No recrea la EC2: endurece su Security
+  Group (80/8000 solo desde CloudFront), crea el rol de minimo privilegio,
+  log groups, alarmas basicas (SNS) y un plan de respaldo AWS Backup.
+  Ver docs/INFRA.md.
+
+Parameters:
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Security group actualmente asociado a integra-server (se le aplican las reglas restringidas).
+  CloudFrontPrefixListId:
+    Type: String
+    Description: >
+      ID del prefix list administrado de CloudFront para la region.
+      Obtener con: aws ec2 describe-managed-prefix-lists
+        --filters Name=prefix-list-name,Values=com.amazonaws.global.cloudfront.origin-facing
+        --query "PrefixLists[0].PrefixListId" --output text
+  InstanceId:
+    Type: AWS::EC2::Instance::Id
+    Default: ""
+    Description: ID de integra-server (opcional; habilita las alarmas de la instancia).
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC de integra-server.
+  AlarmEmail:
+    Type: String
+    Default: ""
+    Description: Correo del equipo para las alertas (puede quedar vacio y suscribir luego).
+  DlqQueueName:
+    Type: String
+    Default: integrai-dlq
+    Description: Nombre de la cola DLQ a vigilar.
+  AppLogRetentionDays:
+    Type: Number
+    Default: 30
+  AuditLogRetentionDays:
+    Type: Number
+    Default: 730
+  BackupSchedule:
+    Type: String
+    Default: "cron(0 5 * * ? *)"
+  BackupRetentionDays:
+    Type: Number
+    Default: 14
+
+Conditions:
+  HasInstance: !Not [!Equals [!Ref InstanceId, ""]]
+  HasEmail: !Not [!Equals [!Ref AlarmEmail, ""]]
+
+Resources:
+  # --- Security group: ingreso 80/8000 solo desde CloudFront ---
+  IngressDashboard:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SecurityGroupId
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourcePrefixListId: !Ref CloudFrontPrefixListId
+      Description: "Dashboard :80 solo desde CloudFront (IntegrAI)"
+
+  IngressApi:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SecurityGroupId
+      IpProtocol: tcp
+      FromPort: 8000
+      ToPort: 8000
+      SourcePrefixListId: !Ref CloudFrontPrefixListId
+      Description: "API :8000 solo desde CloudFront (IntegrAI)"
+
+  # --- Rol IAM de minimo privilegio + instance profile ---
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: integrai-ec2
+      Description: "IntegrAI: Bedrock InvokeModel acotado + SSM + Secrets Manager de IntegrAI"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: integrai-ec2-minimo
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: SSM
+                Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:StartSession
+                  - ssm:DescribeInstanceInformation
+                Resource: "*"
+              - Sid: Secretos
+                Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: "arn:aws:secretsmanager:*:*:secret:integrai/*"
+              - Sid: Bedrock
+                Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                Resource:
+                  - "arn:aws:bedrock:*::foundation-model/us.anthropic.claude-sonnet-5*"
+                  - "arn:aws:bedrock:*::foundation-model/us.amazon.nova-pro-v1*"
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: integrai-ec2-profile
+      Roles:
+        - !Ref InstanceRole
+
+  # --- Logs (sin PII) ---
+  AppLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /integra/app
+      RetentionInDays: !Ref AppLogRetentionDays
+
+  AuditLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /integra/auditoria
+      RetentionInDays: !Ref AuditLogRetentionDays
+
+  # --- Alertas ---
+  AlarmTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: integrai-alarmas
+      DisplayName: "IntegrAI alertas"
+
+  AlarmEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Condition: HasEmail
+    Properties:
+      TopicArn: !Ref AlarmTopic
+      Protocol: email
+      Endpoint: !Ref AlarmEmail
+
+  AlarmDlq:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: integrai-dlq-mensajes
+      AlarmDescription: "Mensajes visibles en la DLQ (IntegrAI)"
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions:
+        - Name: QueueName
+          Value: !Ref DlqQueueName
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref AlarmTopic
+
+  AlarmStatusCheck:
+    Type: AWS::CloudWatch::Alarm
+    Condition: HasInstance
+    Properties:
+      AlarmName: integrai-statuscheck
+      AlarmDescription: "Estado de la instancia integra-server"
+      Namespace: AWS/EC2
+      MetricName: StatusCheckFailed
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref InstanceId
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: breaching
+      AlarmActions:
+        - !Ref AlarmTopic
+
+  AlarmCpu:
+    Type: AWS::CloudWatch::Alarm
+    Condition: HasInstance
+    Properties:
+      AlarmName: integrai-cpu
+      AlarmDescription: "CPU alta en integra-server"
+      Namespace: AWS/EC2
+      MetricName: CPUUtilization
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref InstanceId
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: 85
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref AlarmTopic
+
+  # --- Respaldos del volumen (AWS Backup) ---
+  BackupVault:
+    Type: AWS::Backup::BackupVault
+    Properties:
+      BackupVaultName: !Sub "${AWS::StackName}-vault"
+
+  BackupRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: backup.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup
+
+  BackupPlan:
+    Type: AWS::Backup::BackupPlan
+    Properties:
+      BackupPlan:
+        BackupPlanName: !Sub "${AWS::StackName}-plan"
+        BackupPlanRule:
+          - RuleName: diario
+            TargetBackupVault: !Ref BackupVault
+            ScheduleExpression: !Ref BackupSchedule
+            Lifecycle:
+              DeleteAfterDays: !Ref BackupRetentionDays
+
+  BackupSelection:
+    Type: AWS::Backup::BackupSelection
+    Properties:
+      BackupPlanId: !Ref BackupPlan
+      BackupSelection:
+        SelectionName: integrai-server
+        IamRoleArn: !GetAtt BackupRole.Arn
+        ListOfTags:
+          - ConditionType: STRINGEQUALS
+            ConditionKey: Backup
+            ConditionValue: integrai
+
+Outputs:
+  SecurityGroupId:
+    Value: !Ref SecurityGroupId
+  InstanceProfileName:
+    Value: !Ref InstanceProfile
+  AlarmTopicArn:
+    Value: !Ref AlarmTopic
+  AppLogGroup:
+    Value: !Ref AppLogGroup
+  AuditLogGroup:
+    Value: !Ref AuditLogGroup
