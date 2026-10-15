@@ -17,7 +17,7 @@ from ._bedrock import cliente, converse
 from .audio import transcribir
 from .schema import Segmento
 
-PROMPT_VIDEO = ("Eres una educadora de párvulos observando un video de un niño o niña de 0 a 3 años. "
+PROMPT_VIDEO = ("Eres una educadora de párvulos observando un video de un niño o niña de 0 a 6 años. "
                 "Describe SOLO lo que se VE, en frases cortas en presente y tercera persona, cada una precedida "
                 "por el segundo aproximado entre corchetes. Sé preciso en lo motor, porque eso define el nivel: "
                 "- Control de cabeza y tronco: si levanta o sostiene la cabeza (boca abajo, sentado, en brazos) y cuánto tiempo. "
@@ -34,8 +34,23 @@ PROMPT_VIDEO = ("Eres una educadora de párvulos observando un video de un niño
 MAX_INLINE = 25 * 1024 * 1024
 
 
+def dimensiones_extra() -> str:
+    """Dimensiones del marco activo (p. ej. Identidad y Autonomía) que el video también debe describir."""
+    try:
+        from ..marcos import marco_activo
+        dims = marco_activo().dimensiones_observables()
+    except Exception:  # noqa: BLE001  (sin rúbrica instalada: solo lo motor)
+        return ""
+    return (" Además describe, si aparece: " + "; ".join(dims) +
+            ". Si se escucha lo que dice el niño o niña, cítalo textual entre comillas.")
+
+
+def prompt_video() -> str:
+    return PROMPT_VIDEO + dimensiones_extra()
+
+
 def _pegasus(path: str) -> str:
-    body = {"inputPrompt": PROMPT_VIDEO, "temperature": 0,
+    body = {"inputPrompt": prompt_video(), "temperature": 0,
             "mediaSource": {"base64String": base64.b64encode(Path(path).read_bytes()).decode()}}
     r = cliente().invoke_model(modelId=config.MODELO_VIDEO, body=json.dumps(body))
     return json.loads(r["body"].read())["message"]
@@ -45,7 +60,7 @@ def _nova(path: str) -> str:
     fmt = Path(path).suffix.lstrip(".").lower() or "mp4"
     contenido = [{"video": {"format": fmt if fmt in ("mp4", "mov", "webm", "mkv") else "mp4",
                             "source": {"bytes": Path(path).read_bytes()}}},
-                 {"text": PROMPT_VIDEO}]
+                 {"text": prompt_video()}]
     return converse(config.MODELO_VIDEO_FALLBACK, contenido, max_tokens=700)["texto"]
 
 

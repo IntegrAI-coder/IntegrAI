@@ -1,0 +1,89 @@
+{
+ "version": "tentativo-1",
+ "nota": "validar con Integra; ver docstring de tools/unificar_dataset.py",
+ "cobertura": [
+  {
+   "tramo": "nivel_medio",
+   "subtramo": "medio_menor",
+   "observaciones": 85
+  },
+  {
+   "tramo": "sala_cuna",
+   "subtramo": "sala_cuna_mayor",
+   "observaciones": 682
+  },
+  {
+   "tramo": "sala_cuna",
+   "subtramo": "sala_cuna_menor",
+   "observaciones": 2183
+  }
+ ],
+ "cruce": [
+  {
+   "tramo": "nivel_medio",
+   "nivel_e1": 8,
+   "nivel_rubrica": 1,
+   "observaciones": 6
+  },
+  {
+   "tramo": "nivel_medio",
+   "nivel_e1": 9,
+   "nivel_rubrica": 2,
+   "observaciones": 79
+  },
+  {
+   "tramo": "sala_cuna",
+   "nivel_e1": 1,
+   "nivel_rubrica": 1,
+   "observaciones": 179
+  },
+  {
+   "tramo": "sala_cuna",
+   "nivel_e1": 2,
+   "nivel_rubrica": 2,
+   "observaciones": 298
+  },
+  {
+   "tramo": "sala_cuna",
+   "nivel_e1": 3,
+   "nivel_rubrica": 3,
+   "observaciones": 420
+  },
+  {
+   "tramo": "sala_cuna",
+   "nivel_e1": 4,
+   "nivel_rubrica": 4,
+   "observaciones": 430
+  },
+  {
+   "tramo": "sala_cuna",
+   "nivel_e1": 5,
+   "nivel_rubrica": 5,
+   "observaciones": 433
+  },
+  {
+   "tramo": "sala_cuna",
+   "nivel_e1": 6,
+   "nivel_rubrica": 6,
+   "observaciones": 442
+  },
+  {
+   "tramo": "sala_cuna",
+   "nivel_e1": 7,
+   "nivel_rubrica": 7,
+   "observaciones": 361
+  },
+  {
+   "tramo": "sala_cuna",
+   "nivel_e1": 8,
+   "nivel_rubrica": 8,
+   "observaciones": 249
+  },
+  {
+   "tramo": "sala_cuna",
+   "nivel_e1": 9,
+   "nivel_rubrica": 8,
+   "observaciones": 53
+  }
+ ]
+}

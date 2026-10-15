@@ -28,6 +28,7 @@ class Conducta(BaseModel):
     cita: str = Field(description="Fragmento LITERAL de la transcripción que respalda la conducta.")
     fuente: Fuente = "texto"
     t_inicio_s: float | None = Field(default=None, description="Segundo del video donde ocurre (solo video).")
+    dicho_nino: str | None = Field(default=None, description="Lo que el niño/a dice, textual, si lo hay (ej: '¡es mío!').")
 
 
 class Segmento(BaseModel):

@@ -56,7 +56,12 @@ def _a_conductas(texto: str) -> str:
     try:
         from types import SimpleNamespace
         from src.multimodal import normalizar_entradas
-        obs = normalizar_entradas([SimpleNamespace(tipo="texto", ref="", pie=texto, texto_extraido="")])
+        try:   # MM v2: guiado por el marco activo (rúbrica de Integra); sin rúbrica instalada -> v1
+            from src.marcos import marco_activo
+            guia = marco_activo()
+        except Exception:  # noqa: BLE001
+            guia = None
+        obs = normalizar_entradas([SimpleNamespace(tipo="texto", ref="", pie=texto, texto_extraido="")], guia=guia)
         return obs.texto_para_matcher() or texto
     except Exception as e:  # noqa: BLE001
         print(f"[u2] fallo, uso texto original: {type(e).__name__}", flush=True)
