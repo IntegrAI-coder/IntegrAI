@@ -242,11 +242,36 @@ def _registrar_uno(nin: dict, educadora: str, texto: str, fecha: str, metodo: st
     _publicar({"evento": "observacion", "id_nino": nin["id_nino"],
                "id_jardin": nin.get("id_jardin"), "sala_grupo": nin.get("sala_grupo"),
                "nivel": nivel, "estado": estado})
+    # Si quedó dudoso -> a la COLA DE VERIFICACIÓN al instante (antes esperaba al cron).
+    if estado != "auto":
+        try:
+            _encolar_si_falta(nin, educadora, nivel, margen, dominios, fecha)
+        except Exception as e:  # noqa: BLE001
+            print(f"[cola] encolar falló: {type(e).__name__}: {e}", flush=True)
     pond, n_notas = _nivel_ponderado(nin["id_nino"])
     return {"id_nino": nin["id_nino"], "nombre_pila": nin.get("nombre_pila", ""),
             "tramo": tramo_id, "tramo_nombre": tramo_nom, "nivel": nivel, "nombre_nivel": nombre_nivel,
             "nivel_ponderado": pond, "n_notas": n_notas, "margen": margen, "metodo": metodo,
             "estado_resolucion": estado, "observacion_id": oid}
+
+
+def _encolar_si_falta(nin: dict, educadora: str, nivel, margen, dominios: list, fecha: str) -> str | None:
+    """Encola el caso en la COLA "por verificar" EN VIVO (sin esperar al cron).
+    Idempotente: si el niño/a ya tiene un pendiente abierto, no lo duplica."""
+    id_nino = nin["id_nino"]
+    ya = plat.con.execute(
+        "SELECT 1 FROM evaluaciones_pendientes WHERE id_nino_propuesto=? AND estado='pendiente' LIMIT 1",
+        (id_nino,)).fetchone()
+    if ya:
+        return None
+    tia = plat.educadora_de_sala(nin.get("id_jardin"), nin.get("sala_grupo")) or educadora
+    evidencia = f"1 obs nueva ({fecha}) · dominios: {', '.join(dominios) or '—'}"
+    pid = plat.encolar_pendiente(
+        id_nino, [], nivel, "global", confianza=1.0, margen=float(margen or 0.0),
+        motivo="margen_bajo", evidencia=evidencia,
+        creado_en=datetime.now().isoformat(timespec="seconds"), id_educadora=tia)
+    _publicar({"evento": "pendiente", "id_pendiente": pid, "id_nino": id_nino})
+    return pid
 
 
 def _ack_registros(registros: list[dict], pendientes: list) -> str:
