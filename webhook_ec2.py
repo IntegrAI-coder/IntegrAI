@@ -10,13 +10,16 @@ La verificación humana en la plataforma queda SOLO para el nivel de la rúbrica
 from __future__ import annotations
 
 import base64
+import csv
 import os
 import tempfile
 from datetime import date, datetime
+from pathlib import Path
 
 import hmac
 import os as _os
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -43,6 +46,12 @@ _docs = os.getenv("INTEGRA_DOCS", "0") == "1"   # Swagger solo en desarrollo
 
 app = FastAPI(title="IntegrAI · decisión (EC2)", docs_url="/docs" if _docs else None,
               redoc_url=None, openapi_url="/openapi.json" if _docs else None)
+
+# CORS: el dashboard estático (GitHub Pages / CloudFront) consume /api/* desde otro origen.
+# Solo lectura, sin credenciales. Configurable con INTEGRA_CORS_ORIGINS (coma-separado; "*" en demo).
+CORS_ORIGINS = [o.strip() for o in os.getenv("INTEGRA_CORS_ORIGINS", "*").split(",") if o.strip()]
+app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS, allow_methods=["GET"], allow_headers=["*"])
+
 if not API_TOKEN:
     print("[seguridad] INTEGRA_API_TOKEN no definido: la API queda ABIERTA (solo para desarrollo)", flush=True)
 
@@ -244,6 +253,51 @@ def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
 def health() -> dict:
     # sin jardín ni tamaño del roster (no exponer datos operativos sin autenticación)
     return {"ok": True}
+
+
+# --------------------------------------------------------------------------- #
+# API DE LECTURA (solo consulta) para el dashboard — datos VIVOS de la BD.
+# Privacidad: NUNCA expone nombres/apellidos ni la nota; solo códigos y niveles.
+# --------------------------------------------------------------------------- #
+API_DIR = Path(os.getenv("INTEGRA_HOME", str(Path(__file__).resolve().parent))) / "data"
+
+
+def _csv_json(nombre: str) -> list[dict]:
+    """Catálogo estático del repo (ruta_niveles / manifestaciones) leído como JSON."""
+    fp = API_DIR / nombre
+    if not fp.exists():
+        return []
+    with fp.open(encoding="utf-8") as fh:
+        return list(csv.DictReader(fh))
+
+
+def _sql_filas(consulta: str) -> list[dict]:
+    return [dict(r) for r in plat.con.execute(consulta).fetchall()]
+
+
+@app.get("/api/datos")
+def api_datos() -> dict:
+    """Dataset completo para el dashboard (MISMAS columnas que los CSV que ya lee),
+    pero leído de la BD viva: incluye JAR-EQUIPO y las observaciones de WhatsApp."""
+    return {
+        "ruta_niveles": _csv_json("ruta_niveles.csv"),
+        "manifestaciones": _csv_json("manifestaciones.csv"),
+        "jardines": _sql_filas(
+            "SELECT id_jardin,nombre_fantasia,comuna,region FROM jardines ORDER BY id_jardin"),
+        "ninos": _sql_filas(
+            "SELECT id_nino,fecha_nacimiento,id_jardin,sala_grupo,fecha_ingreso FROM ninos ORDER BY id_nino"),
+        "observaciones": _sql_filas(
+            "SELECT id_observacion,id_nino,fecha_observacion,formato_captura,nivel_estimado "
+            "FROM observaciones ORDER BY id_observacion"),
+        "observacion_manifestaciones": _sql_filas(
+            "SELECT id_observacion,id_manifestacion FROM observacion_manifestaciones"),
+    }
+
+
+@app.get("/api/resumen")
+def api_resumen() -> dict:
+    """Conteos rápidos (cabecera/estado del dashboard)."""
+    return {"ok": True, **plat.resumen()}
 
 
 @app.post("/procesar", dependencies=[Depends(requiere_token)])

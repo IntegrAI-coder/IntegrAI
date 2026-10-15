@@ -8,6 +8,7 @@
 Resultado en la distribución (se ubica por el comentario "IntegrAI", igual que tools/cloudfront_aws.py):
     /              → frontend React (S3 privado vía OAC; SPA: rutas sin extensión → /index.html)
     /streamlit*    → dashboard Streamlit en la EC2 (:80, con --server.baseUrlPath=streamlit)
+    /api/*         → API de lectura (:8000): datos vivos para el dashboard
     /procesar*, /clasificar, /health → API (:8000), sin cambios
 
 Se publican SOLO index.html, assets/ y los 6 CSV que lee frontend/src/data/cargar.ts (datos sintéticos E-1).
@@ -120,6 +121,14 @@ def configurar() -> None:
     st["AllowedMethods"] = {"Quantity": 7, "Items": ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
                             "CachedMethods": {"Quantity": 2, "Items": ["GET", "HEAD"]}}
     otros.append(st)
+    # API de lectura del dashboard (/api/*) -> mismo origen que la API (:8000)
+    api = next(o["Id"] for o in origenes if o.get("CustomOriginConfig", {}).get("HTTPPort") == 8000)
+    api_b = {k: v for k, v in viejo.items() if k not in ("FunctionAssociations",)}
+    api_b.update({"PathPattern": "/api/*", "TargetOriginId": api, "CachePolicyId": CACHE_DESACTIVADO,
+                  "OriginRequestPolicyId": TODO_VIEWER, "FunctionAssociations": {"Quantity": 0}})
+    api_b["AllowedMethods"] = {"Quantity": 7, "Items": ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+                               "CachedMethods": {"Quantity": 2, "Items": ["GET", "HEAD"]}}
+    otros = [b for b in otros if b["PathPattern"] != "/api/*"] + [api_b]
     cfg["CacheBehaviors"] = {"Quantity": len(otros), "Items": otros}
     cfg["DefaultRootObject"] = "index.html"
     cf.update_distribution(Id=d["Id"], IfMatch=etag, DistributionConfig=cfg)
