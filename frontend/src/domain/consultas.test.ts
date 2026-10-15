@@ -6,6 +6,7 @@ import {
   distribucionNiveles,
   fichaNino,
   claveCurso,
+  resumenJardines,
 } from './consultas';
 import type { AlumnoCurso } from './consultas';
 
@@ -121,5 +122,45 @@ describe('evaluación consolidada del backend', () => {
     const n2 = alumnos.find((a) => a.idNino === 'NINO-2');
     expect(n2?.nivelVigente).toBe(4);
     expect(n2?.alerta).toBe(true);
+  });
+});
+
+describe('rezago relativo + panorama de jardín', () => {
+  const datosRr: Datos = {
+    ...datos,
+    ninos: [
+      { idNino: 'N1', fechaNacimiento: '2024-01-01', idJardin: 'JAR-1', salaGrupo: 'SG-A', fechaIngreso: '' },
+      { idNino: 'N2', fechaNacimiento: '2024-01-01', idJardin: 'JAR-1', salaGrupo: 'SG-A', fechaIngreso: '' },
+      { idNino: 'N3', fechaNacimiento: '2024-01-01', idJardin: 'JAR-1', salaGrupo: 'SG-A', fechaIngreso: '' },
+      { idNino: 'N4', fechaNacimiento: '2024-01-01', idJardin: 'JAR-2', salaGrupo: 'SG-B', fechaIngreso: '' },
+    ],
+    jardines: [
+      ...datos.jardines,
+      { idJardin: 'JAR-2', nombreFantasia: 'Jardín Dos', comuna: 'C2', region: 'R2' },
+    ],
+    observaciones: [
+      { idObservacion: 'o1', idNino: 'N1', fechaObservacion: '2025-06-01', formatoCaptura: 'texto', nivelEstimado: 6 },
+      { idObservacion: 'o2', idNino: 'N2', fechaObservacion: '2025-06-01', formatoCaptura: 'texto', nivelEstimado: 6 },
+      { idObservacion: 'o3', idNino: 'N3', fechaObservacion: '2025-06-01', formatoCaptura: 'texto', nivelEstimado: 1 },
+      { idObservacion: 'o4', idNino: 'N4', fechaObservacion: '2025-06-01', formatoCaptura: 'texto', nivelEstimado: 4 },
+    ],
+    evaluaciones: [],
+  };
+
+  it('marca rezagado al que está por debajo del promedio de su sala', () => {
+    const alumnos = alumnosDeCurso(datosRr, 'JAR-1', 'SG-A', HOY);
+    const by = (id: string) => alumnos.find((a) => a.idNino === id);
+    // media sala = (6+6+1)/3 = 4.33 -> N3 (1) está >1 por debajo
+    expect(by('N3')?.rezagoRelativo).toBe(true);
+    expect(by('N3')?.alerta).toBe(true);
+    expect(by('N1')?.rezagoRelativo).toBe(false);
+  });
+
+  it('resume jardines con conteos', () => {
+    const js = resumenJardines(datosRr, HOY);
+    const j1 = js.find((j) => j.idJardin === 'JAR-1');
+    expect(j1?.totalSalas).toBe(1);
+    expect(j1?.totalNinos).toBe(3);
+    expect(j1?.nombreJardin).toBe('Jardín Uno');
   });
 });

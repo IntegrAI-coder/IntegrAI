@@ -9,6 +9,11 @@ import {
   tieneAlerta,
 } from './metrics';
 
+/** Un niño/a se considera REZAGADO en su grupo-curso si su nivel está más de
+ *  `UMBRAL_REZAGO_RELATIVO` niveles por debajo del promedio de su sala (comparación
+ *  RELATIVA con los pares — el criterio que pidió Fundación Integra, FAQ E1 #5/#8). */
+export const UMBRAL_REZAGO_RELATIVO = 1.0;
+
 export interface AlumnoCurso {
   idNino: string;
   edadMeses: number;
@@ -16,6 +21,8 @@ export interface AlumnoCurso {
   nivelEsperado: number | null;
   brecha: number | null;
   alerta: boolean;
+  /** Rezagado RELATIVO a su sala (no a un estándar absoluto). */
+  rezagoRelativo: boolean;
 }
 
 export interface ResumenCurso {
@@ -78,7 +85,22 @@ export function alumnoDesde(
     nivelEsperado: esperado,
     brecha: valorBrecha,
     alerta,
+    rezagoRelativo: false,
   };
+}
+
+/** Marca el rezago RELATIVO de un grupo-curso: compara cada niño/a con el promedio
+ *  de SU sala y suma ese rezago al flag de alerta. */
+function conRezagoRelativo(alumnos: AlumnoCurso[]): AlumnoCurso[] {
+  const niveles = alumnos
+    .map((a) => a.nivelVigente)
+    .filter((v): v is number => v !== null);
+  const media = promedio(niveles);
+  return alumnos.map((a) => {
+    const rezagoRelativo =
+      media !== null && a.nivelVigente !== null && a.nivelVigente < media - UMBRAL_REZAGO_RELATIVO;
+    return { ...a, rezagoRelativo, alerta: a.alerta || rezagoRelativo };
+  });
 }
 
 export function alumnosDeCurso(
@@ -89,9 +111,10 @@ export function alumnosDeCurso(
 ): AlumnoCurso[] {
   const obsPorNino = observacionesDe(datos);
   const evs = evaluacionesGlobales(datos);
-  return datos.ninos
+  const alumnos = datos.ninos
     .filter((n) => n.idJardin === idJardin && n.salaGrupo === salaGrupo)
     .map((n) => alumnoDesde(n, obsPorNino.get(n.idNino) ?? [], datos.niveles, hoy, evs.get(n.idNino)));
+  return conRezagoRelativo(alumnos);
 }
 
 export function resumenCursos(datos: Datos, hoy: Date): ResumenCurso[] {
@@ -111,8 +134,10 @@ export function resumenCursos(datos: Datos, hoy: Date): ResumenCurso[] {
 
   const resumenes: ResumenCurso[] = [];
   for (const { idJardin, sala, ninos } of porCurso.values()) {
-    const alumnos = ninos.map((n) =>
-      alumnoDesde(n, obsPorNino.get(n.idNino) ?? [], datos.niveles, hoy, evs.get(n.idNino)),
+    const alumnos = conRezagoRelativo(
+      ninos.map((n) =>
+        alumnoDesde(n, obsPorNino.get(n.idNino) ?? [], datos.niveles, hoy, evs.get(n.idNino)),
+      ),
     );
     const nivelesVigentes = alumnos
       .map((a) => a.nivelVigente)
@@ -164,6 +189,7 @@ export interface FichaNino {
   nivelEsperado: number | null;
   brecha: number | null;
   alerta: boolean;
+  rezagoRelativo: boolean;
   observaciones: ObservacionDetallada[];
 }
 
@@ -195,7 +221,13 @@ export function fichaNino(
     .filter((o) => o.idNino === idNino)
     .sort((a, b) => a.fechaObservacion.localeCompare(b.fechaObservacion));
 
-  const alumno = alumnoDesde(nino, observaciones, datos.niveles, hoy, evaluacionesGlobales(datos).get(idNino));
+  // Usamos el alumno del grupo-curso para heredar el rezago RELATIVO a su sala.
+  const alumnoCurso = alumnosDeCurso(datos, nino.idJardin, nino.salaGrupo, hoy).find(
+    (a) => a.idNino === idNino,
+  );
+  const alumno =
+    alumnoCurso ??
+    alumnoDesde(nino, observaciones, datos.niveles, hoy, evaluacionesGlobales(datos).get(idNino));
 
   const detalladas: ObservacionDetallada[] = observaciones.map((o) => ({
     idObservacion: o.idObservacion,
@@ -212,10 +244,63 @@ export function fichaNino(
     nivelEsperado: alumno.nivelEsperado,
     brecha: alumno.brecha,
     alerta: alumno.alerta,
+    rezagoRelativo: alumno.rezagoRelativo,
     observaciones: detalladas,
   };
 }
 
 export function nivelPorNumero(niveles: Nivel[]): Map<number, Nivel> {
   return new Map(niveles.map((n) => [n.nivel, n]));
+}
+
+export interface ResumenJardin {
+  idJardin: string;
+  nombreJardin: string;
+  comuna: string;
+  totalSalas: number;
+  totalNinos: number;
+  nivelPromedio: number | null;
+  totalAlertas: number;
+  /** Sala más rezagada del jardín (por debajo del promedio del jardín) → alerta a la directora. */
+  salaMasRezagada: { salaGrupo: string; nivelPromedio: number } | null;
+}
+
+/** Vista de la DIRECTORA: panorama por jardín, comparando sus salas y destacando la
+ *  más rezagada (FAQ E1 #1: "detectar un grupo-curso más rezagado y alertar"). */
+export function resumenJardines(datos: Datos, hoy: Date): ResumenJardin[] {
+  const porJardin = new Map<string, ResumenCurso[]>();
+  for (const curso of resumenCursos(datos, hoy)) {
+    const lista = porJardin.get(curso.idJardin) ?? [];
+    lista.push(curso);
+    porJardin.set(curso.idJardin, lista);
+  }
+
+  const jardines: ResumenJardin[] = [];
+  for (const [idJardin, salas] of porJardin) {
+    const nivelPromedio = promedio(
+      salas.map((s) => s.nivelPromedio).filter((v): v is number => v !== null),
+    );
+    const conPromedio = salas.filter((s) => s.nivelPromedio !== null);
+    let salaMasRezagada: ResumenJardin['salaMasRezagada'] = null;
+    if (conPromedio.length > 0 && nivelPromedio !== null) {
+      const peor = conPromedio.reduce((a, b) =>
+        (a.nivelPromedio as number) <= (b.nivelPromedio as number) ? a : b,
+      );
+      if ((peor.nivelPromedio as number) < nivelPromedio - UMBRAL_REZAGO_RELATIVO) {
+        salaMasRezagada = { salaGrupo: peor.salaGrupo, nivelPromedio: peor.nivelPromedio as number };
+      }
+    }
+    const primera = salas[0];
+    jardines.push({
+      idJardin,
+      nombreJardin: primera?.nombreJardin ?? idJardin,
+      comuna: primera?.comuna ?? '',
+      totalSalas: salas.length,
+      totalNinos: salas.reduce((s, c) => s + c.totalNinos, 0),
+      nivelPromedio,
+      totalAlertas: salas.reduce((s, c) => s + c.totalAlertas, 0),
+      salaMasRezagada,
+    });
+  }
+  return jardines.sort((a, b) => a.nombreJardin.localeCompare(b.nombreJardin));
 }
