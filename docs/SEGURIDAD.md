@@ -83,7 +83,7 @@ Actualizado el 15-oct-2026. Se ejecutó primero todo lo que **no interrumpe la d
 4. **Cerrar el acceso directo:** `INTEGRA_INSTANCE_ID=<id> python tools/seguridad_aws.py corte`. A partir de aquí, el dashboard solo se abre por la URL de CloudFront.
 5. **Si algo falla:** `python tools/seguridad_aws.py revertir-corte` y borrar `/etc/systemd/system/integra-webapi.service.d/seguridad.conf` + `systemctl daemon-reload && systemctl restart integra-webapi`.
 
-El dominio de CloudFront y los valores de los secretos **no se escriben en el repo**: se comparten por el canal interno del equipo.
+El dominio de CloudFront se publica en el README por decisión del equipo (datos sintéticos). Los **valores de los secretos nunca** se escriben en el repo.
 
 ### 3.2 CloudFront y WAF como código (Ivan)
 
