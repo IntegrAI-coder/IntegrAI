@@ -17,7 +17,7 @@ Asistente de WhatsApp para tías de jardín. La tía envía una observación (te
 | `contracts/` | JSON Schema entre unidades (se congela al final de la Inception) |
 | `.kiro/steering/` | Contexto para Kiro (product, tech, structure) |
 
-## Arquitectura (resumen)
+## Arquitectura
 
 ```
 WhatsApp → API Gateway + Lambda (firma + whitelist) → SQS → Worker

@@ -28,7 +28,9 @@ st.set_page_config(page_title="IntegraAI · Fundación Integra", page_icon="🧒
 
 DATOS = config.datos_dir()
 FECHA_REF = "2026-10-13"
-MOTORES = {"hibrido": "Híbrido (lemario + etario)", "laya": "Laya typesafe (calibrado, on-prem)"}
+MOTORES = {"ensemble": "🏆 Ensemble (híbrido ⊕ Laya) — 94% exacto",
+           "hibrido": "Híbrido (matcher + etario) — rápido",
+           "laya": "Laya typesafe (calibrado, on-prem)"}
 
 
 @st.cache_resource
