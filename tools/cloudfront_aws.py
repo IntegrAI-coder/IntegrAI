@@ -373,56 +373,76 @@ def _hash_cabecera(usuario: str, clave: str) -> str:
     return hashlib.sha256(valor.encode()).hexdigest()
 
 
-def _codigo_auth(hash_esperado: str) -> str:
-    """CloudFront Function (cloudfront-js-2.0): solo guarda el HASH, nunca la clave."""
+def _codigo_auth(hash_esperado: str, spa: bool = False) -> str:
+    """CloudFront Function (cloudfront-js-2.0): solo guarda el HASH, nunca la clave.
+
+    spa=True agrega la reescritura del frontend React (rutas sin extensión -> /index.html): CloudFront
+    admite UNA función viewer-request por comportamiento, así que auth y SPA van juntas en la raíz.
+    """
     if len(hash_esperado) != 64 or any(c not in "0123456789abcdef" for c in hash_esperado):
         raise ValueError("hash inválido")
-    return """const crypto = require('crypto');
-var ESPERADO = '%s';
-function handler(event) {
-  var h = event.request.headers['authorization'];
-  if (h && crypto.createHash('sha256').update(h.value).digest('hex') === ESPERADO) {
-    return event.request;
-  }
-  return {
-    statusCode: 401,
-    statusDescription: 'Unauthorized',
-    headers: { 'www-authenticate': { value: 'Basic realm="IntegrAI"' } }
-  };
-}
-""" % hash_esperado
+    reescritura = "    if (r.uri.indexOf('.') === -1) { r.uri = '/index.html'; }\n" if spa else ""
+    return ("const crypto = require('crypto');\n"
+            f"var ESPERADO = '{hash_esperado}';\n"
+            "function handler(event) {\n"
+            "  var r = event.request;\n"
+            "  var h = r.headers['authorization'];\n"
+            "  if (h && crypto.createHash('sha256').update(h.value).digest('hex') === ESPERADO) {\n"
+            + reescritura +
+            "    return r;\n"
+            "  }\n"
+            "  return {\n"
+            "    statusCode: 401,\n"
+            "    statusDescription: 'Unauthorized',\n"
+            "    headers: { 'www-authenticate': { value: 'Basic realm=\"IntegrAI\"' } }\n"
+            "  };\n"
+            "}\n")
+
+
+def _publicar(cf, nombre: str, codigo: str, comentario: str) -> str:
+    config = {"Comment": comentario, "Runtime": "cloudfront-js-2.0"}
+    try:
+        etag = cf.describe_function(Name=nombre, Stage="DEVELOPMENT")["ETag"]
+        etag = cf.update_function(Name=nombre, IfMatch=etag, FunctionConfig=config, FunctionCode=codigo.encode())["ETag"]
+    except cf.exceptions.NoSuchFunctionExists:
+        etag = cf.create_function(Name=nombre, FunctionConfig=config, FunctionCode=codigo.encode())["ETag"]
+    return cf.publish_function(Name=nombre, IfMatch=etag)["FunctionSummary"]["FunctionMetadata"]["FunctionARN"]
 
 
 def auth_basica() -> None:
-    """Basic auth REAL en el dashboard (DefaultCacheBehavior). La API usa X-Api-Key y no se toca."""
+    """Basic auth REAL en el frontend (raíz, con reescritura SPA) y en /streamlit*. La API usa X-Api-Key."""
     cf = _cloudfront()
-    codigo = _codigo_auth(_hash_cabecera(*_credencial())).encode()
-    config = {"Comment": "IntegrAI: Basic auth del dashboard (F0)", "Runtime": "cloudfront-js-2.0"}
-    try:
-        etag = cf.describe_function(Name=FUNCION_AUTH, Stage="DEVELOPMENT")["ETag"]
-        etag = cf.update_function(Name=FUNCION_AUTH, IfMatch=etag, FunctionConfig=config, FunctionCode=codigo)["ETag"]
-        print("función actualizada:", FUNCION_AUTH)
-    except cf.exceptions.NoSuchFunctionExists:
-        etag = cf.create_function(Name=FUNCION_AUTH, FunctionConfig=config, FunctionCode=codigo)["ETag"]
-        print("función creada:", FUNCION_AUTH)
-    arn = cf.publish_function(Name=FUNCION_AUTH, IfMatch=etag)["FunctionSummary"]["FunctionMetadata"]["FunctionARN"]
-    print("función publicada (LIVE)")
+    h = _hash_cabecera(*_credencial())
+    arn_spa = _publicar(cf, FUNCION_AUTH + "-spa", _codigo_auth(h, spa=True), "IntegrAI: Basic auth + SPA (raíz)")
+    arn = _publicar(cf, FUNCION_AUTH, _codigo_auth(h), "IntegrAI: Basic auth (/streamlit*)")
+    print("funciones publicadas (LIVE)")
     dist = _distribucion(cf)
     resp = cf.get_distribution_config(Id=dist["Id"])
     cfg = resp["DistributionConfig"]
-    cfg["DefaultCacheBehavior"]["FunctionAssociations"] = {
-        "Quantity": 1, "Items": [{"EventType": "viewer-request", "FunctionARN": arn}]}
+    asociar = lambda a: {"Quantity": 1, "Items": [{"EventType": "viewer-request", "FunctionARN": a}]}
+    cfg["DefaultCacheBehavior"]["FunctionAssociations"] = asociar(arn_spa)
+    for b in cfg.get("CacheBehaviors", {}).get("Items", []):
+        if b["PathPattern"] == "/streamlit*":
+            b["FunctionAssociations"] = asociar(arn)
     cf.update_distribution(Id=dist["Id"], IfMatch=resp["ETag"], DistributionConfig=cfg)
-    print("auth básica asociada al dashboard. Verifica: sin credencial -> 401; con la de "
+    print("auth básica asociada al frontend y a /streamlit*. Verifica: sin credencial -> 401; con la de "
           f"{SECRETO_AUTH} -> 200. La API (/procesar*, /clasificar, /health) no cambia.")
 
 
 def quitar_auth() -> None:
+    """Quita el Basic auth; la raíz vuelve a la reescritura SPA sola (tools/desplegar_frontend.py)."""
     cf = _cloudfront()
     dist = _distribucion(cf)
     resp = cf.get_distribution_config(Id=dist["Id"])
     cfg = resp["DistributionConfig"]
-    cfg["DefaultCacheBehavior"]["FunctionAssociations"] = {"Quantity": 0}
+    try:
+        arn_spa = cf.describe_function(Name="integrai-spa-rewrite", Stage="LIVE")["FunctionSummary"]["FunctionMetadata"]["FunctionARN"]
+        cfg["DefaultCacheBehavior"]["FunctionAssociations"] = {"Quantity": 1, "Items": [{"EventType": "viewer-request", "FunctionARN": arn_spa}]}
+    except cf.exceptions.NoSuchFunctionExists:
+        cfg["DefaultCacheBehavior"]["FunctionAssociations"] = {"Quantity": 0}
+    for b in cfg.get("CacheBehaviors", {}).get("Items", []):
+        if b["PathPattern"] == "/streamlit*":
+            b["FunctionAssociations"] = {"Quantity": 0}
     cf.update_distribution(Id=dist["Id"], IfMatch=resp["ETag"], DistributionConfig=cfg)
     print("auth básica desasociada")
 
