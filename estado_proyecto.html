@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estado del proyecto · IntegrAI</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root{--fondo:#f5f7fa;--sup:#fff;--borde:#e4e8ee;--texto:#1e293b;--tenue:#64748b;
+--acento:#2563eb;--acento2:#0f766e;--alerta:#dc2626;--ok:#059669;--warn:#d97706;--radio:14px}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--texto);background:var(--fondo)}
+main{max-width:1360px;margin:0 auto;padding:1.4rem 1.5rem 3rem}
+header h1{font-size:1.4rem;margin:0 0 .2rem}
+header p{margin:.15rem 0;color:var(--tenue);font-size:.9rem;line-height:1.5}
+.badge{display:inline-block;background:#e8f0fe;color:var(--acento);border-radius:999px;padding:.1rem .6rem;font-size:.74rem;font-weight:700;margin-left:.4rem}
+.obj{background:linear-gradient(135deg,#eff6ff,#f0fdfa);border:1px solid #dbeafe;border-radius:var(--radio);padding:1rem 1.2rem;margin:1rem 0}
+.obj h3{margin:0 0 .35rem;font-size:1rem}
+.obj .kpi{color:var(--acento2);font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.9rem;margin:1rem 0}
+.kpi{background:var(--sup);border:1px solid var(--borde);border-radius:var(--radio);padding:.85rem 1rem;box-shadow:0 1px 2px rgba(16,24,40,.05)}
+.kpi .n{font-size:1.5rem;font-weight:800;color:var(--acento)}
+.kpi .l{font-size:.75rem;color:var(--tenue);margin-top:.15rem}
+.kpi.ok .n{color:var(--ok)}
+nav.tabs{display:flex;gap:.25rem;flex-wrap:wrap;border-bottom:2px solid var(--borde);margin:1.1rem 0 0;position:sticky;top:0;background:var(--fondo);z-index:6;padding-top:.35rem}
+nav.tabs button{background:transparent;color:var(--tenue);padding:.55rem .95rem;font-size:.88rem;border:0;border-bottom:3px solid transparent;cursor:pointer;border-radius:9px 9px 0 0;font-weight:600}
+nav.tabs button.activo{color:var(--acento);border-bottom-color:var(--acento)}
+.panel{display:none;padding-top:1rem}
+.panel.activo{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:1rem;margin-top:1rem}
+.card{background:var(--sup);border:1px solid var(--borde);border-radius:var(--radio);padding:1rem 1.1rem;box-shadow:0 1px 3px rgba(16,24,40,.06)}
+.card.wide{grid-column:1/-1}
+.card h3{margin:0 0 .2rem;font-size:.95rem}
+.card .purpose{margin:0 0 .6rem;color:var(--tenue);font-size:.82rem}
+.area{border:1px solid var(--borde);border-radius:var(--radio);background:var(--sup);padding:1rem 1.1rem;margin-top:1rem}
+.area h3{margin:0;font-size:1rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap}
+.area .meta{color:var(--tenue);font-size:.8rem;font-weight:400}
+.barra{height:9px;background:#eef2f7;border-radius:999px;overflow:hidden;margin:.55rem 0 .8rem}
+.barra span{display:block;height:100%;background:linear-gradient(90deg,var(--acento),var(--acento2))}
+.items{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:.3rem .9rem}
+.it{display:flex;align-items:flex-start;gap:.45rem;font-size:.84rem;padding:.15rem 0}
+.dot{width:.65rem;height:.65rem;border-radius:50%;flex:0 0 auto;margin-top:.28rem}
+.dot.hecho{background:var(--ok)}.dot.en-curso{background:var(--warn)}.dot.pendiente{background:#cbd5e1}
+.it .nota{color:var(--tenue);font-size:.76rem}
+.table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:.4rem}
+.table th,.table td{text-align:left;padding:.45rem .5rem;border-bottom:1px solid var(--borde)}
+.table th{color:var(--tenue);font-weight:600;font-size:.78rem}
+.table td.n{text-align:right;font-variant-numeric:tabular-nums}
+.chip{display:inline-block;border-radius:999px;padding:.08rem .55rem;font-size:.74rem;font-weight:700}
+.chip.hecho{background:#dcfce7;color:#166534}.chip.en-curso{background:#fef3c7;color:#92400e}.chip.pendiente{background:#e2e8f0;color:#475569}
+code{font-family:ui-monospace,Consolas,monospace;background:#f1f5f9;border-radius:6px;padding:.08rem .35rem;font-size:.8rem}
+footer{color:var(--tenue);font-size:.8rem;text-align:center;padding:2rem 1rem}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+</style></head>
+<body><main>
+<header>
+  <h1>Estado del proyecto · IntegrAI<span class="badge">datos sintéticos</span></h1>
+  <p>Tablero de equipo · Breaking Barriers 2026 · actualizado el 15-10-2026.</p>
+</header>
+<div class="obj">
+  <h3>Convertir una observación de WhatsApp en un nivel con evidencia</h3>
+  <p>La educadora envía texto, foto de post-it, nota de voz o video; el sistema propone un nivel con evidencia del catálogo y ella Confirma / Ajusta / Cancela. Solo su confirmación cambia el nivel del niño/a.</p>
+  <p><span class="kpi">KPI: Bajar el tiempo de documentación de 4 h/semana a casi 0</span></p>
+  <p class="meta" style="color:#64748b;font-size:.85rem">Prototipo funcional desplegado en integra-server · falta congelar código, activar seguridad F0 y demostrar el E2E en teléfonos reales</p>
+</div>
+<div class="kpis" id="kpis"></div>
+<nav class="tabs" id="tabs">
+  <button data-tab="resumen" class="activo">Resumen</button>
+  <button data-tab="areas">Áreas y equipo</button>
+  <button data-tab="plan">Plan y README</button>
+  <button data-tab="modelo">Métricas del modelo</button>
+  <button data-tab="seguridad">Seguridad</button>
+  <button data-tab="repo">Repositorio</button>
+</nav>
+
+<section class="panel activo" data-panel="resumen">
+  <div class="grid">
+    <div class="card"><h3>Avance por área</h3><p class="purpose">% de entregables presentes en el repo.</p><div id="fig-areas" style="height:340px"></div></div>
+    <div class="card"><h3>Exactitud por motor (300 notas)</h3><p class="purpose">Exacto vs. ±1 nivel. Fuente: docs/EVAL_ENSEMBLE.md.</p><div id="fig-motores" style="height:340px"></div></div>
+  </div>
+</section>
+
+<section class="panel" data-panel="areas"><div id="areas"></div></section>
+
+<section class="panel" data-panel="plan"><div id="plan"></div></section>
+
+<section class="panel" data-panel="modelo">
+  <div class="grid">
+    <div class="card wide"><h3>Casos "contra la edad" (60 casos)</h3><p class="purpose">Cuando el niño se aparta de su edad: exactitud, ±1 y recall de alerta de rezago.</p><div id="fig-contra" style="height:340px"></div></div>
+    <div class="card wide"><h3>Compuerta por margen</h3><p class="purpose">Auto-registradas, exactitud de las aceptadas y exactitud final con revisión humana.</p><div id="fig-gate" style="height:340px"></div></div>
+  </div>
+  <div class="card wide" style="margin-top:1rem">
+    <h3>Lectura</h3>
+    <p class="purpose">Punto operativo <code>margen &lt; 0,15</code></p>
+    <ul style="font-size:.88rem;color:#475569;line-height:1.6">
+      <li>83 % se auto-registra con <strong>98,0 %</strong> de acierto; 17 % va a revisión de la educadora.</li>
+      <li>La compuerta atrapa el <strong>72 %</strong> de los errores; <strong>5 errores escapan</strong> (riesgo residual).</li>
+      <li>Con revisión humana de la cola, la <strong>exactitud final es 98,3 %</strong>.</li>
+      <li>La edad explica casi todo el acierto: en casos "contra la edad" el ensemble desplegado baja a 47 %. Poner U2 (nota → conductas) delante sube el exacto a 72 % y el recall de rezago a 80 %.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="panel" data-panel="seguridad">
+  <div class="grid">
+    <div class="card"><h3>Controles F0 (antes de la demo)</h3><p class="purpose">Aplicados vs. pendientes.</p><div id="fig-seg" style="height:300px"></div></div>
+    <div class="card"><h3>Pendientes para el corte</h3><p class="purpose">Requieren coordinación con Sebastián.</p><ul id="seg-pend" style="font-size:.86rem;color:#475569;line-height:1.6"></ul></div>
+  </div>
+  <div class="card wide" style="margin-top:1rem"><h3>Hallazgos corregidos en el código</h3>
+    <p class="purpose">Firma fail-closed, whitelist, token, path traversal, magic bytes, PII en logs, prompt injection y más (docs/SEGURIDAD.md, H1–H20).</p>
+  </div>
+</section>
+
+<section class="panel" data-panel="repo"><div class="grid" id="repo-grid"></div></section>
+
+<footer>Tablero interno de equipo · datos 100 % sintéticos · no es un instrumento clínico.
+Las métricas son un snapshot de los documentos del repo.</footer>
+</main>
+<script>
+const DATA = {"objetivo": {"titulo": "Convertir una observación de WhatsApp en un nivel con evidencia", "detalle": "La educadora envía texto, foto de post-it, nota de voz o video; el sistema propone un nivel con evidencia del catálogo y ella Confirma / Ajusta / Cancela. Solo su confirmación cambia el nivel del niño/a.", "kpi": "Bajar el tiempo de documentación de 4 h/semana a casi 0", "estado": "Prototipo funcional desplegado en integra-server · falta congelar código, activar seguridad F0 y demostrar el E2E en teléfonos reales"}, "kpis": {"avance": 86, "ensemble": "94,0 %", "final": "98,3 %", "recall_rezago": "80 %", "tests": "81", "tests_ok": true, "seguridad": "7/11"}, "areas": [{"area": "Infraestructura AWS", "owner": "Ivan", "rama": "Ivan", "pct": 92, "items": [{"label": "Plan de infraestructura (doc)", "ruta": "docs/INFRA.md", "estado": "hecho", "nota": ""}, {"label": "Plantilla CloudFormation", "ruta": "infra/integra-server.yaml", "estado": "hecho", "nota": ""}, {"label": "README de infra", "ruta": "infra/README.md", "estado": "hecho", "nota": ""}, {"label": "Secretos en Secrets Manager", "ruta": "tools/secrets_aws.py", "estado": "hecho", "nota": ""}, {"label": "IAM mínimo (rol EC2)", "ruta": "tools/iam_aws.py", "estado": "hecho", "nota": ""}, {"label": "Cifrado EBS (plan + migración)", "ruta": "tools/ebs_aws.py", "estado": "hecho", "nota": ""}, {"label": "CloudFront TLS + WAF como código", "ruta": "tools/cloudfront_aws.py", "estado": "hecho", "nota": ""}, {"label": "Observabilidad (CloudTrail/GuardDuty/Config)", "ruta": "tools/observabilidad_aws.py", "estado": "hecho", "nota": ""}, {"label": "KMS + S3 (BPA, lifecycle 24 h)", "ruta": "tools/kms_s3_aws.py", "estado": "hecho", "nota": ""}, {"label": "Bedrock por VPC endpoint", "ruta": "tools/bedrock_aws.py", "estado": "hecho", "nota": ""}, {"label": "Budgets (alerta de gasto)", "ruta": "tools/budgets_aws.py", "estado": "hecho", "nota": ""}, {"label": "Auditoría de región", "ruta": "tools/region_audit.py", "estado": "hecho", "nota": ""}, {"label": "CloudWatch logs y alarmas", "ruta": "tools/cloudwatch_aws.py", "estado": "hecho", "nota": ""}, {"label": "Respaldos", "ruta": "tools/backup_aws.py", "estado": "hecho", "nota": ""}, {"label": "Endurecer servicios EC2", "ruta": "tools/endurecer_servicios_ec2.sh", "estado": "hecho", "nota": ""}, {"label": "Desplegar seguridad en EC2", "ruta": "tools/desplegar_seguridad_ec2.sh", "estado": "hecho", "nota": ""}, {"label": "Cerrar 80/8000 (solo CloudFront)", "ruta": "tools/seguridad_aws.py", "estado": "hecho", "nota": ""}, {"label": "CI de seguridad (deps + escaneo)", "ruta": ".github/workflows/seguridad.yml", "estado": "hecho", "nota": ""}, {"label": "Dashboard de datos", "ruta": "dashboard/visualizar_datos.py", "estado": "hecho", "nota": "Movido a dashboard/"}, {"label": "CloudFront TLS aplicado en AWS", "ruta": null, "estado": "hecho", "nota": "Verificado en la cuenta"}, {"label": "IMDSv2 obligatorio aplicado", "ruta": null, "estado": "hecho", "nota": "Verificado en la instancia"}, {"label": "Cifrado EBS por defecto aplicado", "ruta": null, "estado": "hecho", "nota": "Verificado en la cuenta"}, {"label": "Activar token API + cerrar SG", "ruta": null, "estado": "pendiente", "nota": "Corte coordinado con Sebastián"}, {"label": "Observabilidad/KMS/S3/Budgets aplicados", "ruta": null, "estado": "pendiente", "nota": "Entregado en repo, sin ejecutar"}], "hechos": 22, "total": 24}, {"area": "WhatsApp + clasificador", "owner": "Sebastián", "rama": "whatsapp-clasificador", "pct": 100, "items": [{"label": "Webhook (firma, whitelist)", "ruta": "webhook/server.py", "estado": "hecho", "nota": ""}, {"label": "API EC2 (/procesar, /clasificar)", "ruta": "webhook_ec2.py", "estado": "hecho", "nota": ""}, {"label": "Resolver niño/a por nombre", "ruta": "src/resolver.py", "estado": "hecho", "nota": ""}, {"label": "Clasificador", "ruta": "src/clasificador.py", "estado": "hecho", "nota": ""}, {"label": "Compuerta por margen", "ruta": "src/compuerta.py", "estado": "hecho", "nota": ""}, {"label": "Ensemble (híbrido + Laya)", "ruta": "src/modelo_decision.py", "estado": "hecho", "nota": ""}, {"label": "U2 multimodal delante del ensemble", "ruta": "src/multimodal/__init__.py", "estado": "hecho", "nota": ""}, {"label": "Arquitectura de decisión (doc)", "ruta": "docs/ARQUITECTURA_DECISION.md", "estado": "hecho", "nota": ""}, {"label": "Resolver + cron (doc)", "ruta": "docs/ARQUITECTURA_RESOLVER_Y_CRON.md", "estado": "hecho", "nota": ""}, {"label": "Bench contra la edad", "ruta": "bench/casos_contra_edad.jsonl", "estado": "hecho", "nota": ""}, {"label": "Código del servidor en el repo", "ruta": "webhook/server.py", "estado": "hecho", "nota": "Presente en el repo"}], "hechos": 11, "total": 11}, {"area": "Frontend", "owner": "Santiago", "rama": "frontend", "pct": 62, "items": [{"label": "App React + Vite", "ruta": "frontend/src/App.tsx", "estado": "hecho", "nota": ""}, {"label": "Página de cursos", "ruta": "frontend/src/pages/Cursos.tsx", "estado": "hecho", "nota": ""}, {"label": "Ficha del niño/a", "ruta": "frontend/src/pages/Nino.tsx", "estado": "hecho", "nota": ""}, {"label": "Gráficos de consulta", "ruta": "frontend/src/components/GraficoDistribucion.tsx", "estado": "hecho", "nota": ""}, {"label": "Tests de dominio", "ruta": "frontend/src/domain/consultas.test.ts", "estado": "hecho", "nota": ""}, {"label": "Transcripción/conductas/advertencias en ficha", "ruta": null, "estado": "en curso", "nota": "Pendiente según PLAN"}, {"label": "Marcar 'pendiente de revisión' de la compuerta", "ruta": null, "estado": "pendiente", "nota": "Pendiente"}, {"label": "PR del frontend a main", "ruta": null, "estado": "pendiente", "nota": "Falta PR a main"}], "hechos": 5, "total": 8}, {"area": "Modelo multimodal U2 + seguridad", "owner": "Mauricio", "rama": "u2-eval-despliegue", "pct": 78, "items": [{"label": "U2 multimodal (audio/imagen/video)", "ruta": "src/multimodal/video.py", "estado": "hecho", "nota": ""}, {"label": "Nota → conductas", "ruta": "src/multimodal/conductas.py", "estado": "hecho", "nota": ""}, {"label": "Evaluación del ensemble (doc)", "ruta": "docs/EVAL_ENSEMBLE.md", "estado": "hecho", "nota": ""}, {"label": "Métricas de la compuerta (doc)", "ruta": "docs/METRICAS_GATE.md", "estado": "hecho", "nota": ""}, {"label": "Gobierno de datos y marco legal", "ruta": "docs/GOBIERNO_DATOS.md", "estado": "hecho", "nota": ""}, {"label": "Checklist de seguridad (doc)", "ruta": "docs/SEGURIDAD.md", "estado": "hecho", "nota": ""}, {"label": "Tests de seguridad", "ruta": "tests/test_seguridad.py", "estado": "hecho", "nota": ""}, {"label": "Cerrar puertos 22/8000/8501", "ruta": null, "estado": "pendiente", "nota": "Requiere corte coordinado"}, {"label": "Autenticación de la API y del dashboard", "ruta": null, "estado": "en curso", "nota": "F0/F1"}], "hechos": 7, "total": 9}, {"area": "Entrega, datos y tableros", "owner": "Equipo", "rama": "main", "pct": 100, "items": [{"label": "Dataset sintético (7 CSV)", "ruta": "data/ninos.csv", "estado": "hecho", "nota": ""}, {"label": "Diccionario de datos", "ruta": "docs/diccionario_datos.md", "estado": "hecho", "nota": ""}, {"label": "Plan de equipo", "ruta": "docs/PLAN.md", "estado": "hecho", "nota": ""}, {"label": "Resumen del deck", "ruta": "docs/resumen_deck.md", "estado": "hecho", "nota": ""}, {"label": "Dashboard de datos", "ruta": "dashboard/visualizar_datos.py", "estado": "hecho", "nota": ""}, {"label": "Dashboard de estado del proyecto", "ruta": "tools/estado_proyecto.py", "estado": "hecho", "nota": "Este tablero"}], "hechos": 6, "total": 6}], "motores": [{"m": "Solo edad", "exacto": 1.0, "pm1": 1.0}, {"m": "Laya afinado v1", "exacto": 0.137, "pm1": 0.48}, {"m": "Laya base", "exacto": 0.507, "pm1": 0.857}, {"m": "Matcher híbrido", "exacto": 0.663, "pm1": 0.69}, {"m": "Ensemble", "exacto": 0.94, "pm1": 0.973}], "contraEdad": [{"m": "Solo edad", "exacto": 0.17, "pm1": 0.62, "recall": 0.0}, {"m": "Ensemble (desplegado)", "exacto": 0.47, "pm1": 0.73, "recall": 0.5}, {"m": "Ensemble + conductas U2", "exacto": 0.72, "pm1": 0.88, "recall": 0.8}], "gate": [{"u": 0.0, "auto": 100, "exacto": 94.0, "rev": 0, "final": 94.0}, {"u": 0.08, "auto": 91, "exacto": 96.4, "rev": 9, "final": 96.7}, {"u": 0.12, "auto": 86, "exacto": 97.3, "rev": 14, "final": 97.7}, {"u": 0.15, "auto": 83, "exacto": 98.0, "rev": 17, "final": 98.3}, {"u": 0.2, "auto": 75, "exacto": 98.2, "rev": 25, "final": 98.7}, {"u": 0.25, "auto": 69, "exacto": 98.6, "rev": 31, "final": 99.0}, {"u": 0.3, "auto": 62, "exacto": 98.4, "rev": 38, "final": 99.0}], "seguridad": {"f0_hecho": ["Firma HMAC fail-closed, whitelist y token de API en el código", "IP/ID de instancia/fuera del repo", "IMDSv2 obligatorio", "Puerto 443 cerrado (no escuchaba)", "Cifrado EBS por defecto de la cuenta", "Token de la API en Secrets Manager", "CloudFront con TLS delante de la EC2"], "f0_pendiente": ["Activar el token en la API (corte coordinado)", "Webhook → CloudFront https + secreto + whitelist", "Cerrar 80/8000 a internet (solo CloudFront)", "Servicios sin root y cifrar el EBS actual"]}, "plan": {"arquitectura": "WhatsApp → API Gateway + Lambda (firma + whitelist) → SQS → Worker → Normalizar (Transcribe · visión post-it · video Nova) → Clasificador (Bedrock + Pydantic) → Sesión (Confirmar / Ajustar / Cancelar) → Commit en DynamoDB (nivel + auditoría).", "stack": ["Python 3.12", "AWS SAM", "Lambda", "SQS", "S3", "DynamoDB", "Amazon Transcribe", "Amazon Bedrock (claude-sonnet-5 · nova-pro-v1)", "Meta WhatsApp Cloud API"], "brechas": [["Cómputo", "README/PLAN: serverless (Lambda + SAM + SQS + DynamoDB)", "Implementación: FastAPI en EC2 `integra-server`; el clasificador corre como ensemble ahí."], ["Runtime", "README/PLAN: Python 3.12", "Implementación: Python 3.13 (entorno local y EC2)."], ["Clasificador", "1 nivel por la rúbrica (Claude + Pydantic)", "Además del LLM: ensemble (matcher híbrido + Laya) con compuerta por margen."], ["Dashboard", "PLAN lo deja como stretch del 16-oct (P4)", "Entregado: dashboard de datos (dashboard/) + este tablero de estado."], ["Contratos", "/contracts congelados al final de la Inception", "No hay carpeta contracts/ en el repo."]], "cierre": [{"persona": "Ivan", "rama": "Ivan", "tareas": ["Decidir la infraestructura de demo y de producción (EC2 para la demo; documentar camino serverless).", "Infraestructura como código del servidor (instance profile, security group, systemd).", "Secretos de Meta en Secrets Manager, no en disco.", "Logs y alarmas básicas (CloudWatch)."], "listo": "docs/INFRA.md + plantilla en infra/, desplegable por otra persona"}, {"persona": "Sebastián", "rama": "whatsapp-clasificador", "tareas": ["Subir al repo el código que corre en integra-server (API + webhook).", "Llamar a U2 (normalizar_entradas) antes del ensemble (47 % → 72 %).", "Evaluar el ensemble con bench/casos_contra_edad.jsonl."], "listo": "PR con el código del servidor y la mejora medida"}, {"persona": "Santiago", "rama": "frontend", "tareas": ["Abrir el PR de frontend/ a main.", "Mostrar en la ficha del niño/a transcripción, conductas y advertencias de U2.", "Marcar los casos 'pendiente de revisión' de la compuerta."], "listo": "Dashboard en main y desplegado"}, {"persona": "Mauricio", "rama": "u2-eval-despliegue", "tareas": ["Fusionar PR #3 (U2 + evaluación).", "Medir audio (Whisper small vs. large-v3-turbo) y video con medios del equipo.", "Seguridad: cerrar 22/8000/8501, auth de API, firma del webhook, whitelist, borrar medios, PII fuera de logs."], "listo": "Checklist de seguridad cumplido en el servidor"}]}, "tests": {"archivos": 8, "declaradas": 59, "corridas": 81, "ok": true}, "repo": {"rama": "Ivan", "head": "1e03f0d · feat(dashboard): legibilidad para parvularias - titulos y unidades en graficos, leyenda, notas y etiquetas claras", "commits": "46", "fecha_head": "2026-10-15", "detras": "0", "delante": "0", "ramas": 14, "ramas_activas": "origin\norigin/main\norigin/shiva/manifestaciones-fix\norigin/shiva/tiempo-real-sse\norigin/shiva/rezago-relativo-jardin\norigin/Ivan\norigin/shiva/frontend-hitl-view\norigin/shiva/frontend-reconcile\norigin/shiva/deploy-frontend-live\norigin/shiva/api-catalogo-json\norigin/shiva/rescate-periodo-cron\norigin/shiva/integra-api-frontend", "cambios": ["M .gitignore", " M frontend/src/App.tsx", " M frontend/src/estilos.css", " M frontend/src/vite-env.d.ts", " M webhook_ec2.py", "?? .kiro/", "?? dashboard/", "?? estado_proyecto.html", "?? frontend/src/data/api.ts", "?? frontend/src/domain/repos.test.ts", "?? frontend/src/domain/repos.ts", "?? frontend/src/pages/Sincronizacion.tsx", "?? tests/test_repos.py", "?? tools/estado_proyecto.py", "?? visualizacion_datos.html"], "remoto": "https://github.com/IntegrAI-coder/IntegrAI"}, "generado": "15-10-2026"};
+
+const $ = id => document.getElementById(id);
+const COLOR = {ok:"#059669", warn:"#d97706", gris:"#cbd5e1", azul:"#2563eb", teal:"#0f766e"};
+
+function pct(x){ return Math.round(x); }
+
+function renderKpis(){
+  const k = DATA.kpis;
+  const items = [
+    {n:k.avance+"%", l:"Avance de entregables", cls:"ok"},
+    {n:k.ensemble, l:"Exactitud ensemble", cls:""},
+    {n:k.final, l:"Exactitud final (compuerta)", cls:"ok"},
+    {n:k.recall_rezago, l:"Recall alerta de rezago", cls:""},
+    {n:k.tests, l:"Tests en verde", cls:k.tests_ok?"ok":""},
+    {n:k.seguridad, l:"Controles F0 aplicados", cls:""},
+  ];
+  $("kpis").innerHTML = items.map(i =>
+    `<div class="kpi ${i.cls}"><div class="n">${i.n}</div><div class="l">${i.l}</div></div>`).join("");
+}
+
+function renderAreas(){
+  const cont = $("areas");
+  cont.innerHTML = DATA.areas.map(a => {
+    const its = a.items.map(it => {
+      const cls = it.estado.replace(" ", "-").replace("ó","o");
+      const estado = it.estado.charAt(0).toUpperCase() + it.estado.slice(1);
+      const nota = it.nota ? ` <span class="nota">· ${it.nota}</span>` : "";
+      return `<div class="it"><span class="dot ${cls}" title="${estado}"></span><span>${it.label}${nota}</span></div>`;
+    }).join("");
+    return `<div class="area">
+      <h3>${a.area} <span class="meta">${a.owner} · rama <code>${a.rama}</code> · ${a.hechos}/${a.total} · ${a.pct}%</span></h3>
+      <div class="barra"><span style="width:${a.pct}%"></span></div>
+      <div class="items">${its}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderSeg(){
+  $("seg-pend").innerHTML = DATA.seguridad.f0_pendiente.map(x => `<li>${x}</li>`).join("");
+}
+
+function renderPlan(){
+  const p = DATA.plan;
+  const brechas = p.brechas.map(b => `<tr><th>${b[0]}</th><td>${b[1]}<br><em style="color:#0f766e">${b[2]}</em></td></tr>`).join("");
+  const cierre = p.cierre.map(c => `
+    <div class="area">
+      <h3>${c.persona} <span class="meta">rama <code>${c.rama}</code></span></h3>
+      <ul style="font-size:.86rem;color:#475569;line-height:1.55;margin:.2rem 0 .5rem">${c.tareas.map(t=>`<li>${t}</li>`).join("")}</ul>
+      <p class="purpose">Listo cuando: ${c.listo}</p>
+    </div>`).join("");
+  $("plan").innerHTML = `
+    <div class="card wide" style="margin-top:1rem">
+      <h3>Arquitectura declarada (README actual)</h3>
+      <p class="purpose">${p.arquitectura}</p>
+      <p class="purpose">Stack declarado: ${p.stack.map(s=>`<code>${s}</code>`).join(" ")}</p>
+    </div>
+    <div class="card wide" style="margin-top:1rem">
+      <h3>Plan vs. implementación (brechas)</h3>
+      <p class="purpose">Lo que dicen los documentos frente a lo verificado en el repositorio.</p>
+      <table class="table">${brechas}</table>
+    </div>
+    <h3 class="seccion" style="margin:1.4rem 0 .2rem;font-size:1rem">Tareas hasta el cierre (docs/PLAN.md §2)</h3>
+    ${cierre}`;
+}
+
+const CFG = {responsive:true, displaylogo:false, modeBarButtonsToRemove:["lasso2d","select2d"]};
+function lay(extra){ return Object.assign({
+  margin:{t:20,r:16,b:60,l:60}, font:{family:"system-ui,Segoe UI,Roboto,Arial", size:12, color:"#334155"},
+  paper_bgcolor:"#fff", plot_bgcolor:"#fff",
+  xaxis:{gridcolor:"#eef2f7"}, yaxis:{gridcolor:"#eef2f7"}, showlegend:true,
+  legend:{orientation:"h", y:-0.2}
+}, extra||{}); }
+
+function drawAreas(){
+  const a = DATA.areas;
+  Plotly.react("fig-areas", [{type:"bar", orientation:"h", x:a.map(x=>x.pct), y:a.map(x=>x.area),
+    text:a.map(x=>x.pct+"%"), textposition:"outside",
+    marker:{color:a.map(x=>x.pct>=90?COLOR.ok:x.pct>=60?COLOR.azul:COLOR.warn)}}],
+    lay({showlegend:false, xaxis:{range:[0,108], title:"% completado", gridcolor:"#eef2f7"},
+      yaxis:{automargin:true}, margin:{t:10,r:30,b:50,l:170}}), CFG);
+}
+
+function drawMotores(){
+  const m = DATA.motores;
+  Plotly.react("fig-motores", [
+    {type:"bar", name:"Exacto", x:m.map(x=>x.m), y:m.map(x=>x.exacto), marker:{color:COLOR.azul}},
+    {type:"bar", name:"±1", x:m.map(x=>x.m), y:m.map(x=>x.pm1), marker:{color:"#93c5fd"}}
+  ], lay({barmode:"group", yaxis:{tickformat:".0%", range:[0,1.08], gridcolor:"#eef2f7"},
+    xaxis:{automargin:true, tickangle:-15}}), CFG);
+}
+
+function drawContra(){
+  const c = DATA.contraEdad;
+  Plotly.react("fig-contra", [
+    {type:"bar", name:"Exacto", x:c.map(x=>x.m), y:c.map(x=>x.exacto), marker:{color:COLOR.azul}},
+    {type:"bar", name:"±1", x:c.map(x=>x.m), y:c.map(x=>x.pm1), marker:{color:"#93c5fd"}},
+    {type:"bar", name:"Recall rezago", x:c.map(x=>x.m), y:c.map(x=>x.recall), marker:{color:COLOR.warn}}
+  ], lay({barmode:"group", yaxis:{tickformat:".0%", range:[0,1.08], gridcolor:"#eef2f7"}}), CFG);
+}
+
+function drawGate(){
+  const g = DATA.gate;
+  Plotly.react("fig-gate", [
+    {type:"bar", name:"Auto-registradas (%)", x:g.map(x=>x.u), y:g.map(x=>x.auto), marker:{color:"#93c5fd"}},
+    {type:"bar", name:"A revisión (%)", x:g.map(x=>x.u), y:g.map(x=>x.rev), marker:{color:"#fca5a5"}},
+    {type:"scatter", mode:"lines+markers", name:"Exactitud final (%)", x:g.map(x=>x.u), y:g.map(x=>x.final),
+     line:{color:COLOR.ok, width:3}, marker:{size:8}, yaxis:"y"}
+  ], lay({barmode:"group", xaxis:{title:"umbral de margen", dtick:0.05},
+    yaxis:{title:"%", range:[0,105], gridcolor:"#eef2f7"}}), CFG);
+}
+
+function drawSeg(){
+  const hecho = DATA.seguridad.f0_hecho.length, pend = DATA.seguridad.f0_pendiente.length;
+  Plotly.react("fig-seg", [{type:"pie", hole:.55, labels:["Aplicados","Pendientes"],
+    values:[hecho,pend], marker:{colors:[COLOR.ok, COLOR.gris]}, textinfo:"label+value"}],
+    lay({showlegend:false, margin:{t:10,r:10,b:10,l:10}}), CFG);
+}
+
+function renderRepo(){
+  const r = DATA.repo;
+  const cambios = r.cambios.length ? r.cambios.map(c=>`<li><code>${c}</code></li>`).join("") : "<li>Sin cambios pendientes</li>";
+  const ramas = (r.ramas_activas||"").split("\n").filter(Boolean).slice(0,12).map(x=>`<li><code>${x}</code></li>`).join("");
+  $("repo-grid").innerHTML = `
+    <div class="card"><h3>Rama de trabajo</h3><p class="purpose">Sincronía con el remoto.</p>
+      <table class="table">
+        <tr><th>Rama</th><td><code>${r.rama}</code></td></tr>
+        <tr><th>Último commit</th><td>${r.head}</td></tr>
+        <tr><th>Commits (HEAD)</th><td class="n">${r.commits}</td></tr>
+        <tr><th>Fecha</th><td>${r.fecha_head}</td></tr>
+        <tr><th>vs. origin/Ivan</th><td>detrás ${r.detras} · delante ${r.delante}</td></tr>
+        <tr><th>Ramas remotas</th><td class="n">${r.ramas}</td></tr>
+      </table></div>
+    <div class="card"><h3>Cambios en el árbol</h3><p class="purpose">Sin commitear en esta máquina.</p>
+      <ul style="font-size:.84rem;color:#475569">${cambios}</ul></div>
+    <div class="card wide"><h3>Ramas remotas recientes</h3><p class="purpose">Trabajo en curso del equipo.</p>
+      <ul style="columns:2;font-size:.84rem;color:#475569">${ramas}</ul></div>`;
+}
+
+document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.remove("activo"));
+  b.classList.add("activo");
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("activo", p.dataset.panel===b.dataset.tab));
+  requestAnimationFrame(()=>{ ["fig-areas","fig-motores","fig-contra","fig-gate","fig-seg"].forEach(f=>{
+    const el=$(f); if(el && window.Plotly) Plotly.Plots.resize(el); }); });
+}));
+
+renderKpis(); renderAreas(); renderSeg(); renderRepo(); renderPlan();
+drawAreas(); drawMotores(); drawContra(); drawGate(); drawSeg();
+
+</script>
+</body></html>
