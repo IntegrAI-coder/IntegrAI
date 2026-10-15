@@ -130,6 +130,42 @@ def ejecutar(plataforma: Plataforma | None = None, dry_run: bool = False,
             "watermark": max_rid, "detalle": detalle}
 
 
+def consolidar_nino(plataforma: Plataforma, id_nino: str, ahora: str | None = None,
+                    periodo: str | None = None) -> dict[str, Any]:
+    """Reconsolida la evaluación de UN niño/a a partir de sus observaciones del período.
+
+    Es el "adelanto en vivo": se llama tras registrar una observación (WhatsApp) para
+    que el nivel y la alerta queden al día SIN esperar al cron. Escribe `evaluaciones`
+    solo si el margen alcanza (auto); si no, la observación queda `por_verificar`
+    (entra a la cola en la próxima corrida del cron). Best-effort: no rompe el flujo.
+    """
+    p = plataforma
+    ahora = ahora or datetime.now().isoformat(timespec="seconds")
+    periodo = periodo or ahora[:10]
+    obs = [o for o in p.observaciones_de(id_nino) if o.get("fecha") == periodo]
+    if not obs:
+        return {"ok": False, "motivo": "sin_observaciones_periodo"}
+    nivel, margen, dist = _consolidar(obs)
+    if nivel is None:
+        return {"ok": False, "motivo": "sin_nivel"}
+    tray = p.trayectoria(id_nino) or {}
+    prev = p.ultima_evaluacion(id_nino, "global")
+    tend = _tendencia(nivel, prev["nivel"] if prev else None)
+    alerta = None
+    if tend == "retroceso" and prev:
+        alerta = f"Retroceso: {prev['nivel']} -> {nivel} (período {periodo})."
+    elif tray.get("alertas"):
+        alerta = "; ".join(tray["alertas"])
+    umbral = getattr(config, "GATE_MARGEN", 0.15)
+    escrito = False
+    if margen >= umbral:
+        p.guardar_evaluacion(id_nino, "global", nivel, dist.get(nivel, 0.0), margen,
+                             periodo=periodo, tendencia=tend, alerta=alerta, generado_en=ahora)
+        escrito = True
+    return {"ok": True, "escrito": escrito, "nivel": nivel, "margen": margen,
+            "tendencia": tend, "alerta": alerta}
+
+
 def main() -> None:  # pragma: no cover
     ap = argparse.ArgumentParser(description="Evaluación periódica IntegrAI (cron)")
     ap.add_argument("--dry-run", action="store_true", help="no escribe, solo reporta")

@@ -43,6 +43,11 @@ export function usaApi(): boolean {
   return USAR_API;
 }
 
+/** URL del stream SSE de eventos (o null si el dashboard está en modo CSV). */
+export function urlEventos(): string | null {
+  return USAR_API ? `${API_BASE}/api/eventos` : null;
+}
+
 interface DatosCrudos {
   ruta_niveles?: Fila[];
   jardines?: Fila[];
