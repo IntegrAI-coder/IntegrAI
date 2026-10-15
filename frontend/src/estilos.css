@@ -325,7 +325,42 @@ a:focus-visible {
 
 .grafico {
   width: 100%;
-  height: 280px;
+  height: 300px;
+}
+
+.figura {
+  margin: 0;
+}
+
+.figura__titulo {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  color: var(--color-texto);
+}
+
+.figura__nota {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: var(--color-texto-tenue);
+}
+
+.seccion__titulo {
+  font-size: 1rem;
+  margin: 0 0 0.75rem;
+}
+
+.ayuda {
+  color: var(--color-texto-tenue);
+  font-size: 0.9rem;
+  margin: 0 0 1.25rem;
+  max-width: 70ch;
+}
+
+.tarjeta__descripcion {
+  font-size: 0.8rem;
+  color: var(--color-texto-tenue);
+  margin: 0.35rem 0 0;
 }
 
 @media (max-width: 480px) {

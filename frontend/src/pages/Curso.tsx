@@ -61,30 +61,41 @@ export function Curso() {
           <h2>
             {nombreJardin} · Sala {sala}
           </h2>
+          <p className="ayuda">
+            Este panel muestra cómo está el grupo completo. Cada niño/a aparece con
+            su nivel actual y el nivel esperado para su edad; si está muy por debajo,
+            se marca con una alerta para revisarlo.
+          </p>
 
           {vista.alumnos.length === 0 ? (
             <Vacio mensaje="Este curso no tiene niños/as registrados." />
           ) : (
             <>
               <section aria-label="Resumen del curso" className="tarjetas">
-                <Tarjeta etiqueta="Niños/as" valor={String(vista.alumnos.length)} />
+                <Tarjeta
+                  etiqueta="Niños y niñas"
+                  valor={String(vista.alumnos.length)}
+                  descripcion="Matriculados en esta sala"
+                />
                 <Tarjeta
                   etiqueta="Nivel promedio"
                   valor={formatearPromedio(vista.nivelPromedio)}
+                  descripcion="Promedio del grupo, escala 1 a 9"
                 />
                 <Tarjeta
-                  etiqueta="Con alerta"
+                  etiqueta="Necesitan apoyo"
                   valor={String(vista.totalAlertas)}
+                  descripcion="Nivel por debajo de lo esperado para su edad"
                   alerta={vista.totalAlertas > 0}
                 />
               </section>
 
               <section aria-label="Distribución por nivel" className="panel">
-                <h3 className="tarjeta__etiqueta">Distribución por nivel (1–9)</h3>
                 <GraficoDistribucion datos={vista.distribucion} />
               </section>
 
               <section aria-label="Alumnos del curso" className="panel">
+                <h3 className="seccion__titulo">Niños y niñas de la sala</h3>
                 <Tabla
                   descripcion="Tabla de alumnos del curso con su nivel y brecha"
                   filas={vista.alumnos}
@@ -115,7 +126,7 @@ const columnas: Columna<AlumnoCurso>[] = [
   },
   {
     clave: 'vigente',
-    encabezado: 'Nivel vigente',
+    encabezado: 'Nivel actual',
     numerica: true,
     valor: (a) => a.nivelVigente,
     render: (a) => <BadgeNivel nivel={a.nivelVigente} />,
@@ -129,7 +140,7 @@ const columnas: Columna<AlumnoCurso>[] = [
   },
   {
     clave: 'brecha',
-    encabezado: 'Brecha',
+    encabezado: 'Diferencia',
     numerica: true,
     valor: (a) => a.brecha,
     render: (a) =>
@@ -143,7 +154,7 @@ const columnas: Columna<AlumnoCurso>[] = [
   },
   {
     clave: 'alerta',
-    encabezado: 'Alerta',
+    encabezado: 'Revisar',
     valor: (a) => (a.alerta ? 1 : 0),
     render: (a) => <BadgeAlerta activa={a.alerta} />,
   },

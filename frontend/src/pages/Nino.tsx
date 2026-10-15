@@ -62,19 +62,29 @@ export function Nino() {
       {estado.estado === 'listo' && vista && (
         <>
           <h2>{vista.ficha.nino.idNino}</h2>
+          <p className="ayuda">
+            Ficha individual. Reúne las observaciones registradas, el nivel en que
+            se ubica al niño o niña y cómo ha ido avanzando con el tiempo.
+          </p>
 
           <section aria-label="Resumen del niño/a" className="tarjetas">
-            <Tarjeta etiqueta="Edad (meses)" valor={String(vista.ficha.edadMeses)} />
             <Tarjeta
-              etiqueta="Nivel vigente"
+              etiqueta="Edad"
+              valor={`${vista.ficha.edadMeses} meses`}
+              descripcion="Meses cumplidos"
+            />
+            <Tarjeta
+              etiqueta="Nivel actual"
               valor={vista.ficha.nivelVigente?.toString() ?? '—'}
+              descripcion="Según la última observación"
             />
             <Tarjeta
               etiqueta="Nivel esperado"
               valor={vista.ficha.nivelEsperado?.toString() ?? '—'}
+              descripcion="Según su edad"
             />
             <Tarjeta
-              etiqueta="Brecha"
+              etiqueta="Diferencia"
               valor={
                 vista.ficha.brecha === null
                   ? '—'
@@ -82,13 +92,14 @@ export function Nino() {
                     ? `+${vista.ficha.brecha}`
                     : String(vista.ficha.brecha)
               }
+              descripcion="Nivel actual menos nivel esperado"
               alerta={vista.ficha.alerta}
             />
           </section>
 
           {vista.nivelVigenteInfo && (
             <section aria-label="Nivel vigente" className="panel">
-              <h3>
+              <h3 className="seccion__titulo">
                 Nivel {vista.nivelVigenteInfo.nivel}: {vista.nivelVigenteInfo.nombreNivel}{' '}
                 {vista.ficha.alerta && <BadgeAlerta activa />}
               </h3>
@@ -97,16 +108,18 @@ export function Nino() {
           )}
 
           <section aria-label="Trayectoria del nivel" className="panel">
-            <h3 className="tarjeta__etiqueta">Trayectoria del nivel</h3>
             {vista.trayectoria.length === 0 ? (
-              <Vacio mensaje="Sin observaciones registradas." />
+              <>
+                <h3 className="seccion__titulo">Evolución en el tiempo</h3>
+                <Vacio mensaje="Sin observaciones registradas." />
+              </>
             ) : (
               <GraficoTrayectoria datos={vista.trayectoria} />
             )}
           </section>
 
           <section aria-label="Observaciones" className="panel">
-            <h3 className="tarjeta__etiqueta">Observaciones</h3>
+            <h3 className="seccion__titulo">Observaciones registradas</h3>
             {vista.ficha.observaciones.length === 0 ? (
               <Vacio mensaje="Sin observaciones registradas." />
             ) : (

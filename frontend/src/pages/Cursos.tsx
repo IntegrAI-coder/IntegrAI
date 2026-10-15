@@ -37,6 +37,11 @@ export function Cursos() {
     <>
       <Breadcrumbs migas={[{ etiqueta: 'Cursos' }]} />
       <h2>Cursos</h2>
+      <p className="ayuda">
+        Elige un curso (jardín y sala) para ver cómo está el grupo y cada niño o
+        niña. La columna "Necesitan apoyo" indica cuántos están por debajo del nivel
+        esperado para su edad.
+      </p>
 
       {estado.estado === 'cargando' && <Cargando />}
       {estado.estado === 'error' && (
@@ -87,7 +92,7 @@ const columnas: Columna<ResumenCurso>[] = [
   { clave: 'sala', encabezado: 'Sala', valor: (c) => c.salaGrupo },
   {
     clave: 'ninos',
-    encabezado: 'Niños/as',
+    encabezado: 'Niños y niñas',
     numerica: true,
     valor: (c) => c.totalNinos,
   },
@@ -100,7 +105,7 @@ const columnas: Columna<ResumenCurso>[] = [
   },
   {
     clave: 'alertas',
-    encabezado: 'Alertas',
+    encabezado: 'Necesitan apoyo',
     numerica: true,
     valor: (c) => c.totalAlertas,
   },
