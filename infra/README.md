@@ -41,6 +41,7 @@ aws cloudformation deploy \
 ## Después de desplegar
 
 ```bash
+# OJO: el rol integrai-ec2 lo crea ESTA plantilla o tools/iam_aws.py crear, NO ambos (mismos nombres).
 # Revocar el acceso directo 0.0.0.0/0 de 80/8000 y cerrar 22/8501 (CloudFormation no revoca reglas existentes)
 INTEGRA_INSTANCE_ID=<id> python tools/seguridad_aws.py corte
 
