@@ -27,7 +27,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from src.plataforma import Plataforma
-from src.resolver import Resolver, DIMINUTIVOS, normalizar
+from src.resolver import Resolver, DIMINUTIVOS, normalizar, extraer_menciones, extraer_mencion
 from src.marco import STOPWORDS
 from src import config
 from src.clasificador import Clasificador
@@ -186,29 +186,6 @@ def _nivel_ponderado(id_nino: str) -> tuple:
     return round(num / den), len(obs)
 
 
-def _es_apellido_del_roster(cand: str, aps: list[str]) -> bool:
-    """¿`cand` coincide con (o es prefijo de) algún apellido del roster?"""
-    return any(a == cand or a.startswith(cand + " ") or cand.startswith(a) for a in aps if a)
-
-
-def extraer_mencion(texto: str, filas: list[dict]) -> str:
-    """Heurística determinista: busca un nombre de pila del roster (o diminutivo)
-    y toma el nombre + los tokens siguientes SOLO si son **apellidos del roster**
-    (evita confundir el verbo de la frase con un apellido). Máx. 2 apellidos."""
-    toks = normalizar(texto).split()
-    pila = {normalizar(f["nombre_pila"]) for f in filas if f.get("nombre_pila")}
-    aps = [normalizar(f.get("apellidos") or "") for f in filas if f.get("apellidos")]
-    aliases = set(DIMINUTIVOS.keys())
-    for i, t in enumerate(toks):
-        if t in pila or t in aliases:
-            nombre = [t]
-            j = i + 1
-            while j < len(toks) and len(nombre) < 3 and _es_apellido_del_roster(toks[j], aps):
-                nombre.append(toks[j]); j += 1
-            return " ".join(nombre)
-    return toks[0] if toks else ""
-
-
 def _ack_no_identificado(palabra: str, res) -> str:
     if res.estado == "ambiguo":
         return (f"⚠️ Hay más de un niño/a con el nombre «{palabra}». "
@@ -227,27 +204,11 @@ class Msg(BaseModel):
         populate_by_name = True
 
 
-def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
-    fecha = fecha or date.today().isoformat()
-    ctx = _ctx_remitente(from_)
-    if not ctx:
-        return {"ok": False, "estado": "remitente_desconocido",
-                "ack": "⚠️ No reconozco este número. Pídele a tu coordinadora que lo registre."}
-    filas = _filas_ctx(ctx)
-    educadora = ctx[0]["id_educadora"]
-    res = Resolver(filas).resolver(extraer_mencion(texto, filas))
-
-    if res.estado != "resuelto":
-        return {"ok": False, "estado": res.estado, "metodo": res.metodo,
-                "candidatos": res.candidatos,
-                "ack": _ack_no_identificado(extraer_mencion(texto, filas), res)}
-
-    nin = plat.nino(res.id_nino) or {}
+def _registrar_uno(nin: dict, educadora: str, texto: str, fecha: str, metodo: str) -> dict:
+    """Clasifica (rúbrica, o ensemble de respaldo) + registra UNA observación para UN niño/a.
+    Además consolida su evaluación y avisa al dashboard (best-effort)."""
     edad = marco.edad_meses(nin["fecha_nacimiento"], fecha) if nin.get("fecha_nacimiento") else None
-    # el clasificador recibe conductas sin nombres; se guarda eso, no la nota cruda con el nombre
-    texto_clas, revisar_u2 = _a_conductas(texto)   # U2: conductas sin PII + controles de seguridad
-
-    # --- RÚBRICA de Integra: la edad solo elige el tramo; dentro, el nivel 1-8 ---
+    texto_clas, revisar_u2 = _a_conductas(texto)   # conductas sin PII + controles de seguridad (U2)
     tramo = marcos.tramo_por_edad(nin["fecha_nacimiento"], fecha) if nin.get("fecha_nacimiento") else None
     tramo_id, tramo_nom, nombre_nivel = None, "—", None
     if tramo:
@@ -269,33 +230,77 @@ def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
         dominios, matches = cl.dominios, cl.matches
     # manipulación, sin evidencia o lectura dudosa (U2) -> siempre a la cola de la educadora
     estado = "por_verificar" if (requiere or revisar_u2) else "auto"
-
     oid = plat.registrar_observacion(
-        id_nino=res.id_nino, id_educadora=educadora, fecha=fecha, formato="texto",
+        id_nino=nin["id_nino"], id_educadora=educadora, fecha=fecha, formato="texto",
         nivel=nivel, nota=texto_clas, dominios=dominios,
         manifestaciones=[m.manifestacion["id"] for m in matches],
-        confianza=conf, origen="whatsapp", metodo_resolucion=res.metodo, margen=margen, estado=estado)
-
-    # Adelanto en vivo: reconsolida la evaluación del niño y avisa al dashboard (best-effort).
+        confianza=conf, origen="whatsapp", metodo_resolucion=metodo, margen=margen, estado=estado)
     try:
-        consolidar_nino(plat, res.id_nino, periodo=fecha)
+        consolidar_nino(plat, nin["id_nino"], periodo=fecha)
     except Exception as e:  # noqa: BLE001
         print(f"[live] consolidar falló: {type(e).__name__}: {e}", flush=True)
-    _publicar({"evento": "observacion", "id_nino": res.id_nino,
+    _publicar({"evento": "observacion", "id_nino": nin["id_nino"],
                "id_jardin": nin.get("id_jardin"), "sala_grupo": nin.get("sala_grupo"),
                "nivel": nivel, "estado": estado})
+    pond, n_notas = _nivel_ponderado(nin["id_nino"])
+    return {"id_nino": nin["id_nino"], "nombre_pila": nin.get("nombre_pila", ""),
+            "tramo": tramo_id, "tramo_nombre": tramo_nom, "nivel": nivel, "nombre_nivel": nombre_nivel,
+            "nivel_ponderado": pond, "n_notas": n_notas, "margen": margen, "metodo": metodo,
+            "estado_resolucion": estado, "observacion_id": oid}
 
-    # El ACK responde el nivel PONDERADO del niño (media) + el tramo + el nivel de la rúbrica.
-    pond, n_notas = _nivel_ponderado(res.id_nino)
-    etiqueta = f"{nivel} {nombre_nivel}" if nombre_nivel else f"nivel {nivel}"
-    ack = (f"registrado ✓ — {nin.get('nombre_pila','')} · {tramo_nom} · "
-           f"promedio {pond} ({n_notas} notas) · este registro: {etiqueta}")
-    if estado != "auto":
-        ack += " (quedó por confirmar)"
-    return {"ok": True, "id_nino": res.id_nino, "tramo": tramo_id, "tramo_nombre": tramo_nom,
-            "nivel": nivel, "nombre_nivel": nombre_nivel, "nivel_ponderado": pond, "n_notas": n_notas,
-            "margen": margen, "metodo": res.metodo, "estado_resolucion": estado,
-            "observacion_id": oid, "ack": ack}
+
+def _ack_registros(registros: list[dict], pendientes: list) -> str:
+    """ACK de WhatsApp. Con un niño/a mantiene el formato histórico; con varios los lista."""
+    if len(registros) == 1:
+        r = registros[0]
+        etiqueta = f"{r['nivel']} {r['nombre_nivel']}" if r["nombre_nivel"] else f"nivel {r['nivel']}"
+        ack = (f"registrado ✓ — {r['nombre_pila']} · {r['tramo_nombre']} · "
+               f"promedio {r['nivel_ponderado']} ({r['n_notas']} notas) · este registro: {etiqueta}")
+        if r["estado_resolucion"] != "auto":
+            ack += " (quedó por confirmar)"
+    else:
+        partes = [f"{r['nombre_pila']} ({r['nombre_nivel'] or ('nivel ' + str(r['nivel']))})" for r in registros]
+        ack = "registrado ✓ — " + " y ".join(partes)
+        if any(r["estado_resolucion"] != "auto" for r in registros):
+            ack += " (alguno quedó por confirmar)"
+    if pendientes:
+        nombres = ", ".join(f"«{m}»" for m, _ in pendientes)
+        ack += f" · ⚠️ no pude identificar a {nombres} (reenvía con apellido)"
+    return ack
+
+
+def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
+    fecha = fecha or date.today().isoformat()
+    ctx = _ctx_remitente(from_)
+    if not ctx:
+        return {"ok": False, "estado": "remitente_desconocido",
+                "ack": "⚠️ No reconozco este número. Pídele a tu coordinadora que lo registre."}
+    filas = _filas_ctx(ctx)
+    educadora = ctx[0]["id_educadora"]
+
+    # Un mensaje puede nombrar a VARIOS niños/as ("Sofía jugó bien con Camila").
+    menciones = extraer_menciones(texto, filas) or [extraer_mencion(texto, filas)]
+    resueltos, pendientes = [], []
+    for men in menciones:
+        r = Resolver(filas).resolver(men)
+        (resueltos if r.estado == "resuelto" else pendientes).append((men, r))
+
+    registros, vistos = [], set()
+    for _men, r in resueltos:
+        if r.id_nino in vistos:
+            continue
+        vistos.add(r.id_nino)
+        registros.append(_registrar_uno(plat.nino(r.id_nino) or {}, educadora, texto, fecha, r.metodo))
+
+    if not registros:
+        men0, r0 = pendientes[0]
+        return {"ok": False, "estado": r0.estado, "metodo": r0.metodo,
+                "candidatos": r0.candidatos, "ack": _ack_no_identificado(men0, r0)}
+
+    ack = _ack_registros(registros, pendientes)
+    if len(registros) == 1:
+        return {"ok": True, **registros[0], "registrados": registros, "ack": ack}
+    return {"ok": True, "n": len(registros), "registrados": registros, "ack": ack}
 
 
 @app.get("/health")

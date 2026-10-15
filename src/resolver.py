@@ -125,6 +125,47 @@ def resolver_menciones(menciones: list[str], filas_sala: list[dict]) -> list[Res
     return [r.resolver(m) for m in menciones]
 
 
+def es_apellido_del_roster(cand: str, aps: list[str]) -> bool:
+    """¿`cand` coincide con (o es prefijo de) algún apellido del roster?"""
+    return any(a == cand or a.startswith(cand + " ") or cand.startswith(a) for a in aps if a)
+
+
+def extraer_menciones(texto: str, filas: list[dict]) -> list[str]:
+    """TODAS las menciones de la frase (nombre de pila del roster o diminutivo + apellidos
+    del roster), en orden y sin repetir. Un mensaje puede nombrar a **más de un niño/a**
+    ("Sofía jugó bien con Camila")."""
+    toks = normalizar(texto).split()
+    pila = {normalizar(f["nombre_pila"]) for f in filas if f.get("nombre_pila")}
+    aps = [normalizar(f.get("apellidos") or "") for f in filas if f.get("apellidos")]
+    aliases = set(DIMINUTIVOS.keys())
+    out: list[str] = []
+    vistos: set[str] = set()
+    i = 0
+    while i < len(toks):
+        t = toks[i]
+        if t in pila or t in aliases:
+            nombre = [t]
+            j = i + 1
+            while j < len(toks) and len(nombre) < 3 and es_apellido_del_roster(toks[j], aps):
+                nombre.append(toks[j]); j += 1
+            men = " ".join(nombre)
+            if men not in vistos:
+                vistos.add(men); out.append(men)
+            i = j
+        else:
+            i += 1
+    return out
+
+
+def extraer_mencion(texto: str, filas: list[dict]) -> str:
+    """Primera mención (compatibilidad con el flujo de un solo niño/a)."""
+    menciones = extraer_menciones(texto, filas)
+    if menciones:
+        return menciones[0]
+    toks = normalizar(texto).split()
+    return toks[0] if toks else ""
+
+
 if __name__ == "__main__":  # self-test con el caso del enunciado
     roster = [
         {"id_nino": "N-001", "nombre_pila": "Sebastián", "apellidos": "Wagner"},
