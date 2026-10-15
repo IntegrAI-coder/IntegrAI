@@ -32,6 +32,9 @@ sys.path.insert(0, os.getenv("INTEGRA_HOME", "/opt/integra"))
 from src.plataforma import Plataforma  # noqa: E402
 from src import marco  # noqa: E402
 from src.evaluacion_periodica import ejecutar  # noqa: E402
+from catalogo_manifestaciones import elegir, indice  # noqa: E402
+
+MANIF = indice()   # catálogo de conductas observables → evidencia por (nivel, dominio)
 
 JARDIN = "JAR-EQUIPO"
 ORIGEN = "demo_hist"
@@ -116,7 +119,8 @@ def main() -> None:
                                       "socioemocional", "cognitivo"])
                 p.registrar_observacion(nin["id_nino"], edu, f.isoformat(), rnd.choice(FORMATOS),
                                         l, f"{nin.get('nombre_pila','')}: {nota}",
-                                        dominios=[dom], confianza=rnd.uniform(0.55, 0.9),
+                                        dominios=[dom], manifestaciones=elegir(MANIF, l, dom, rnd=rnd),
+                                        confianza=rnd.uniform(0.55, 0.9),
                                         origen=ORIGEN, metodo_resolucion="demo_hist")
                 total += 1
         c.commit()

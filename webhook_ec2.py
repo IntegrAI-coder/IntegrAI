@@ -256,7 +256,13 @@ def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
     rub = _rubrica_clasificar(texto_clas, tramo_id) if tramo_id else None
     if rub:
         nivel, nombre_nivel = rub["nivel"], rub["nombre_nivel"]
-        requiere, margen, conf, dominios, matches = rub["requiere_revision"], rub.get("margen", 0.0), rub.get("confianza", 0.0), [], []
+        requiere, margen, conf = rub["requiere_revision"], rub.get("margen", 0.0), rub.get("confianza", 0.0)
+        # Evidencia: aunque decida la rúbrica, el matcher da las conductas observables (manifestaciones).
+        try:
+            matches = clas.matcher.matchear(texto_clas)
+            dominios = sorted({m.manifestacion["dominio"] for m in matches})
+        except Exception:  # noqa: BLE001
+            matches, dominios = [], []
     else:   # sin rúbrica / fallo: ensemble (Laya+matcher) como respaldo
         cl = clas.clasificar(texto_clas, edad)
         nivel, requiere, margen, conf = cl.nivel, cl.requiere_revision, cl.margen, cl.confianza
