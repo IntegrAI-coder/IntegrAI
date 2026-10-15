@@ -65,3 +65,16 @@ Armado con `python -m bench.contra_edad`. Tiene 20 observaciones reales con nive
 **Recomendaciones para la compuerta:**
 - Mandar a revisión siempre que la predicción del texto y el prior de edad discrepen (por ejemplo, si el voto del híbrido sin edad está a ≥ 2 niveles del nivel típico), aunque el margen sea alto.
 - Calibrar el umbral de margen **en este set**, no en el aleatorio.
+
+## 6. Compuerta de revisión (`src/compuerta.py`, `bench/reporte_compuerta.md`)
+
+Medido sobre las respuestas reales de `/clasificar` (90 casos: 30 al azar y 60 contra la edad). Un *rezago que se escapa* es un niño/a bajo lo típico para su edad que el sistema acepta sin revisión y sin marcarlo.
+
+| Compuerta | A revisión (al azar) | A revisión (contra la edad) | Exactos en aceptados (contra la edad) | Rezagos que se escapan |
+|---|---:|---:|---:|---:|
+| Actual (margen < 0,15), nota original | 20 % | 38 % | 17/37 | **16/40** |
+| Actual, **nota → conductas U2** | **10 %** | 27 % | 37/44 | **6/40** |
+| + discrepancia texto-edad ≥ 2 | 13 % | 50 % | 24/30 | 5/40 |
+| + discrepancia ≥ 1 | 20 % | 78 % | 9/13 | 4/40 |
+
+**Decisión recomendada:** pasar la nota a conductas (U2) y mantener la compuerta de margen. La regla de discrepancia queda implementada pero **desactivada**: evita un rezago más a costa de duplicar la revisión en los casos difíciles. Es una decisión de política para Integra (cuánta revisión aceptan las tías), no técnica.
