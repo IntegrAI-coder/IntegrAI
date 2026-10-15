@@ -6,9 +6,15 @@ Hackathon AWS Breaking Barriers Chile 2026 — **Desafío 1 de Fundación Integr
 
 **👉 https://d2eg8hbkfurj9b.cloudfront.net**
 
-Dashboard del sistema, servido por HTTPS (CloudFront + TLS) delante del servidor `integra-server`. La API de decisión responde en la misma URL (`/health`, `/procesar`, `/procesar_media`, `/clasificar`).
+| Ruta | Qué es |
+|---|---|
+| [`/`](https://d2eg8hbkfurj9b.cloudfront.net) | **Dashboard pedagógico (React)**: cursos por jardín, ficha de cada niño/a con nivel vigente, nivel esperado, brecha y trayectoria (`frontend/`) |
+| [`/streamlit/`](https://d2eg8hbkfurj9b.cloudfront.net/streamlit/) | Dashboard operativo (Streamlit): registrar observaciones, cola "por verificar", panorama de aula (`app.py`) |
+| `/health`, `/procesar`, `/procesar_media`, `/clasificar` | API de decisión (`webhook_ec2.py`) |
 
-> Todos los datos son **sintéticos**. Es una demo de hackathon: el acceso al dashboard se protege con Basic auth (`tools/cloudfront_aws.py auth-basica`) y la API con `X-Api-Key` cuando se ejecute el corte de seguridad (`docs/SEGURIDAD.md` §3.1).
+Todo va por HTTPS (CloudFront + TLS). El frontend se sirve desde un bucket S3 **privado** (solo CloudFront puede leerlo) y se despliega con `python tools/desplegar_frontend.py subir`.
+
+> Todos los datos son **sintéticos**. El Basic auth (`tools/cloudfront_aws.py auth-basica`) y el token de la API se activan en el corte de seguridad (`docs/SEGURIDAD.md` §3.1).
 
 ## Qué hace
 
@@ -38,7 +44,7 @@ Tía (WhatsApp) ─► Meta Cloud API ─► webhook/ (firma HMAC + whitelist) �
       · clasificador (ensemble / juez de rúbrica) · compuerta · cola "por verificar"
                                      │
                        SQLite (plataforma) ─► dashboard Streamlit (app.py) · frontend React (frontend/)
-Usuarios ─► CloudFront (HTTPS) ─► :80 dashboard · :8000 API          Bedrock: Claude Sonnet 5 · Nova · Pegasus · Titan
+Usuarios ─► CloudFront (HTTPS) ─► / React (S3) · /streamlit :80 · API :8000          Bedrock: Claude Sonnet 5 · Nova · Pegasus · Titan
 ```
 
 ## Estructura del repo
@@ -51,7 +57,7 @@ Usuarios ─► CloudFront (HTTPS) ─► :80 dashboard · :8000 API          Be
 | `src/marcos.py`, `src/clasificador_rubrica.py` | **Rúbrica de Integra** como marco principal: tramos por edad (regla del 31 de marzo), anclas, juez LLM |
 | `src/` (resto) | Matcher híbrido, decisores (Laya / ensemble), compuerta, plataforma SQLite, resolver, evaluación periódica |
 | `src/seguridad/` | Firma del webhook, whitelist, rutas confinadas, validación de medios |
-| `app.py`, `frontend/` | Dashboard Streamlit (el que sirve la web) y dashboard React (Vite + TS) |
+| `frontend/`, `app.py` | Dashboard React (Vite + TS, en la raíz de la web) y dashboard Streamlit (en `/streamlit/`) |
 | `infra/`, `tools/*_aws.py` | Infraestructura como código (CloudFormation) y scripts de seguridad/operación AWS |
 | `bench/` | Benchmarks y evaluaciones reproducibles (rúbrica, contra la edad, multimodal, compuerta) |
 | `data/` | Dataset sintético E-1 (7 CSV). La rúbrica de Integra **no** está en el repo (`privado/`, ver `tools/importar_rubrica.py`) |

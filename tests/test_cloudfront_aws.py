@@ -73,3 +73,9 @@ def test_auth_basica_rechaza_hash_malformado():
     import pytest
     with pytest.raises(ValueError):
         cf._codigo_auth("'; return event.request; //")
+
+
+def test_auth_spa_incluye_reescritura_solo_en_la_raiz():
+    h = cf._hash_cabecera("integra", "x")
+    assert "/index.html" in cf._codigo_auth(h, spa=True)
+    assert "/index.html" not in cf._codigo_auth(h)

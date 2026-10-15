@@ -51,7 +51,7 @@ Tres revisiones en paralelo (código del repo, infraestructura vista desde fuera
 | H13 | Errores internos (`repr(e)`) devueltos al usuario | Media | ✅ Mensajes genéricos; el detalle va a logs |
 | H14 | Temporales con `mktemp`, nunca borrados | Media | ✅ `NamedTemporaryFile` + borrado en `finally` |
 | H15 | Dashboard Streamlit **sin login** | Alta | ⏳ Santiago + Ivan (F1, o F0 con auth básica detrás de CloudFront) |
-| H16 | Frontend publica todo `data/` como estático (`publicDir: '../data'`) | Alta | ⏳ Santiago: servir por API con autenticación |
+| H16 | Frontend publica todo `data/` como estático (`publicDir: '../data'`) | Alta | ✅ Mitigado (15-oct): el despliegue (`tools/desplegar_frontend.py`) publica **solo** `index.html`, `assets/` y los 6 CSV que usa la app (datos sintéticos, ya públicos en el repo), desde un S3 **privado** con OAC. El resto de `data/` da 403. Para datos reales: servirlos por una API autenticada |
 | H17 | **IDOR**: `EDUCADORA_DEMO` fija; no se verifica que la educadora pertenezca al jardín del niño | Alta | ⏳ Sebastián: mapear teléfono → educadora → salas (tabla `educadora_salas` ya existe) |
 | H18 | **Chatwoot (fan-out)** guarda las conversaciones en un tercero sin DPA | Alta (legal) | ⏳ Integra/Sebastián: apagar `CHATWOOT_FANOUT` o firmar DPA |
 | H19 | Dependencias sin versión fija (`>=`), sin `pip-audit` | Baja | ⏳ CI |
@@ -69,7 +69,7 @@ Actualizado el 15-oct-2026. Se ejecutó primero todo lo que **no interrumpe la d
 | 4 | Puerto 443 cerrado (no escuchaba nada) | ✅ Aplicado | Security group |
 | 5 | Cifrado EBS por defecto en la cuenta | ✅ Aplicado | Discos nuevos cifrados; el actual sigue sin cifrar (requiere detener la instancia) |
 | 6 | Token de la API en **Secrets Manager** (`integrai/api-token`) | ✅ Creado | Nadie lo ve en texto; la EC2 lo lee al desplegar |
-| 7 | **CloudFront con TLS** delante de la EC2 | ✅ Creado | Dashboard → :80, `/procesar*`, `/clasificar`, `/health` → :8000. Sin caché, cabeceras de seguridad (HSTS) |
+| 7 | **CloudFront con TLS** delante de la EC2 | ✅ Creado. Desde el 15-oct: `/` → frontend React (S3 privado + OAC), `/streamlit*` → Streamlit, API sin cambios | Dashboard → :80, `/procesar*`, `/clasificar`, `/health` → :8000. Sin caché, cabeceras de seguridad (HSTS) |
 | 8 | Activar el token en la API | ⏳ Corte coordinado | `tools/desplegar_seguridad_ec2.sh` |
 | 9 | Webhook → CloudFront (`https`) + `WA_APP_SECRET` + `WA_WHITELIST` + token | ⏳ Sebastián | Variables del webhook |
 | 10 | Cerrar 80/8000 a internet (solo CloudFront) | ⏳ Después de 9 | `tools/seguridad_aws.py corte` (revertible con `revertir-corte`) |
