@@ -26,10 +26,18 @@ jobs:
           for f in requirements*.txt; do [ -e "$f" ] && echo "auditing $f" && pip-audit -r "$f" --progress-spinner=off || true; done
       - name: npm audit (condicional)
         run: |
-          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ] || [ -f yarn.lock ] || [ -f pnpm-lock.yaml ]; then
-            if [ -f package-lock.json ]; then npm ci && npm audit --audit-level=high || true; fi
-          else
-            echo "sin lockfile JS; omitiendo npm audit"
+          found=0
+          for d in frontend .; do
+            if [ -f "$d/package-lock.json" ]; then
+              (cd "$d" && npm ci && npm audit --audit-level=high) || true
+              found=1
+            fi
+          done
+          [ "$found" = "1" ] || echo "sin lockfile JS; omitiendo npm audit"
+      - name: frontend tests (condicional)
+        run: |
+          if [ -f frontend/package.json ] && [ -f frontend/package-lock.json ]; then
+            (cd frontend && npm test) || true
           fi
       - name: pytest
         run: |
