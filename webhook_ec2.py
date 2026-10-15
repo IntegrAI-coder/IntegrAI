@@ -204,7 +204,8 @@ class Msg(BaseModel):
         populate_by_name = True
 
 
-def _registrar_uno(nin: dict, educadora: str, texto: str, fecha: str, metodo: str) -> dict:
+def _registrar_uno(nin: dict, educadora: str, texto: str, fecha: str, metodo: str,
+                   formato: str = "texto") -> dict:
     """Clasifica (rúbrica, o ensemble de respaldo) + registra UNA observación para UN niño/a.
     Además consolida su evaluación y avisa al dashboard (best-effort)."""
     edad = marco.edad_meses(nin["fecha_nacimiento"], fecha) if nin.get("fecha_nacimiento") else None
@@ -231,7 +232,7 @@ def _registrar_uno(nin: dict, educadora: str, texto: str, fecha: str, metodo: st
     # manipulación, sin evidencia o lectura dudosa (U2) -> siempre a la cola de la educadora
     estado = "por_verificar" if (requiere or revisar_u2) else "auto"
     oid = plat.registrar_observacion(
-        id_nino=nin["id_nino"], id_educadora=educadora, fecha=fecha, formato="texto",
+        id_nino=nin["id_nino"], id_educadora=educadora, fecha=fecha, formato=formato,
         nivel=nivel, nota=texto_clas, dominios=dominios,
         manifestaciones=[m.manifestacion["id"] for m in matches],
         confianza=conf, origen="whatsapp", metodo_resolucion=metodo, margen=margen, estado=estado)
@@ -294,7 +295,7 @@ def _ack_registros(registros: list[dict], pendientes: list) -> str:
     return ack
 
 
-def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
+def _procesar(from_: str, texto: str, fecha: str | None = None, formato: str = "texto") -> dict:
     fecha = fecha or date.today().isoformat()
     ctx = _ctx_remitente(from_)
     if not ctx:
@@ -315,7 +316,7 @@ def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
         if r.id_nino in vistos:
             continue
         vistos.add(r.id_nino)
-        registros.append(_registrar_uno(plat.nino(r.id_nino) or {}, educadora, texto, fecha, r.metodo))
+        registros.append(_registrar_uno(plat.nino(r.id_nino) or {}, educadora, texto, fecha, r.metodo, formato))
 
     if not registros:
         men0, r0 = pendientes[0]
@@ -622,6 +623,8 @@ def procesar_media(m: MediaMsg) -> dict:
     except Exception:
         return invalido
     real = tipo_real(data[:16])   # magic bytes, no la extensi\u00f3n ni lo que diga el cliente
+    # rótulo que se guarda en observaciones.formato_captura (imagen | audio | video)
+    formato = {"image": "imagen", "audio": "audio", "video": "video"}.get(m.tipo, "texto")
     if m.tipo == "audio" and real in ("ogg", "mp3", "wav", "mp4"):
         texto = transcribir_audio_bytes(data, ext=f".{real}")
     elif m.tipo == "video" and real in ("mp4", "webm"):
@@ -633,7 +636,7 @@ def procesar_media(m: MediaMsg) -> dict:
         # la descripción visual (sin nombres) es la observación que se clasifica
         texto = " ".join(p for p in ((m.caption or ""), audio, visual) if p).strip()
         print(f"[media] video -> visual {len(visual)} chars, audio {len(audio)} chars", flush=True)
-        return _procesar(m.from_, texto)
+        return _procesar(m.from_, texto, formato=formato)
     elif m.tipo == "image" and real in ("jpeg", "png", "webp", "gif"):
         texto = extraer_texto_ocr(data, fmt=real)
     else:
@@ -644,7 +647,7 @@ def procesar_media(m: MediaMsg) -> dict:
                 "ack": "\u26a0\ufe0f Recib\u00ed el archivo pero no pude leer un nombre en \u00e9l. "
                        "Reenv\u00eda con el nombre del ni\u00f1o/a (o escr\u00edbelo en el mensaje)."}
     print(f"[media] {m.tipo} -> {len(texto)} chars", flush=True)   # sin el texto (PII)
-    return _procesar(m.from_, texto)
+    return _procesar(m.from_, texto, formato=formato)
 
 
 # --- estático (index.html del demo) como fallback en "/" ---
