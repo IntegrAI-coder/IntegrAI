@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import base64
 import csv
+import json
 import os
 import tempfile
 from datetime import date, datetime
@@ -262,13 +263,21 @@ def health() -> dict:
 API_DIR = Path(os.getenv("INTEGRA_HOME", str(Path(__file__).resolve().parent))) / "data"
 
 
-def _csv_json(nombre: str) -> list[dict]:
-    """Catálogo estático del repo (ruta_niveles / manifestaciones) leído como JSON."""
-    fp = API_DIR / nombre
-    if not fp.exists():
+def _catalogo(nombre: str) -> list[dict]:
+    """Catálogo del repo (ruta_niveles / manifestaciones). Prioriza el CSV (mismas columnas
+    que el frontend), pero cae al JSON si el CSV no está — la EC2 tiene los `.json`."""
+    csv_fp = API_DIR / f"{nombre}.csv"
+    if csv_fp.exists():
+        with csv_fp.open(encoding="utf-8") as fh:
+            return list(csv.DictReader(fh))
+    json_fp = API_DIR / f"{nombre}.json"
+    if not json_fp.exists():
         return []
-    with fp.open(encoding="utf-8") as fh:
-        return list(csv.DictReader(fh))
+    data = json.loads(json_fp.read_text(encoding="utf-8"))
+    if nombre == "manifestaciones":   # {id,nivel,dominio,texto} -> columnas del CSV
+        return [{"id_manifestacion": d.get("id"), "nivel": d.get("nivel"),
+                 "dominio": d.get("dominio"), "texto_observable": d.get("texto")} for d in data]
+    return data   # ruta_niveles.json ya trae las claves que usa el frontend
 
 
 def _sql_filas(consulta: str) -> list[dict]:
@@ -280,8 +289,8 @@ def api_datos() -> dict:
     """Dataset completo para el dashboard (MISMAS columnas que los CSV que ya lee),
     pero leído de la BD viva: incluye JAR-EQUIPO y las observaciones de WhatsApp."""
     return {
-        "ruta_niveles": _csv_json("ruta_niveles.csv"),
-        "manifestaciones": _csv_json("manifestaciones.csv"),
+        "ruta_niveles": _catalogo("ruta_niveles"),
+        "manifestaciones": _catalogo("manifestaciones"),
         "jardines": _sql_filas(
             "SELECT id_jardin,nombre_fantasia,comuna,region FROM jardines ORDER BY id_jardin"),
         "ninos": _sql_filas(
