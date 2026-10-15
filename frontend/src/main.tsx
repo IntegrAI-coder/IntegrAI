@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
 import { App } from './App';
 import { DatosProvider } from './data/DatosContext';
+import { RevisionProvider } from './data/RevisionContext';
 import './estilos.css';
 
 const contenedor = document.getElementById('root');
@@ -14,7 +15,9 @@ createRoot(contenedor).render(
   <StrictMode>
     <HashRouter>
       <DatosProvider>
-        <App />
+        <RevisionProvider>
+          <App />
+        </RevisionProvider>
       </DatosProvider>
     </HashRouter>
   </StrictMode>,

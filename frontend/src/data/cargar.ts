@@ -1,5 +1,6 @@
 import Papa from 'papaparse';
 import type {
+  Educadora,
   Evaluacion,
   Jardin,
   Manifestacion,
@@ -11,6 +12,7 @@ import type {
 } from '../domain/tipos';
 
 export interface Datos {
+  educadoras: Educadora[];
   niveles: Nivel[];
   jardines: Jardin[];
   ninos: Nino[];
@@ -56,6 +58,15 @@ interface DatosCrudos {
   manifestaciones?: Fila[];
   observacion_manifestaciones?: Fila[];
   evaluaciones?: Fila[];
+}
+
+function educadorasDesde(filas: Fila[]): Educadora[] {
+  return filas.map((f) => ({
+    idEducadora: f.id_educadora ?? '',
+    idJardin: f.id_jardin ?? '',
+    rol: f.rol ?? '',
+    aniosExperiencia: Number(f.anios_experiencia),
+  }));
 }
 
 function nivelesDesde(filas: Fila[]): Nivel[] {
@@ -125,8 +136,9 @@ function evaluacionesDesde(filas: Fila[]): Evaluacion[] {
   }));
 }
 
-function armarDatos(r: DatosCrudos): Datos {
+function armarDatos(r: DatosCrudos, educadoras: Educadora[]): Datos {
   return {
+    educadoras,
     niveles: nivelesDesde(r.ruta_niveles ?? []),
     jardines: jardinesDesde(r.jardines ?? []),
     ninos: ninosDesde(r.ninos ?? []),
@@ -137,12 +149,12 @@ function armarDatos(r: DatosCrudos): Datos {
   };
 }
 
-async function desdeApi(): Promise<Datos> {
+async function desdeApi(educadoras: Educadora[]): Promise<Datos> {
   const respuesta = await fetch(`${API_BASE}/api/datos`);
   if (!respuesta.ok) {
     throw new Error(`El backend respondió ${respuesta.status} en /api/datos`);
   }
-  return armarDatos((await respuesta.json()) as DatosCrudos);
+  return armarDatos((await respuesta.json()) as DatosCrudos, educadoras);
 }
 
 function rutaCsv(nombre: string): string {
@@ -160,7 +172,7 @@ async function leerCsv(nombre: string): Promise<Fila[]> {
   return resultado.data;
 }
 
-async function desdeCsv(): Promise<Datos> {
+async function desdeCsv(educadoras: Educadora[]): Promise<Datos> {
   const [
     ruta_niveles,
     jardines,
@@ -183,7 +195,7 @@ async function desdeCsv(): Promise<Datos> {
     observaciones,
     manifestaciones,
     observacion_manifestaciones,
-  });
+  }, educadoras);
 }
 
 function pendienteDesde(f: Record<string, unknown>): Pendiente {
@@ -219,12 +231,13 @@ export async function cargarPendientes(): Promise<Pendiente[]> {
 }
 
 export async function cargarDatos(): Promise<Datos> {
+  const educadoras = educadorasDesde(await leerCsv('educadoras.csv'));
   if (USAR_API) {
     try {
-      return await desdeApi();
+      return await desdeApi(educadoras);
     } catch (error) {
       console.warn('No se pudo leer /api/datos; uso los CSV estáticos.', error);
     }
   }
-  return desdeCsv();
+  return desdeCsv(educadoras);
 }

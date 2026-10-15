@@ -53,6 +53,24 @@ export interface Evaluacion {
   alerta: string | null;
 }
 
+export interface Educadora {
+  idEducadora: string;
+  idJardin: string;
+  rol: string;
+  aniosExperiencia: number;
+}
+
+export interface CursoProfesora {
+  idJardin: string;
+  salaGrupo: string;
+}
+
+export interface Profesora {
+  idEducadora: string;
+  telefono: string;
+  cursos: CursoProfesora[];
+}
+
 export interface Pendiente {
   idPendiente: string;
   idNinoPropuesto: string;
@@ -66,4 +84,13 @@ export interface Pendiente {
   creadoEn: string;
   idJardin: string | null;
   salaGrupo: string | null;
+}
+
+export interface NotificacionAdvertencia {
+  idNotificacion: string;
+  tipo: 'advertencia';
+  titulo: string;
+  detalle: string;
+  fecha: string;
+  href: string;
 }
