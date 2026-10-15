@@ -1,7 +1,8 @@
-import { Navigate, Route, Routes, Link } from 'react-router-dom';
+import { Navigate, Route, Routes, Link, NavLink } from 'react-router-dom';
 import { Cursos } from './pages/Cursos';
 import { Curso } from './pages/Curso';
 import { Nino } from './pages/Nino';
+import { Sincronizacion } from './pages/Sincronizacion';
 
 export function App() {
   return (
@@ -14,6 +15,12 @@ export function App() {
             </Link>
           </h1>
           <p>Dashboard de apoyo pedagógico</p>
+          <nav className="cabecera__nav" aria-label="Navegación principal">
+            <NavLink to="/" end>
+              Cursos
+            </NavLink>
+            <NavLink to="/sincronizacion">Sincronización</NavLink>
+          </nav>
         </div>
       </header>
 
@@ -23,6 +30,7 @@ export function App() {
             <Route path="/" element={<Cursos />} />
             <Route path="/curso/:idJardin/:sala" element={<Curso />} />
             <Route path="/nino/:idNino" element={<Nino />} />
+            <Route path="/sincronizacion" element={<Sincronizacion />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
