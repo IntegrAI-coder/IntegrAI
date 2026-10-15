@@ -12,7 +12,7 @@ from __future__ import annotations
 from pydantic import BaseModel, Field, ValidationError
 
 from .. import config
-from ._bedrock import converse
+from ._bedrock import converse, converse_tipado
 from .schema import Conducta, cita_valida
 
 
@@ -78,14 +78,11 @@ def extraer(bloques: list[tuple[str, str]], modelo: str | None = None,
     transcripcion = "\n".join(t for _, t in bloques)
     adv: list[str] = []
     modelo = modelo or config.MODELO_CONDUCTAS
-    for intento in range(2):
-        try:
-            r = converse(modelo, [{"text": entrada}], system=system_para(guia), tool=TOOL, max_tokens=1200)
-            salida = _Salida.model_validate(r["input"])
-            break
-        except (ValidationError, ValueError):
-            if intento == 1:
-                return [], None, ["no se pudieron extraer conductas; se usa la transcripción"]
+    try:   # typesafe: tool forzada + Pydantic; si falla, se reintenta mostrando el error al modelo
+        salida = converse_tipado(modelo, [{"text": entrada}], _Salida, system=system_para(guia),
+                                 max_tokens=1200, nombre_tool=TOOL["name"])
+    except (ValidationError, ValueError):
+        return [], None, ["no se pudieron extraer conductas; se usa la transcripción"]
     validas = [c for c in salida.conductas if cita_valida(c.cita, transcripcion)]
     descartadas = len(salida.conductas) - len(validas)
     if descartadas:

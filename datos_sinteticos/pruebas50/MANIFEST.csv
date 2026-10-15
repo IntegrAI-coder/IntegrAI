@@ -1,0 +1,36 @@
+archivo,bytes,sha256,caso,generador,modelo
+medios/B04.jpg,22783,87297a5dbf5f7b90f14c901b9e836a01976088eed101a6290800ffed9ed560fc,B04,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/B05.jpg,22860,1826b37058aa1b473af2c24228ffe11cd911928baf225ff2ac1c44290930e2be,B05,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/B06.jpg,39,306a664fcd7c7960cfba39fee60d620317430bbf0d01afbede12be084b3b30b9,B06,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/B07.mp3,17756,a2aede44432f47bbb85cf11d265752bdac24603c3d74cc282ec6a0ac75347f7a,B07,bench/pruebas50/generar.py,Amazon Polly
+medios/B08.mp3,2348,a94f133c924f8e6271f0af9b66ed5ddf79c7d5d4769c635e476ccb5f8b1c2aca,B08,bench/pruebas50/generar.py,Amazon Polly
+medios/B09.mp4,3531,ed3dd8a65eff682be91dbb3fb2c7d9b062ad48722ab0f04c03ddcf1c64e53823,B09,bench/pruebas50/generar.py,PIL + imageio-ffmpeg + Polly
+medios/B10.mp4,50502,4af2e553553f023e614b3c1d1b64686b6da837d1dc8a23eb64ffaa48574206b8,B10,bench/pruebas50/generar.py,PIL + imageio-ffmpeg + Polly
+medios/R04.jpg,42605,855c89d48c330806a5b93e52f7ea623fc0914e0ba8121bbc5edddd22633cefbf,R04,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/R05.jpg,46658,a44858d0d5f68cfa66f2368f14b63a2570c03af4b13d8c220d3089dbb12a80a8,R05,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/R06.jpg,37446,a17d2544eca9b341a2ff1d1c041fabe37a5b50620f7d7fc63889f4884be742c5,R06,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/R07.mp3,44252,bb1828bff45ec03a58d1380d666d7b4346d794208ae1d5a8e4af2fc9dd6f4849,R07,bench/pruebas50/generar.py,Amazon Polly
+medios/R08.mp3,35180,6163a1686a2b02eff6099b68b868692cb9046df3ed22df5500d84b36fd274276,R08,bench/pruebas50/generar.py,Amazon Polly
+medios/R09.mp4,28187,3caf80be30a03e0c2abcd3bbb587bd39baa5e5a283fb50d3504d083fab271c8d,R09,bench/pruebas50/generar.py,PIL + imageio-ffmpeg + Polly
+medios/R10.mp4,49700,261227c77ed14b8c497f1661838ca647f127f5617aa61d4be09d474117bec223,R10,bench/pruebas50/generar.py,PIL + imageio-ffmpeg + Polly
+medios/M04.jpg,34386,2a506469d0e88dc1cae84c9a7d70ed0c36764ae5a83f203c670659c552d9e481,M04,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/M05.jpg,32820,72e71b095041f30979f13e51c43bb20873cd868070b1d35b99db84948527a570,M05,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/M06.jpg,40036,04e5ba343e3bb247e819256c7ba4a844649ad87a2d7838f2c72def27f15c5ee3,M06,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/M07.mp3,57068,14d7b531efc3343ab3daaf5d1aa96904810fdcf59dcc07f09b033609006733fb,M07,bench/pruebas50/generar.py,Amazon Polly
+medios/M08.mp3,36620,023ffcd89ccd9108b30990cdad74849419817c09ac4ce493b6d57846a6cd6a6d,M08,bench/pruebas50/generar.py,Amazon Polly
+medios/M09.mp4,59539,efe4223d3523eba019f6157a6ecd2203beba3129c7bf597712945b24d32270ea,M09,bench/pruebas50/generar.py,PIL + imageio-ffmpeg + Polly
+medios/M10.mp4,52429,c86e857e78334ca1bc9a046989466c4eef1eeda8b47def9e2ca9ea21e2b8efab,M10,bench/pruebas50/generar.py,PIL + imageio-ffmpeg + Polly
+medios/F04.jpg,17254,47b3345cf787932af2dbad32aa3c84b559325e8674fb8ec8f25996f1682f3ae4,F04,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/F05.jpg,28433,20645dddd487940373cf2dd16cd42b4abbef515b1768741cf9b54f352ea558d7,F05,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/F06.jpg,18773,a8d3dfcb728b0bca5d4d688d49375c2d6e4eac764cbe231cff6bd977e497ec45,F06,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/F07.mp3,29420,ed1be249ae0c5323e8dac80ebe98f7bd6062b99ab53f9dab4d6ffd5e51d00a42,F07,bench/pruebas50/generar.py,Amazon Polly
+medios/F08.mp3,31724,1d48a39b51db53f8b9ac2e97c53293489599b0e62b83981ee3480e94445e2ad3,F08,bench/pruebas50/generar.py,Amazon Polly
+medios/F09.mp4,54833,1a28d6152f5937bf75a619b44b27e253db313be2589b3c963a9b10b9d3a629e8,F09,bench/pruebas50/generar.py,PIL + imageio-ffmpeg + Polly
+medios/F10.mp4,23085,ed9130cc68f32670f596d157783ece31f4113a445de6576c13dd772ece43b957,F10,bench/pruebas50/generar.py,PIL + imageio-ffmpeg + Polly
+medios/S04.jpg,42346,90d7d7baa391e47030d441686d5941b90c3d4105e1ca308ce0e3dc2157dea81c,S04,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/S05.jpg,43220,662008b46ebcedc4efe4c483ea7d1b43a98917a6d5a96934aa1d14f9626b56fe,S05,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/S06.png,39,306a664fcd7c7960cfba39fee60d620317430bbf0d01afbede12be084b3b30b9,S06,bench/pruebas50/generar.py,PIL + fuentes OFL
+medios/S07.mp3,27116,81b27b938bc0abc37e80589849dd6d2d0d0ea6dfa8a171f31a76be42016c0712,S07,bench/pruebas50/generar.py,Amazon Polly
+medios/S08.mp3,30428,8f97ae74e8d37c3f12b37d022be4d7b52879961b87e52b10a79a6b9f8372517a,S08,bench/pruebas50/generar.py,Amazon Polly
+medios/S09.mp4,62174,26ccc5b1bd2d2513cad32b17b9cce84e221cf8709b68e422e5e6d6c3f5190478,S09,bench/pruebas50/generar.py,PIL + imageio-ffmpeg + Polly
+medios/S10.mp4,19385,909d2649f1670c588a710db42fc6a9fad123454c756b26ad6c3e8e568c617355,S10,bench/pruebas50/generar.py,PIL + imageio-ffmpeg + Polly

@@ -41,6 +41,49 @@ def converse(modelo: str, contenido: list[dict], system: str | None = None,
     return {"texto": "".join(b.get("text", "") for b in bloques).strip(), "usage": r.get("usage")}
 
 
+def _desanidar(valor):
+    """Los modelos a veces devuelven un campo lista/objeto como STRING con JSON adentro: se decodifica."""
+    import json
+    if isinstance(valor, dict):
+        return {k: _desanidar(v) for k, v in valor.items()}
+    if isinstance(valor, list):
+        return [_desanidar(v) for v in valor]
+    if isinstance(valor, str) and valor[:1] in "[{":
+        try:
+            dec = json.loads(valor)
+            if isinstance(dec, dict) and len(dec) == 1 and isinstance(next(iter(dec.values())), list):
+                dec = next(iter(dec.values()))          # {"conductas": [...]} dentro de "conductas"
+            return _desanidar(dec)
+        except ValueError:
+            return valor
+    return valor
+
+
+def converse_tipado(modelo: str, contenido: list[dict], schema, system: str | None = None,
+                    max_tokens: int = 1200, intentos: int = 3, nombre_tool: str = "registrar"):
+    """Salida estructurada TYPESAFE: tool forzada con el JSON Schema de Pydantic + validación.
+
+    Si la validación falla, se reintenta mostrándole al modelo el error exacto de Pydantic para que
+    corrija (no se afloja el esquema). Lanza ValidationError si tras `intentos` sigue inválida.
+    """
+    from pydantic import ValidationError
+    tool = {"name": nombre_tool, "description": "Registra la respuesta con el formato exacto pedido.",
+            "inputSchema": {"json": schema.model_json_schema()}}
+    mensaje = list(contenido)
+    error = None
+    for _ in range(intentos):
+        r = converse(modelo, mensaje, system=system, tool=tool, max_tokens=max_tokens)
+        try:
+            return schema.model_validate(_desanidar(r["input"]))
+        except ValidationError as e:
+            error = e
+            mensaje = list(contenido) + [{"text": (
+                "\n\nTu respuesta anterior NO cumplió el esquema y fue rechazada. Error de validación:\n"
+                f"{str(e)[:800]}\nVuelve a responder cumpliendo el esquema exactamente "
+                "(listas como listas JSON, no como texto; respeta los largos máximos).")}]
+    raise error
+
+
 def formato_imagen(nombre: str) -> str:
     ext = nombre.rsplit(".", 1)[-1].lower() if "." in nombre else "jpeg"
     return {"jpg": "jpeg"}.get(ext, ext if ext in ("jpeg", "png", "gif", "webp") else "jpeg")
