@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import educadorasCsv from './educadoras.csv?raw';
 import type {
   Educadora,
   Evaluacion,
@@ -25,6 +26,11 @@ export interface Datos {
 }
 
 type Fila = Record<string, string>;
+
+function filasDesdeCsv(texto: string): Fila[] {
+  const resultado = Papa.parse<Fila>(texto, { header: true, skipEmptyLines: true });
+  return resultado.data;
+}
 
 /**
  * Fuente de datos. Si `VITE_API_BASE` está definido, el dashboard lee los datos
@@ -68,6 +74,8 @@ function educadorasDesde(filas: Fila[]): Educadora[] {
     aniosExperiencia: Number(f.anios_experiencia),
   }));
 }
+
+const EDUCADORAS_DEMO = educadorasDesde(filasDesdeCsv(educadorasCsv));
 
 function nivelesDesde(filas: Fila[]): Nivel[] {
   return filas.map((f) => ({
@@ -168,8 +176,7 @@ async function leerCsv(nombre: string): Promise<Fila[]> {
     throw new Error(`No se pudo cargar ${ruta} (${respuesta.status})`);
   }
   const texto = await respuesta.text();
-  const resultado = Papa.parse<Fila>(texto, { header: true, skipEmptyLines: true });
-  return resultado.data;
+  return filasDesdeCsv(texto);
 }
 
 async function desdeCsv(educadoras: Educadora[]): Promise<Datos> {
@@ -231,13 +238,12 @@ export async function cargarPendientes(): Promise<Pendiente[]> {
 }
 
 export async function cargarDatos(): Promise<Datos> {
-  const educadoras = educadorasDesde(await leerCsv('educadoras.csv'));
   if (USAR_API) {
     try {
-      return await desdeApi(educadoras);
+      return await desdeApi(EDUCADORAS_DEMO);
     } catch (error) {
       console.warn('No se pudo leer /api/datos; uso los CSV estáticos.', error);
     }
   }
-  return desdeCsv(educadoras);
+  return desdeCsv(EDUCADORAS_DEMO);
 }

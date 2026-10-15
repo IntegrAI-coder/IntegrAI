@@ -20,9 +20,9 @@ Abre la URL que imprime Vite (por defecto `http://localhost:5173`). La aplicaci�
 
 ## Fuentes de datos y revisión
 
-Los CSV viven en `../data`. `vite.config.ts` usa `publicDir: '../data'`, por lo que Vite los sirve en desarrollo y los incluye en `dist/`. Las rutas se construyen con `import.meta.env.BASE_URL` para funcionar tanto en `/` como en el subpath `/IntegrAI/`.
+Los CSV generales viven en `../data`. `vite.config.ts` usa `publicDir: '../data'`, por lo que Vite los sirve en desarrollo y los incluye en `dist/`. Las rutas se construyen con `import.meta.env.BASE_URL` para funcionar tanto en `/` como en el subpath `/IntegrAI/`. La copia de `educadoras.csv` usada por el demo vive en `src/data/` y Vite la integra en el bundle, por lo que no requiere publicar un CSV adicional.
 
-`DatosProvider` (`src/data/DatosContext.tsx`) carga los datos una vez y los comparte entre las vistas. Si se configura `VITE_API_BASE`, intenta `GET /api/datos`, conserva el fallback CSV y refresca mediante SSE (`/api/eventos`) más polling. `educadoras.csv` siempre se carga para el modo demostración porque `GET /api/datos` no incluye educadoras.
+`DatosProvider` (`src/data/DatosContext.tsx`) carga los datos una vez y los comparte entre las vistas. Si se configura `VITE_API_BASE`, intenta `GET /api/datos`, conserva el fallback CSV y refresca mediante SSE (`/api/eventos`) más polling. Las educadoras demo empaquetadas no agregan una solicitud de red ni bloquean `/api/datos` cuando el despliegue usa `VITE_REVISION=api`.
 
 La fuente de revisión se elige de forma independiente:
 
@@ -79,7 +79,7 @@ GitHub Pages publica bajo `/IntegrAI/`; por eso Vite usa esa base por defecto y 
 python tools/desplegar_frontend.py subir
 ```
 
-El build de CloudFront debe publicar también `educadoras.csv` además de los CSV históricos para que el modo demo pueda listar profesoras.
+El build integra `src/data/educadoras.csv` en los assets de Vite, que el despliegue de CloudFront ya publica; no se requiere agregar ese CSV a la lista de archivos estáticos.
 
 ## Pendientes del backend (fuera de alcance)
 
