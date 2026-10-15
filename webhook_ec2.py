@@ -355,7 +355,7 @@ def api_datos() -> dict:
             "SELECT id_observacion,id_manifestacion FROM observacion_manifestaciones"),
         # nivel CONSOLIDADO + alerta (rubric-aware) que produce el cron
         "evaluaciones": _sql_filas(
-            "SELECT id_nino,dominio,nivel,margen,periodo,tendencia,alerta "
+            "SELECT id_nino,dominio,nivel,margen,periodo,tendencia,alerta,origen "
             "FROM evaluaciones ORDER BY id_nino, periodo"),
     }
 
@@ -486,6 +486,28 @@ def pendiente_resolver(m: ResolverPendiente) -> dict:
 def api_pendiente_resolver(m: ResolverPendiente) -> dict:
     """Igual que /pendiente/resolver pero bajo /api/* (para el dashboard, mismo origen)."""
     return _resolver_pendiente(m)
+
+
+class AjusteNivel(BaseModel):
+    id_nino: str
+    nivel: int
+    resuelto_por: str | None = None
+
+
+@app.post("/api/evaluacion")
+def api_evaluacion(m: AjusteNivel) -> dict:
+    """Ajuste MANUAL del nivel de un niño/a (la profesora puede corregir también los auto)."""
+    nin = plat.nino(m.id_nino)
+    if not nin:
+        return {"ok": False, "error": "niño/a no encontrado"}
+    if not 1 <= int(m.nivel) <= 9:
+        return {"ok": False, "error": "nivel fuera de rango (1-9)"}
+    ahora = datetime.now().isoformat(timespec="seconds")
+    plat.guardar_evaluacion(m.id_nino, "global", int(m.nivel), 1.0, 1.0, periodo=ahora[:10],
+                            tendencia="—", alerta=None, generado_en=ahora,
+                            origen=f"manual:{m.resuelto_por or 'profesora'}")
+    _publicar({"evento": "evaluacion", "id_nino": m.id_nino, "nivel": int(m.nivel)})
+    return {"ok": True, "id_nino": m.id_nino, "nivel": int(m.nivel)}
 
 
 # --------------------------------------------------------------------------- #

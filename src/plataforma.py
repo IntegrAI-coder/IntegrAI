@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS evaluaciones_pendientes (
     creado_en TEXT, resuelto_en TEXT, resuelto_por TEXT, id_educadora TEXT);
 CREATE TABLE IF NOT EXISTS evaluaciones (
     id_evaluacion TEXT PRIMARY KEY, id_nino TEXT, dominio TEXT, nivel INTEGER,
-    confianza REAL, margen REAL, periodo TEXT, tendencia TEXT, alerta TEXT, generado_en TEXT);
+    confianza REAL, margen REAL, periodo TEXT, tendencia TEXT, alerta TEXT, generado_en TEXT,
+    origen TEXT DEFAULT 'auto');
 CREATE TABLE IF NOT EXISTS meta (clave TEXT PRIMARY KEY, valor TEXT);
 """
 
@@ -66,6 +67,7 @@ _MIGRACIONES = [
     ("observaciones", "estado", "TEXT DEFAULT 'auto'"),
     ("observaciones", "id_mensaje", "TEXT"),
     ("evaluaciones_pendientes", "id_educadora", "TEXT"),
+    ("evaluaciones", "origen", "TEXT"),
 ]
 
 
@@ -287,7 +289,7 @@ class Plataforma:
         if accion in ("aprobado", "editado") and nivel is not None and id_nino:
             self.guardar_evaluacion(id_nino, dominio or "global", nivel, 1.0, 1.0,
                                     periodo=(cuando or "")[:10], tendencia="—", alerta=None,
-                                    generado_en=cuando)
+                                    generado_en=cuando, origen="manual")
         self.con.commit()
 
     # ==================================================================
@@ -295,13 +297,13 @@ class Plataforma:
     # ==================================================================
     def guardar_evaluacion(self, id_nino: str, dominio: str, nivel: int, confianza: float,
                            margen: float, periodo: str, tendencia: str, alerta: str | None,
-                           generado_en: str | None = None) -> str:
+                           generado_en: str | None = None, origen: str = "auto") -> str:
         n = self.con.execute("SELECT COUNT(*) c FROM evaluaciones").fetchone()["c"]
         eid = f"EVAL-{90000 + n + 1}"
         self.con.execute(
             "INSERT INTO evaluaciones (id_evaluacion,id_nino,dominio,nivel,confianza,margen,periodo,"
-            "tendencia,alerta,generado_en) VALUES (?,?,?,?,?,?,?,?,?,?)",
-            (eid, id_nino, dominio, nivel, confianza, margen, periodo, tendencia, alerta, generado_en))
+            "tendencia,alerta,generado_en,origen) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            (eid, id_nino, dominio, nivel, confianza, margen, periodo, tendencia, alerta, generado_en, origen))
         self.con.commit()
         return eid
 

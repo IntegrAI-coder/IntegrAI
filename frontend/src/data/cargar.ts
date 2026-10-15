@@ -141,6 +141,7 @@ function evaluacionesDesde(filas: Fila[]): Evaluacion[] {
     periodo: f.periodo ?? '',
     tendencia: f.tendencia ?? '',
     alerta: f.alerta && f.alerta !== '' ? f.alerta : null,
+    origen: f.origen ?? 'auto',
   }));
 }
 
@@ -257,6 +258,25 @@ export async function resolverPendiente(
   const datos = (await respuesta.json()) as { ok?: boolean; error?: string };
   if (datos && datos.ok === false) {
     throw new Error(datos.error ?? 'no se pudo resolver');
+  }
+}
+
+/** Ajuste MANUAL del nivel de un niño/a (la profesora corrige, incluso los auto). */
+export async function ajustarNivel(idNino: string, nivel: number, resueltoPor?: string): Promise<void> {
+  if (!USAR_API) {
+    throw new Error('Requiere datos vivos del backend');
+  }
+  const respuesta = await fetch(`${API_BASE}/api/evaluacion`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id_nino: idNino, nivel, resuelto_por: resueltoPor }),
+  });
+  if (!respuesta.ok) {
+    throw new Error(`El backend respondió ${respuesta.status} al ajustar el nivel`);
+  }
+  const datos = (await respuesta.json()) as { ok?: boolean; error?: string };
+  if (datos && datos.ok === false) {
+    throw new Error(datos.error ?? 'no se pudo ajustar el nivel');
   }
 }
 

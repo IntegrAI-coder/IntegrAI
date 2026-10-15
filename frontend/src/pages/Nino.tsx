@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { BadgeAlerta } from '../components/BadgeAlerta';
 import { BadgeNivel } from '../components/BadgeNivel';
@@ -7,6 +7,7 @@ import { Cargando, ErrorEstado, Vacio } from '../components/Estado';
 import { GraficoTrayectoria } from '../components/GraficoTrayectoria';
 import { Tarjeta } from '../components/Tarjeta';
 import { useEstadoDatos } from '../data/DatosContext';
+import { ajustarNivel, usaApi } from '../data/cargar';
 import { useRevision } from '../data/RevisionContext';
 import { tieneAccesoNino } from '../domain/acceso';
 import { fichaNino, nivelPorNumero } from '../domain/consultas';
@@ -41,6 +42,32 @@ export function Nino() {
       })),
     };
   }, [autorizado, estado, idNino]);
+
+  const [nivelAjuste, setNivelAjuste] = useState('');
+  const [guardando, setGuardando] = useState(false);
+  const [mensajeAjuste, setMensajeAjuste] = useState<string | null>(null);
+  const [errorAjuste, setErrorAjuste] = useState<string | null>(null);
+  const puedeAjustar = usaApi();
+
+  async function guardarNivel() {
+    const valor = Number(nivelAjuste || vista?.ficha.nivelVigente);
+    if (!Number.isInteger(valor) || valor < 1 || valor > 9) {
+      setErrorAjuste('Elige un nivel entre 1 y 9');
+      return;
+    }
+    setGuardando(true);
+    setErrorAjuste(null);
+    setMensajeAjuste(null);
+    try {
+      await ajustarNivel(idNino, valor, profesora?.idEducadora);
+      setMensajeAjuste(`Nivel actualizado a ${valor} ✓`);
+      setNivelAjuste('');
+    } catch (error: unknown) {
+      setErrorAjuste(error instanceof Error ? error.message : 'No se pudo guardar el nivel');
+    } finally {
+      setGuardando(false);
+    }
+  }
 
   const idJardin = vista?.ficha.nino.idJardin ?? nino?.idJardin;
   const sala = vista?.ficha.nino.salaGrupo ?? nino?.salaGrupo;
@@ -96,6 +123,39 @@ export function Nino() {
                 {vista.ficha.alerta && <BadgeAlerta activa />}
               </h3>
               <p className="ficha-descripcion">{vista.nivelVigenteInfo.descripcion}</p>
+            </section>
+          )}
+
+          {vista.ficha.ajustadoManual && (
+            <p className="ficha-descripcion" role="status">
+              ✏️ Nivel ajustado manualmente por la profesora.
+            </p>
+          )}
+
+          {puedeAjustar && (
+            <section aria-label="Ajustar nivel" className="panel">
+              <h3 className="tarjeta__etiqueta">Ajustar nivel (profesora)</h3>
+              <p className="ficha-descripcion">
+                Puedes <strong>corregir el nivel vigente</strong> — incluso los que el modelo
+                registró solo (por encima del umbral).
+              </p>
+              {errorAjuste && <ErrorEstado mensaje={errorAjuste} />}
+              {mensajeAjuste && <p className="estado" role="status">{mensajeAjuste}</p>}
+              <div className="advertencia__acciones">
+                <label htmlFor="nivel-ajuste">Nivel (1–9)</label>
+                <input
+                  id="nivel-ajuste"
+                  type="number"
+                  min={1}
+                  max={9}
+                  value={nivelAjuste}
+                  placeholder={String(vista.ficha.nivelVigente ?? '')}
+                  onChange={(e) => setNivelAjuste(e.target.value)}
+                />
+                <button type="button" disabled={guardando} onClick={guardarNivel}>
+                  {guardando ? 'Guardando…' : 'Guardar nivel'}
+                </button>
+              </div>
             </section>
           )}
 

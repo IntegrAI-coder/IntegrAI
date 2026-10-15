@@ -51,6 +51,8 @@ export interface Evaluacion {
   periodo: string;
   tendencia: string;
   alerta: string | null;
+  /** `auto` (cron) | `manual*` (ajustada por la profesora). */
+  origen?: string;
 }
 
 export interface Educadora {
