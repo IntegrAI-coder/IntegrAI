@@ -26,7 +26,7 @@ Usamos 30 casos que el ensemble nunca vio (`bench/casos.jsonl`). Son notas estil
 |---|---:|---:|---:|---:|
 | Ensemble con edad | **90 %** | 90 % | 20 % | 24/24 |
 | Ensemble con edad, nota → conductas (etapa 2 de U2) | 90 % | 97 % | 10 % | 25/27 |
-| **Ensemble sin edad (solo texto)** | **47 %** | 50 % | 50 % | — |
+| **Ensemble sin edad (solo texto)** | **47 %** | 50 % | 50 % | 9/15 |
 | **Solo la edad, sin leer el texto** | **100 %** | 100 % | — | — |
 
 La matriz de confusión con edad es casi diagonal. El único error sistemático: 3 de los 4 casos de nivel 2 se predicen como nivel 5.
@@ -37,7 +37,7 @@ En el dataset sintético **el nivel está casi determinado por la edad**: el niv
 
 1. **El 90–94 % del ensemble no demuestra que entienda la observación.** Un clasificador que ignora el texto y solo mira la edad saca 100 % en nuestros casos. Con el texto solo, el ensemble baja a 47 %.
 2. **El valor real del producto está en los casos que se apartan de la edad**: rezagos o adelantos. Ahí la edad engaña y solo el texto puede detectar la diferencia. El dataset tiene 47 observaciones fuera del rango orientativo y 25 niños/as con una baja acotada. **Esa es la evaluación que importa** para el jurado y para Integra.
-3. **La compuerta funciona como idea:** los casos aceptados fueron 24/24 correctos. Pero el 17 % depende de qué tanto empuje la edad, y en datos reales con rezago la tasa de revisión será mayor.
+3. **La compuerta funciona con edad (24/24 aceptados correctos), pero sin edad se debilita: 9/15 aceptados correctos y 50 % a revisión.** Pero el 17 % depende de qué tanto empuje la edad, y en datos reales con rezago la tasa de revisión será mayor.
 
 ## 4. Recomendaciones antes del pitch
 
