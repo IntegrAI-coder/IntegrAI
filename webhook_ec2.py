@@ -313,6 +313,19 @@ def api_resumen() -> dict:
     return {"ok": True, **plat.resumen()}
 
 
+@app.get("/api/pendientes")
+def api_pendientes(estado: str = "pendiente", limit: int = 300) -> dict:
+    """Cola POR VERIFICAR (todas las tías), con su curso. Solo consulta; sin nombres."""
+    filas = [dict(r) for r in plat.con.execute(
+        "SELECT p.id_pendiente, p.id_nino_propuesto, p.id_educadora, p.nivel_propuesto, "
+        "p.dominio, p.margen, p.motivo, substr(p.evidencia,1,140) AS evidencia, p.estado, "
+        "p.creado_en, n.id_jardin, n.sala_grupo "
+        "FROM evaluaciones_pendientes p LEFT JOIN ninos n ON n.id_nino = p.id_nino_propuesto "
+        "WHERE p.estado = ? ORDER BY p.creado_en DESC LIMIT ?",
+        (estado, int(limit))).fetchall()]
+    return {"ok": True, "n": len(filas), "pendientes": filas}
+
+
 @app.post("/procesar", dependencies=[Depends(requiere_token)])
 def procesar(m: Msg) -> dict:
     return _procesar(m.from_, m.texto, m.fecha)

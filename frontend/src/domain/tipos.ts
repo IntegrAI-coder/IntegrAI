@@ -52,3 +52,18 @@ export interface Evaluacion {
   tendencia: string;
   alerta: string | null;
 }
+
+export interface Pendiente {
+  idPendiente: string;
+  idNinoPropuesto: string;
+  idEducadora: string | null;
+  nivelPropuesto: number | null;
+  dominio: string | null;
+  margen: number | null;
+  motivo: string;
+  evidencia: string;
+  estado: string;
+  creadoEn: string;
+  idJardin: string | null;
+  salaGrupo: string | null;
+}

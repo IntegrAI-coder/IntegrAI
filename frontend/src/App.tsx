@@ -1,7 +1,8 @@
-import { Navigate, Route, Routes, Link } from 'react-router-dom';
+import { Navigate, NavLink, Route, Routes, Link } from 'react-router-dom';
 import { Cursos } from './pages/Cursos';
 import { Curso } from './pages/Curso';
 import { Nino } from './pages/Nino';
+import { Pendientes } from './pages/Pendientes';
 
 export function App() {
   return (
@@ -14,6 +15,12 @@ export function App() {
             </Link>
           </h1>
           <p>Dashboard de apoyo pedagógico</p>
+          <nav className="navegacion">
+            <NavLink to="/" end>
+              Cursos
+            </NavLink>
+            <NavLink to="/pendientes">Por verificar</NavLink>
+          </nav>
         </div>
       </header>
 
@@ -23,6 +30,7 @@ export function App() {
             <Route path="/" element={<Cursos />} />
             <Route path="/curso/:idJardin/:sala" element={<Curso />} />
             <Route path="/nino/:idNino" element={<Nino />} />
+            <Route path="/pendientes" element={<Pendientes />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
