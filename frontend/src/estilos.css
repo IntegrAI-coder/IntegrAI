@@ -753,3 +753,11 @@ h3 {
     max-height: calc(100vh - 5.5rem);
   }
 }
+
+.advertencia__acciones { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-top: .6rem; }
+.advertencia__acciones button { font: inherit; cursor: pointer; padding: .35rem .7rem; border-radius: 6px;
+  border: 1px solid var(--borde, #cbd5e1); background: #fff; }
+.advertencia__acciones button:disabled { opacity: .5; cursor: progress; }
+.advertencia__acciones input { width: 4.5rem; padding: .3rem .4rem; border-radius: 6px; border: 1px solid var(--borde, #cbd5e1); }
+.advertencia__ocupado { font-size: .85em; opacity: .7; }
+.profesora-ayuda { margin: .25rem 0 .75rem; color: #475569; }

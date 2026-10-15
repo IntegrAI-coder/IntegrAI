@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { ListaAdvertencias } from '../components/ListaAdvertencias';
@@ -15,7 +15,21 @@ const HOY = new Date();
 
 export function ProfesoraInicio() {
   const estadoDatos = useEstadoDatos();
-  const { profesora, modo, notificaciones, estadoPendientes } = useRevision();
+  const { profesora, modo, notificaciones, estadoPendientes, resolver } = useRevision();
+  const [resolviendo, setResolviendo] = useState<string | null>(null);
+  const [errorAccion, setErrorAccion] = useState<string | null>(null);
+
+  async function manejarResolver(idPendiente: string, accion: 'aprobado' | 'editado' | 'rechazado', nivel?: number) {
+    setResolviendo(idPendiente);
+    setErrorAccion(null);
+    try {
+      await resolver(idPendiente, accion, nivel);
+    } catch (error: unknown) {
+      setErrorAccion(error instanceof Error ? error.message : 'No se pudo guardar la verificación');
+    } finally {
+      setResolviendo(null);
+    }
+  }
 
   const cursos = useMemo(() => {
     if (estadoDatos.estado !== 'listo' || !profesora) {
@@ -54,7 +68,18 @@ export function ProfesoraInicio() {
           notificaciones.length === 0 ? (
             <Vacio mensaje="No hay casos por revisar." />
           ) : (
-            <ListaAdvertencias notificaciones={notificaciones} />
+            <>
+              <p className="profesora-ayuda">
+                Revisa la evidencia y <strong>confirma el nivel</strong> (aprobar), <strong>corrígelo</strong> (editar)
+                o <strong>rechaza</strong> el caso.
+              </p>
+              {errorAccion && <ErrorEstado mensaje={errorAccion} />}
+              <ListaAdvertencias
+                notificaciones={notificaciones}
+                onResolver={manejarResolver}
+                resolviendoId={resolviendo}
+              />
+            </>
           )
         )}
       </section>

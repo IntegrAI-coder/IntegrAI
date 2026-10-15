@@ -93,4 +93,6 @@ export interface NotificacionAdvertencia {
   detalle: string;
   fecha: string;
   href: string;
+  /** Caso original (para poder aprobarlo/editarlo/rechazarlo desde la UI). */
+  pendiente: Pendiente;
 }

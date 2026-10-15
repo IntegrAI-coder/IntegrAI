@@ -391,16 +391,38 @@ def api_resumen() -> dict:
 
 
 @app.get("/api/pendientes")
-def api_pendientes(estado: str = "pendiente", limit: int = 300) -> dict:
-    """Cola POR VERIFICAR (todas las tías), con su curso. Solo consulta; sin nombres."""
-    filas = [dict(r) for r in plat.con.execute(
-        "SELECT p.id_pendiente, p.id_nino_propuesto, p.id_educadora, p.nivel_propuesto, "
-        "p.dominio, p.margen, p.motivo, substr(p.evidencia,1,140) AS evidencia, p.estado, "
-        "p.creado_en, n.id_jardin, n.sala_grupo "
-        "FROM evaluaciones_pendientes p LEFT JOIN ninos n ON n.id_nino = p.id_nino_propuesto "
-        "WHERE p.estado = ? ORDER BY p.creado_en DESC LIMIT ?",
-        (estado, int(limit))).fetchall()]
+def api_pendientes(estado: str = "pendiente", limit: int = 300,
+                   from_: str = Query("", alias="from")) -> dict:
+    """Cola POR VERIFICAR, con su curso. Con `from=<número>` devuelve solo la de esa tía.
+    Solo consulta; sin nombres."""
+    sql = ("SELECT p.id_pendiente, p.id_nino_propuesto, p.id_educadora, p.nivel_propuesto, "
+           "p.dominio, p.margen, p.motivo, substr(p.evidencia,1,140) AS evidencia, p.estado, "
+           "p.creado_en, n.id_jardin, n.sala_grupo "
+           "FROM evaluaciones_pendientes p LEFT JOIN ninos n ON n.id_nino = p.id_nino_propuesto "
+           "WHERE p.estado = ?")
+    params: list = [estado]
+    if from_:
+        ctx = plat.ruta_de_whatsapp(from_)
+        edu = ctx[0]["id_educadora"] if ctx else None
+        sql += " AND p.id_educadora = ?"
+        params.append(edu)
+    sql += " ORDER BY p.creado_en DESC LIMIT ?"
+    params.append(int(limit))
+    filas = [dict(r) for r in plat.con.execute(sql, tuple(params)).fetchall()]
     return {"ok": True, "n": len(filas), "pendientes": filas}
+
+
+@app.get("/api/profesora")
+def api_profesora(telefono: str = Query("")) -> dict:
+    """Identifica a la profesora por su número de WhatsApp + sus cursos (login del dashboard)."""
+    ctx = plat.ruta_de_whatsapp(telefono or "")
+    if not ctx:
+        raise HTTPException(status_code=404, detail="número no registrado")
+    id_edu = ctx[0]["id_educadora"]
+    tel = next((e["telefono_whatsapp"] for e in plat.educadoras_con_whatsapp()
+                if e["id_educadora"] == id_edu), telefono)
+    return {"id_educadora": id_edu, "telefono": tel,
+            "cursos": [{"id_jardin": c["id_jardin"], "sala_grupo": c["sala_grupo"]} for c in ctx]}
 
 
 @app.post("/procesar", dependencies=[Depends(requiere_token)])
@@ -438,8 +460,7 @@ class ResolverPendiente(BaseModel):
     resuelto_por: str | None = None
 
 
-@app.post("/pendiente/resolver", dependencies=[Depends(requiere_token)])
-def pendiente_resolver(m: ResolverPendiente) -> dict:
+def _resolver_pendiente(m: "ResolverPendiente") -> dict:
     """Aprueba / edita / rechaza un pendiente. Aprobar o editar ESCRIBE en `evaluaciones`."""
     row = plat.con.execute("SELECT * FROM evaluaciones_pendientes WHERE id_pendiente=?",
                            (m.id_pendiente,)).fetchone()
@@ -450,8 +471,21 @@ def pendiente_resolver(m: ResolverPendiente) -> dict:
     plat.resolver_pendiente(m.id_pendiente, m.accion, m.resuelto_por or d.get("id_educadora") or "tia",
                             id_nino=d.get("id_nino_propuesto"), nivel=nivel,
                             dominio=d.get("dominio"), cuando=datetime.now().isoformat(timespec="seconds"))
+    _publicar({"evento": "resuelto", "id_pendiente": m.id_pendiente, "accion": m.accion})
     return {"ok": True, "id_pendiente": m.id_pendiente, "accion": m.accion,
             "id_nino": d.get("id_nino_propuesto"), "nivel": nivel}
+
+
+@app.post("/pendiente/resolver", dependencies=[Depends(requiere_token)])
+def pendiente_resolver(m: ResolverPendiente) -> dict:
+    """Aprueba / edita / rechaza un pendiente (uso WhatsApp / tools)."""
+    return _resolver_pendiente(m)
+
+
+@app.post("/api/pendiente/resolver")
+def api_pendiente_resolver(m: ResolverPendiente) -> dict:
+    """Igual que /pendiente/resolver pero bajo /api/* (para el dashboard, mismo origen)."""
+    return _resolver_pendiente(m)
 
 
 # --------------------------------------------------------------------------- #

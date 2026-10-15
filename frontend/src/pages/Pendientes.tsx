@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useEstadoDatos, useVersionDatos } from '../data/DatosContext';
-import { cargarPendientes, usaApi } from '../data/cargar';
+import { cargarPendientes, resolverPendiente, usaApi } from '../data/cargar';
 import type { Pendiente } from '../domain/tipos';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Tabla, type Columna } from '../components/Tabla';
@@ -17,6 +17,8 @@ export function Pendientes() {
   const version = useVersionDatos();
   const hayApi = usaApi();
   const [carga, setCarga] = useState<EstadoCarga>({ estado: 'cargando' });
+  const [accionError, setAccionError] = useState<string | null>(null);
+  const [resolviendo, setResolviendo] = useState<string | null>(null);
 
   useEffect(() => {
     if (!hayApi) {
@@ -58,9 +60,45 @@ export function Pendientes() {
         render: (p) => <>{p.margen === null ? '—' : p.margen.toFixed(3)}</> },
       { clave: 'motivo', encabezado: 'Motivo', ordenable: true, valor: (p) => p.motivo },
       { clave: 'creado', encabezado: 'Creado', ordenable: true, valor: (p) => p.creadoEn },
+      {
+        clave: 'acciones',
+        encabezado: 'Verificar',
+        valor: () => '',
+        render: (p) => (
+          <div className="advertencia__acciones">
+            <button type="button" disabled={resolviendo === p.idPendiente}
+                    onClick={() => accion(p, 'aprobado')}>
+              ✓ Aprobar
+            </button>
+            <button type="button" disabled={resolviendo === p.idPendiente}
+                    onClick={() => accion(p, 'editado', p.nivelPropuesto ?? undefined)}>
+              ✏️ Editar {p.nivelPropuesto ?? ''}
+            </button>
+            <button type="button" disabled={resolviendo === p.idPendiente}
+                    onClick={() => accion(p, 'rechazado')}>
+              🚫 Rechazar
+            </button>
+          </div>
+        ),
+      },
     ],
-    [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [resolviendo],
   );
+
+  async function accion(p: Pendiente, accionTipo: 'aprobado' | 'editado' | 'rechazado', nivel?: number) {
+    setResolviendo(p.idPendiente);
+    setAccionError(null);
+    try {
+      await resolverPendiente(p.idPendiente, accionTipo, nivel);
+      const nuevos = await cargarPendientes();
+      setCarga({ estado: 'listo', pendientes: nuevos });
+    } catch (error: unknown) {
+      setAccionError(error instanceof Error ? error.message : 'No se pudo resolver');
+    } finally {
+      setResolviendo(null);
+    }
+  }
 
   return (
     <>
@@ -74,12 +112,13 @@ export function Pendientes() {
       {!hayApi && <Vacio mensaje="Esta vista requiere datos vivos del backend (no disponible en modo CSV)." />}
       {hayApi && carga.estado === 'cargando' && <Cargando mensaje="Cargando cola…" />}
       {carga.estado === 'error' && <ErrorEstado mensaje={`No se pudo cargar la cola: ${carga.mensaje}`} />}
+      {accionError && <ErrorEstado mensaje={accionError} />}
       {hayApi && carga.estado === 'listo' && (
         carga.pendientes.length === 0 ? (
           <Vacio mensaje="No hay pendientes por verificar." />
         ) : (
           <>
-            <p className="estado">{carga.pendientes.length} pendientes.</p>
+            <p className="estado">{carga.pendientes.length} pendientes. Aprobar o editar escribe la evaluación canónica.</p>
             <Tabla
               columnas={columnas}
               filas={carga.pendientes}
