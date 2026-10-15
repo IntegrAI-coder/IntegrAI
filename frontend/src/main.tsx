@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import { App } from './App';
 import { DatosProvider } from './data/DatosContext';
 import './estilos.css';
@@ -12,10 +12,10 @@ if (!contenedor) {
 
 createRoot(contenedor).render(
   <StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <DatosProvider>
         <App />
       </DatosProvider>
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>,
 );
