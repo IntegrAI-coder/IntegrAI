@@ -89,6 +89,8 @@ def describir_imagen(path: str, pie: str = "") -> str:
 
 class Procesador:
     def procesar(self, entradas: list[Entrada]) -> tuple[str, list[dict[str, Any]]]:
+        if config.U2_PIPELINE == "v2" and not config.usar_mock():
+            return self._procesar_v2(entradas)
         partes, detalle = [], []
         for e in entradas:
             t = (e.tipo or "").lower()
@@ -109,3 +111,12 @@ class Procesador:
                 partes.append(texto)
                 detalle.append({"tipo": t, "ref": e.ref, "texto": texto})
         return " ".join(partes).strip(), detalle
+
+    def _procesar_v2(self, entradas: list[Entrada]) -> tuple[str, list[dict[str, Any]]]:
+        """U2 v2 (src/multimodal): misma firma; `detalle` incluye la ObservacionNormalizada."""
+        from .multimodal import normalizar_entradas
+        obs = normalizar_entradas(entradas)
+        detalle = [{"tipo": s.fuente, "texto": s.texto, "calidad": s.calidad, "modelo": s.modelo,
+                    "advertencias": s.advertencias} for s in obs.segmentos]
+        detalle.append({"tipo": "observacion_normalizada", **obs.model_dump(exclude={"segmentos"})})
+        return obs.texto_para_matcher(), detalle

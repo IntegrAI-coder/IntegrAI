@@ -18,6 +18,16 @@ MODELO_SIMPLE = os.getenv("MODELO_SIMPLE", "amazon.nova-lite-v1:0")
 MODELO_RAZONAMIENTO = os.getenv("MODELO_RAZONAMIENTO", "amazon.nova-pro-v1:0")
 MODELO_VISION = os.getenv("MODELO_VISION", "amazon.nova-pro-v1:0")
 
+# --- U2 · Ingesta multimodal (src/multimodal) ---
+# "legacy" = Procesador original | "v2" = puente de texto en 2 etapas (transcripción + conductas)
+U2_PIPELINE = os.getenv("U2_PIPELINE", "legacy")
+WHISPER_MODEL = os.getenv("WHISPER_MODEL", "large-v3-turbo")
+MODELO_OCR = os.getenv("MODELO_OCR", "us.anthropic.claude-sonnet-5")
+MODELO_OCR_VERIF = os.getenv("MODELO_OCR_VERIF", "us.amazon.nova-2-lite-v1:0")
+MODELO_VIDEO = os.getenv("MODELO_VIDEO", "us.twelvelabs.pegasus-1-2-v1:0")
+MODELO_VIDEO_FALLBACK = os.getenv("MODELO_VIDEO_FALLBACK", "us.amazon.nova-2-lite-v1:0")
+MODELO_CONDUCTAS = os.getenv("MODELO_CONDUCTAS", "us.anthropic.claude-sonnet-5")
+
 # auto = Bedrock si hay credenciales, si no MOCK | "1" = fuerza MOCK
 MODO_MOCK = os.getenv("MODO_MOCK", "auto")
 

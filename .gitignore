@@ -45,3 +45,9 @@ __pycache__/
 *.pyc
 .env
 dataset_e1_validacion_interna.zip
+
+# U2 benchmark: team media and generated outputs (may contain voices/handwriting)
+bench/medios/
+bench/.cache/
+bench/detalle_*.jsonl
+models/
