@@ -119,17 +119,25 @@ def _nivel_ponderado(id_nino: str) -> tuple:
     return round(num / den), len(obs)
 
 
+def _es_apellido_del_roster(cand: str, aps: list[str]) -> bool:
+    """¿`cand` coincide con (o es prefijo de) algún apellido del roster?"""
+    return any(a == cand or a.startswith(cand + " ") or cand.startswith(a) for a in aps if a)
+
+
 def extraer_mencion(texto: str, filas: list[dict]) -> str:
     """Heurística determinista: busca un nombre de pila del roster (o diminutivo)
-    y toma el nombre + el siguiente token SOLO si es plausible apellido (no stopword)."""
+    y toma el nombre + los tokens siguientes SOLO si son **apellidos del roster**
+    (evita confundir el verbo de la frase con un apellido). Máx. 2 apellidos."""
     toks = normalizar(texto).split()
     pila = {normalizar(f["nombre_pila"]) for f in filas if f.get("nombre_pila")}
+    aps = [normalizar(f.get("apellidos") or "") for f in filas if f.get("apellidos")]
     aliases = set(DIMINUTIVOS.keys())
     for i, t in enumerate(toks):
         if t in pila or t in aliases:
             nombre = [t]
-            if i + 1 < len(toks) and toks[i + 1] not in STOPWORDS and len(toks[i + 1]) > 1:
-                nombre.append(toks[i + 1])   # apellido plausible
+            j = i + 1
+            while j < len(toks) and len(nombre) < 3 and _es_apellido_del_roster(toks[j], aps):
+                nombre.append(toks[j]); j += 1
             return " ".join(nombre)
     return toks[0] if toks else ""
 
