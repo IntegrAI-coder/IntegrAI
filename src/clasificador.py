@@ -31,6 +31,8 @@ class Clasificacion:
     niveles_esperados: list[int] = field(default_factory=list)
     alerta_rezago: bool = False
     backend: str = "hibrido"
+    margen: float = 0.0
+    requiere_revision: bool = False
     meta: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -45,6 +47,8 @@ class Clasificacion:
             "niveles_esperados": self.niveles_esperados,
             "alerta_rezago": self.alerta_rezago,
             "backend": self.backend,
+            "margen": round(self.margen, 4),
+            "requiere_revision": self.requiere_revision,
             "manifestaciones": [m.to_dict() for m in self.matches],
             "meta": self.meta,
         }
@@ -63,6 +67,12 @@ class Clasificador:
 
         dec = self.decisor.decidir(texto, matches, edad_meses, esperados, umbral_evidencia)
 
+        # GATE: si la decisión no es clara (margen chico) -> escalar a revisión humana
+        vals = sorted(dec.probabilidades.values(), reverse=True)
+        margen = (vals[0] - vals[1]) if len(vals) > 1 else 0.0
+        umbral_gate = getattr(config, "GATE_MARGEN", 0.15)
+        requiere = bool(margen < umbral_gate)
+
         # alerta de rezago: nivel observado por debajo de la banda etaria esperada
         alerta = bool(edad_meses is not None and dec.nivel is not None and esperados
                       and dec.nivel < min(esperados))
@@ -73,4 +83,5 @@ class Clasificador:
             dominios=dec.dominios, matches=matches, edad_meses=edad_meses,
             niveles_esperados=esperados, alerta_rezago=alerta,
             backend=dec.backend, meta=dec.meta,
+            margen=margen, requiere_revision=requiere,
         )

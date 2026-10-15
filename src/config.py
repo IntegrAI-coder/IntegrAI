@@ -35,6 +35,8 @@ MODO_MOCK = os.getenv("MODO_MOCK", "auto")
 # "heuristico" = mock | "jev" | "laya" | "clm"
 BACKEND_DECISION = os.getenv("BACKEND_DECISION", "heuristico")
 LAYA_MODEL_PATH = os.getenv("LAYA_MODEL_PATH", "")
+# Gate: si el margen (top1-top2) del ensemble < este valor -> escala a revision humana
+GATE_MARGEN = float(os.getenv("GATE_MARGEN", "0.15"))
 JEV_API_KEY = os.getenv("JEV_API_KEY")
 JEV_ENDPOINT = os.getenv("JEV_ENDPOINT")
 

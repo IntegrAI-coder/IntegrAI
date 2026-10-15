@@ -36,6 +36,24 @@ def _whisper() -> Any | None:
 _MODELO_WHISPER = None
 
 
+def _decode_audio_np(path: str):
+    """Decodifica audio a float32 16k mono con ffmpeg (evita la incompatibilidad av/faster_whisper)."""
+    import subprocess, tempfile, wave
+    import numpy as np
+    wav = tempfile.mktemp(suffix=".wav")
+    try:
+        r = subprocess.run(["ffmpeg", "-y", "-i", path, "-ac", "1", "-ar", "16000", "-f", "wav", wav],
+                           capture_output=True, timeout=300)
+        if not Path(wav).exists() or Path(wav).stat().st_size < 100:
+            print(f"[whisper] ffmpeg fallo: {r.stderr[-300:]!r}", flush=True)
+            return None
+        with wave.open(wav, "rb") as w:
+            frames = w.readframes(w.getnframes())
+        return np.frombuffer(frames, dtype=np.int16).astype("float32") / 32768.0
+    finally:
+        Path(wav).unlink(missing_ok=True)
+
+
 def transcribir_audio(path: str) -> str:
     global _MODELO_WHISPER
     if not path or not Path(path).exists():
@@ -43,11 +61,16 @@ def transcribir_audio(path: str) -> str:
     if _MODELO_WHISPER is None:
         _MODELO_WHISPER = _whisper()
     if _MODELO_WHISPER is None:
+        print("[whisper] modelo no disponible", flush=True)
+        return ""
+    audio = _decode_audio_np(path)
+    if audio is None or audio.size == 0:
         return ""
     try:
-        segs, _ = _MODELO_WHISPER.transcribe(path, language="es", vad_filter=True)
+        segs, _ = _MODELO_WHISPER.transcribe(audio, language="es", vad_filter=True)
         return " ".join(s.text.strip() for s in segs).strip()
-    except Exception:
+    except Exception as e:  # noqa: BLE001
+        print(f"[whisper] error: {e!r}", flush=True)
         return ""
 
 

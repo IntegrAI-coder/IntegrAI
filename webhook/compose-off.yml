@@ -1,0 +1,22 @@
+services:
+  integrai-webhook:
+    build: .
+    image: integrai-webhook:latest
+    container_name: integrai-webhook
+    restart: always
+    env_file: .env
+    networks:
+      - traefik-public
+    labels:
+      - traefik.enable=true
+      # SOLO staging (sin interceptar el webhook de Meta → el bot de Chatwoot vuelve a recibir)
+      - traefik.http.routers.integrai-webhook.rule=Host(`integrai.wagnersolutionsai.com`)
+      - traefik.http.routers.integrai-webhook.entrypoints=websecure
+      - traefik.http.routers.integrai-webhook.tls=true
+      - traefik.http.routers.integrai-webhook.tls.certresolver=letsencrypt
+      - traefik.http.services.integrai-webhook.loadbalancer.server.port=8123
+      - traefik.docker.network=traefik-public
+
+networks:
+  traefik-public:
+    external: true
