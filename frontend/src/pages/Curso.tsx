@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { BadgeAlerta } from '../components/BadgeAlerta';
 import { BadgeNivel } from '../components/BadgeNivel';
@@ -8,6 +8,7 @@ import { GraficoDistribucion } from '../components/GraficoDistribucion';
 import { Tabla, type Columna } from '../components/Tabla';
 import { Tarjeta } from '../components/Tarjeta';
 import { useEstadoDatos } from '../data/DatosContext';
+import { ajustarNivel, usaApi } from '../data/cargar';
 import { useRevision } from '../data/RevisionContext';
 import { tieneAccesoCurso } from '../domain/acceso';
 import {
@@ -43,6 +44,61 @@ export function Curso() {
       distribucion: distribucionNiveles(alumnos),
     };
   }, [autorizado, estado, idJardin, sala]);
+
+  const [ajuste, setAjuste] = useState<Record<string, string>>({});
+  const [guardando, setGuardando] = useState<string | null>(null);
+  const [errorAjuste, setErrorAjuste] = useState<string | null>(null);
+  const [mensajeAjuste, setMensajeAjuste] = useState<string | null>(null);
+  const puedeAjustar = usaApi();
+
+  async function guardarNivel(a: AlumnoCurso, valor: string) {
+    const n = Number(valor || a.nivelVigente);
+    if (!Number.isInteger(n) || n < 1 || n > 9) {
+      setErrorAjuste('Elige un nivel entre 1 y 9');
+      return;
+    }
+    setGuardando(a.idNino);
+    setErrorAjuste(null);
+    setMensajeAjuste(null);
+    try {
+      await ajustarNivel(a.idNino, n, profesora?.idEducadora);
+      setMensajeAjuste(`Nivel de ${a.idNino} → ${n} ✓`);
+      setAjuste((prev) => ({ ...prev, [a.idNino]: '' }));
+    } catch (error: unknown) {
+      setErrorAjuste(error instanceof Error ? error.message : 'No se pudo guardar el nivel');
+    } finally {
+      setGuardando(null);
+    }
+  }
+
+  const columnas: Columna<AlumnoCurso>[] = useMemo(() => {
+    if (!puedeAjustar) {
+      return columnasBase;
+    }
+    const colAjuste: Columna<AlumnoCurso> = {
+      clave: 'ajustar',
+      encabezado: 'Ajustar nivel',
+      valor: () => '',
+      render: (a) => (
+        <div className="advertencia__acciones">
+          <label className="sr-only" htmlFor={`ajuste-${a.idNino}`}>Nivel para {a.idNino}</label>
+          <input
+            id={`ajuste-${a.idNino}`}
+            type="number" min={1} max={9}
+            value={ajuste[a.idNino] ?? ''}
+            placeholder={String(a.nivelVigente ?? '')}
+            onChange={(e) => setAjuste((prev) => ({ ...prev, [a.idNino]: e.target.value }))}
+          />
+          <button type="button" disabled={guardando === a.idNino}
+                  onClick={() => guardarNivel(a, ajuste[a.idNino] ?? '')}>
+            {guardando === a.idNino ? '…' : 'Guardar'}
+          </button>
+        </div>
+      ),
+    };
+    return [...columnasBase, colAjuste];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [puedeAjustar, ajuste, guardando]);
 
   const nombreJardin = vista?.jardin?.nombreFantasia ?? idJardin;
 
@@ -90,6 +146,14 @@ export function Curso() {
               </section>
 
               <section aria-label="Alumnos del curso" className="panel">
+                {puedeAjustar && (
+                  <p className="ficha-descripcion">
+                    Como profesora puedes <strong>ajustar el nivel</strong> de cualquier niño/a
+                    (incluidos los que el modelo registró solo).
+                  </p>
+                )}
+                {errorAjuste && <ErrorEstado mensaje={errorAjuste} />}
+                {mensajeAjuste && <p className="estado" role="status">{mensajeAjuste}</p>}
                 <Tabla
                   descripcion="Tabla de alumnos del curso con su nivel y brecha"
                   filas={vista.alumnos}
@@ -105,7 +169,7 @@ export function Curso() {
   );
 }
 
-const columnas: Columna<AlumnoCurso>[] = [
+const columnasBase: Columna<AlumnoCurso>[] = [
   {
     clave: 'codigo',
     encabezado: 'Código',
