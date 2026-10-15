@@ -33,6 +33,31 @@ class Trayectoria:
         }
 
 
+def _umbral_rezago() -> int:
+    """Umbral de "nivel bajo" (rúbrica). Se define con Integra; por ahora env REZAGO_UMBRAL (default 2)."""
+    import os
+    try:
+        return int(os.getenv("REZAGO_UMBRAL", "2"))
+    except ValueError:
+        return 2
+
+
+def _subtramo(edad_meses: int | None) -> str:
+    """Nombre del subtramo (o tramo) del niño/a según la rúbrica, para el mensaje de alerta."""
+    try:
+        from . import marcos
+        t = marcos.tramo_por_meses(edad_meses) if edad_meses is not None else None
+        if not t:
+            return "su tramo"
+        tramo_id, sub_id = t
+        for tr in marcos.marco_activo().tramos():
+            if tr["id"] == tramo_id:
+                return next((x["nombre"] for x in tr.get("subtramos", []) if x["id"] == sub_id), tr["nombre"])
+    except Exception:  # noqa: BLE001
+        pass
+    return "su tramo"
+
+
 def construir(id_nino: str, observaciones: list[dict],
               edad_meses_actual: int | None = None) -> Trayectoria:
     """observaciones: [{fecha, nivel, formato, edad_meses?}] ordenadas o no."""
@@ -60,11 +85,9 @@ def construir(id_nino: str, observaciones: list[dict],
         tendencia = "sin_datos" if not obs else "estable"
 
     alertas: list[str] = []
-    # 1) rezago persistente: nivel actual muy por debajo de lo esperado por edad
-    if edad_meses_actual is not None and nivel_actual is not None:
-        esperados = marco.niveles_esperados_por_edad(edad_meses_actual)
-        if esperados and nivel_actual < min(esperados) - 1:
-            alertas.append(f"Nivel actual {nivel_actual} por debajo de la banda etaria esperada {esperados} (posible rezago).")
+    # 1) nivel bajo para su tramo (rúbrica Integra). El umbral se define con Integra (env REZAGO_UMBRAL).
+    if nivel_actual is not None and nivel_actual <= _umbral_rezago():
+        alertas.append(f"Nivel {nivel_actual} en el tramo bajo de {_subtramo(edad_meses_actual)} (posible rezago).")
     # 2) estancamiento: 4+ observaciones sin cambio
     if len(obs) >= 4 and len({o["nivel"] for o in obs[-4:]}) == 1:
         alertas.append("Cuatro observaciones consecutivas en el mismo nivel (estancamiento).")
