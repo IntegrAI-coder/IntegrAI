@@ -4,6 +4,16 @@ Hackathon AWS Breaking Barriers Chile 2026 — **Desafío 1 de Fundación Integr
 
 ## 🌐 Ver la web
 
+**Demo pública (GitHub Pages, datos sintéticos):**
+
+| Página | Enlace |
+|---|---|
+| **Dashboard general**: cursos por jardín y panorama de niveles | https://integrai-coder.github.io/IntegrAI/ |
+| **Vista de profesoras**: ingreso con número de WhatsApp de demostración | https://integrai-coder.github.io/IntegrAI/#/profesora |
+| **Ficha de un niño/a** (ej. NINO-00008): nivel vigente, esperado, brecha y trayectoria | https://integrai-coder.github.io/IntegrAI/#/nino/NINO-00008 |
+
+**Despliegue en AWS (CloudFront, datos vivos de la API):**
+
 **👉 https://d2eg8hbkfurj9b.cloudfront.net**
 
 | Ruta | Qué es |
