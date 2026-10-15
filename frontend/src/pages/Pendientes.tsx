@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useEstadoDatos } from '../data/DatosContext';
+import { useEstadoDatos, useVersionDatos } from '../data/DatosContext';
 import { cargarPendientes, usaApi } from '../data/cargar';
 import type { Pendiente } from '../domain/tipos';
 import { Breadcrumbs } from '../components/Breadcrumbs';
@@ -14,6 +14,7 @@ type EstadoCarga =
 export function Pendientes() {
   // Aseguramos que el contexto de datos esté montado (misma app).
   useEstadoDatos();
+  const version = useVersionDatos();
   const hayApi = usaApi();
   const [carga, setCarga] = useState<EstadoCarga>({ estado: 'cargando' });
 
@@ -35,7 +36,7 @@ export function Pendientes() {
     return () => {
       activo = false;
     };
-  }, [hayApi]);
+  }, [hayApi, version]);
 
   const columnas: Columna<Pendiente>[] = useMemo(
     () => [

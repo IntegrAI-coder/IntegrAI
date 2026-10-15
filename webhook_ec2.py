@@ -9,6 +9,7 @@ La verificación humana en la plataforma queda SOLO para el nivel de la rúbrica
 """
 from __future__ import annotations
 
+import asyncio
 import base64
 import csv
 import json
@@ -19,8 +20,9 @@ from pathlib import Path
 
 import hmac
 import os as _os
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -29,6 +31,7 @@ from src.resolver import Resolver, DIMINUTIVOS, normalizar
 from src.marco import STOPWORDS
 from src import config
 from src.clasificador import Clasificador
+from src.evaluacion_periodica import consolidar_nino
 from src import marco
 from src import marcos
 
@@ -52,6 +55,27 @@ app = FastAPI(title="IntegrAI · decisión (EC2)", docs_url="/docs" if _docs els
 # Solo lectura, sin credenciales. Configurable con INTEGRA_CORS_ORIGINS (coma-separado; "*" en demo).
 CORS_ORIGINS = [o.strip() for o in os.getenv("INTEGRA_CORS_ORIGINS", "*").split(",") if o.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS, allow_methods=["GET"], allow_headers=["*"])
+
+# --- SSE: aviso en vivo al dashboard de que llegó una observación ---
+_subs: set = set()
+_loop = None
+
+
+@app.on_event("startup")
+async def _captura_loop() -> None:
+    global _loop
+    _loop = asyncio.get_running_loop()
+
+
+def _publicar(evento: dict) -> None:
+    """Publica un evento a todos los navegadores suscritos (thread-safe)."""
+    if _loop is None:
+        return
+    for q in list(_subs):
+        try:
+            _loop.call_soon_threadsafe(q.put_nowait, evento)
+        except Exception:  # noqa: BLE001
+            pass
 
 if not API_TOKEN:
     print("[seguridad] INTEGRA_API_TOKEN no definido: la API queda ABIERTA (solo para desarrollo)", flush=True)
@@ -246,6 +270,15 @@ def _procesar(from_: str, texto: str, fecha: str | None = None) -> dict:
         manifestaciones=[m.manifestacion["id"] for m in matches],
         confianza=conf, origen="whatsapp", metodo_resolucion=res.metodo, margen=margen, estado=estado)
 
+    # Adelanto en vivo: reconsolida la evaluación del niño y avisa al dashboard (best-effort).
+    try:
+        consolidar_nino(plat, res.id_nino, periodo=fecha)
+    except Exception as e:  # noqa: BLE001
+        print(f"[live] consolidar falló: {type(e).__name__}: {e}", flush=True)
+    _publicar({"evento": "observacion", "id_nino": res.id_nino,
+               "id_jardin": nin.get("id_jardin"), "sala_grupo": nin.get("sala_grupo"),
+               "nivel": nivel, "estado": estado})
+
     # El ACK responde el nivel PONDERADO del niño (media) + el tramo + el nivel de la rúbrica.
     pond, n_notas = _nivel_ponderado(res.id_nino)
     etiqueta = f"{nivel} {nombre_nivel}" if nombre_nivel else f"nivel {nivel}"
@@ -314,6 +347,30 @@ def api_datos() -> dict:
             "SELECT id_nino,dominio,nivel,margen,periodo,tendencia,alerta "
             "FROM evaluaciones ORDER BY id_nino, periodo"),
     }
+
+
+@app.get("/api/eventos")
+async def api_eventos(request: Request) -> StreamingResponse:
+    """Stream SSE: emite un evento cada vez que llega una observación (tiempo real)."""
+    cola: asyncio.Queue = asyncio.Queue()
+    _subs.add(cola)
+
+    async def gen():
+        try:
+            yield "data: {\"evento\": \"hola\"}\n\n"
+            while True:
+                if await request.is_disconnected():
+                    break
+                try:
+                    ev = await asyncio.wait_for(cola.get(), timeout=20)
+                    yield f"data: {json.dumps(ev)}\n\n"
+                except asyncio.TimeoutError:
+                    yield ": keep-alive\n\n"
+        finally:
+            _subs.discard(cola)
+
+    return StreamingResponse(gen(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 @app.get("/api/resumen")
