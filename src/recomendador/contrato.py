@@ -9,7 +9,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
 AVISO = "Propuesta para el criterio de la educadora. No es un diagnóstico."
-ID_SINTETICO = re.compile(r"^NINO-\d{5}$")
+ID_SINTETICO = re.compile(r"^NINO-(\d{5}|[0-9A-Z]{2}-\d{2})$")  # base sintética y curso demo del equipo
 
 
 class Estricto(BaseModel):

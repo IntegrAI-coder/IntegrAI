@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generado_en": "2026-10-16T04:57:13+00:00",
+  "generado_en": "2026-10-16T13:43:03+00:00",
   "modelos": {
     "extraccion": "us.anthropic.claude-sonnet-5",
     "redaccion": "us.anthropic.claude-sonnet-5",
@@ -1162,6 +1162,2358 @@
       ],
       "resumen": "La nota se separó para revisión manual porque contiene instrucciones que podrían manipular el procesamiento.",
       "sugerencias": [],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00020",
+      "id_nino": "NINO-2C-03",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 2, esperado 9; brecha -7; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9004964",
+            "OBS-9005131"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00021",
+      "id_nino": "NINO-2C-05",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 5, esperado 9; brecha -4; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9004966",
+            "OBS-9005134"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00022",
+      "id_nino": "NINO-2C-06",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel 8 sin cambios en las últimas observaciones; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9004967",
+            "OBS-9005135"
+          ]
+        }
+      ],
+      "resumen": "El nivel en Identidad y Autonomía se mantiene sin cambios en las últimas observaciones; se proponen nuevas experiencias para movilizarlo.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00023",
+      "id_nino": "NINO-2C-07",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 3, esperado 9; brecha -6; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9004969",
+            "OBS-9005136"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00024",
+      "id_nino": "NINO-2C-08",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 6, esperado 9; brecha -3; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9004971",
+            "OBS-9005137"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00025",
+      "id_nino": "NINO-2C-09",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 1, esperado 9; brecha -8; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9004972",
+            "OBS-9005138"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00026",
+      "id_nino": "NINO-2C-10",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 7, esperado 9; brecha -2; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9004974",
+            "OBS-9005139"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00027",
+      "id_nino": "NINO-2C-12",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel 8 sin cambios en las últimas observaciones; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005142",
+            "OBS-9005143"
+          ]
+        }
+      ],
+      "resumen": "El nivel en Identidad y Autonomía se mantiene sin cambios en las últimas observaciones; se proponen nuevas experiencias para movilizarlo.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00028",
+      "id_nino": "NINO-2C-13",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 3, esperado 9; brecha -6; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005144",
+            "OBS-9005145"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00029",
+      "id_nino": "NINO-2C-15",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 1, esperado 9; brecha -8; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005148",
+            "OBS-9005149"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00030",
+      "id_nino": "NINO-2C-17",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 4, esperado 9; brecha -5; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9004984",
+            "OBS-9005152"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00031",
+      "id_nino": "NINO-2C-19",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 3, esperado 9; brecha -6; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005155",
+            "OBS-9005156"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00032",
+      "id_nino": "NINO-2C-22",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 6, esperado 9; brecha -3; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9004990",
+            "OBS-9005160"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00033",
+      "id_nino": "NINO-2C-23",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 2, esperado 9; brecha -7; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9004991",
+            "OBS-9005161"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00034",
+      "id_nino": "NINO-2C-25",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 1, esperado 9; brecha -8; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005164",
+            "OBS-9005165"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00035",
+      "id_nino": "NINO-2C-26",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Mariposa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 5, esperado 9; brecha -4; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9004996",
+            "OBS-9005166"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00036",
+      "id_nino": "NINO-3C-01",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 6, esperado 9; brecha -3; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9004998",
+            "OBS-9005167"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00037",
+      "id_nino": "NINO-3C-05",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 5, esperado 9; brecha -4; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005005",
+            "OBS-9005171"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00038",
+      "id_nino": "NINO-3C-09",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 3, esperado 9; brecha -6; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005011",
+            "OBS-9005177"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00039",
+      "id_nino": "NINO-3C-11",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 4, esperado 9; brecha -5; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005180",
+            "OBS-9005181"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00040",
+      "id_nino": "NINO-3C-15",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 6, esperado 9; brecha -3; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005188",
+            "OBS-9005189"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00041",
+      "id_nino": "NINO-3C-16",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel 8 sin cambios en las últimas observaciones; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005024",
+            "OBS-9005190"
+          ]
+        }
+      ],
+      "resumen": "El nivel en Identidad y Autonomía se mantiene sin cambios en las últimas observaciones; se proponen nuevas experiencias para movilizarlo.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00042",
+      "id_nino": "NINO-3C-18",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 6, esperado 9; brecha -3; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005193",
+            "OBS-9005194"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00043",
+      "id_nino": "NINO-3C-19",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 3, esperado 9; brecha -6; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005028",
+            "OBS-9005195"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00044",
+      "id_nino": "NINO-3C-20",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 7, esperado 9; brecha -2; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005029",
+            "OBS-9005196"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00045",
+      "id_nino": "NINO-3C-21",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 4, esperado 9; brecha -5; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005031",
+            "OBS-9005197"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00046",
+      "id_nino": "NINO-3C-22",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel 8 sin cambios en las últimas observaciones; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005198",
+            "OBS-9005199"
+          ]
+        }
+      ],
+      "resumen": "El nivel en Identidad y Autonomía se mantiene sin cambios en las últimas observaciones; se proponen nuevas experiencias para movilizarlo.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00047",
+      "id_nino": "NINO-3C-23",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 1, esperado 9; brecha -8; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005200",
+            "OBS-9005201"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00048",
+      "id_nino": "NINO-3C-25",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 3, esperado 9; brecha -6; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005204",
+            "OBS-9005205"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00049",
+      "id_nino": "NINO-3C-30",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Estrella",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 6, esperado 9; brecha -3; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005212",
+            "OBS-9005213"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00050",
+      "id_nino": "NINO-4C-03",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 3, esperado 9; brecha -6; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005217",
+            "OBS-9005218"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00051",
+      "id_nino": "NINO-4C-05",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 1, esperado 9; brecha -8; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005052",
+            "OBS-9005220"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00052",
+      "id_nino": "NINO-4C-06",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 5, esperado 9; brecha -4; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005054",
+            "OBS-9005221"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00053",
+      "id_nino": "NINO-4C-07",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 3, esperado 9; brecha -6; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005056",
+            "OBS-9005222"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00054",
+      "id_nino": "NINO-4C-08",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 1, esperado 9; brecha -8; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005058",
+            "OBS-9005223"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00055",
+      "id_nino": "NINO-4C-09",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 2, esperado 9; brecha -7; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005059",
+            "OBS-9005224"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00056",
+      "id_nino": "NINO-4C-11",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 4, esperado 9; brecha -5; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005062",
+            "OBS-9005227"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00057",
+      "id_nino": "NINO-4C-12",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 7, esperado 9; brecha -2; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005228",
+            "OBS-9005229"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00058",
+      "id_nino": "NINO-4C-13",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 4, esperado 9; brecha -5; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005230",
+            "OBS-9005231"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00059",
+      "id_nino": "NINO-4C-14",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 6, esperado 9; brecha -3; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005067",
+            "OBS-9005232"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00060",
+      "id_nino": "NINO-4C-15",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 2, esperado 9; brecha -7; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005068",
+            "OBS-9005233"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00061",
+      "id_nino": "NINO-4C-16",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 5, esperado 9; brecha -4; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005069",
+            "OBS-9005234"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00062",
+      "id_nino": "NINO-4C-18",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 5, esperado 9; brecha -4; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005072",
+            "OBS-9005237"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00063",
+      "id_nino": "NINO-4C-19",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 7, esperado 9; brecha -2; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005238",
+            "OBS-9005239"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00064",
+      "id_nino": "NINO-4C-21",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 5, esperado 9; brecha -4; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005242",
+            "OBS-9005243"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00065",
+      "id_nino": "NINO-4C-22",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel 8 sin cambios en las últimas observaciones; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005244",
+            "OBS-9005245"
+          ]
+        }
+      ],
+      "resumen": "El nivel en Identidad y Autonomía se mantiene sin cambios en las últimas observaciones; se proponen nuevas experiencias para movilizarlo.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Nivel Medio. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 53,
+              "fragmento": "Representar verbal y corporalmente diferentes emociones y sentimientos, en sus\njuegos.",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00066",
+      "id_nino": "NINO-4C-25",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 1, esperado 9; brecha -8; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005249",
+            "OBS-9005250"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00067",
+      "id_nino": "NINO-4C-26",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 7, esperado 9; brecha -2; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005083",
+            "OBS-9005251"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
+      "derivacion_salud": false,
+      "generado_por": {
+        "tipo": "plantilla_deterministica",
+        "modelo": null
+      },
+      "validacion": {
+        "citas_literales": true,
+        "numeros_verificados": true,
+        "sin_pii": true,
+        "requiere_revision_humana": true
+      },
+      "aviso": "Propuesta para el criterio de la educadora. No es un diagnóstico."
+    },
+    {
+      "id_recomendacion": "REC-00068",
+      "id_nino": "NINO-4C-27",
+      "id_jardin": "JAR-EQUIPO",
+      "sala_grupo": "Sala Cometa",
+      "estado_revision": "por_verificar",
+      "hito": null,
+      "hallazgos_deterministicos": [
+        {
+          "id": "H-1",
+          "tipo": "nivel",
+          "regla": "NIVEL_IYA_V1",
+          "resultado": "Escala E-1: nivel vigente 6, esperado 9; brecha -3; fecha 2026-10-13.",
+          "observacion_ids": [
+            "OBS-9005084",
+            "OBS-9005252"
+          ]
+        }
+      ],
+      "resumen": "El nivel registrado en Identidad y Autonomía está bajo lo esperado para su edad; se proponen experiencias para fortalecerlo y seguir observando.",
+      "sugerencias": [
+        {
+          "texto": "Ofrecer en la rutina oportunidades para elegir entre opciones, expresar preferencias y emociones, y hacer por sí mismo/a tareas de autocuidado (vestirse, ordenar, servirse), reconociendo sus logros, según los objetivos de Identidad y Autonomía de Transición. Registrar los cambios observables.",
+          "citas": [
+            {
+              "fuente_id": "MINEDUC-BASES",
+              "organizacion": "MINEDUC",
+              "titulo": "Bases Curriculares de la Educación Parvularia",
+              "pagina_pdf": 54,
+              "fragmento": "Comunicar a los demás, emociones y sentimientos tales como: amor, miedo, alegría,\nira, que le provocan diversas narraciones o situaciones observadas en forma directa",
+              "url": "https://parvularia.mineduc.cl/bases-curriculares-ed-parvularia/"
+            }
+          ]
+        }
+      ],
       "derivacion_salud": false,
       "generado_por": {
         "tipo": "plantilla_deterministica",

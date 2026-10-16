@@ -35,6 +35,6 @@ export function esLoteRecomendaciones(valor: unknown): valor is LoteRecomendacio
   const lote = valor as Partial<LoteRecomendaciones>;
   return lote.version === 1 && lote.umbralesPorValidar === true && typeof lote.aviso === 'string' && Array.isArray(lote.items)
     && lote.items.every((item) => item && typeof item.idRecomendacion === 'string'
-      && item.estadoRevision === 'por_verificar' && /^NINO-\d{5}$/.test(item.idNino)
+      && item.estadoRevision === 'por_verificar' && /^NINO-(\d{5}|[0-9A-Z]{2}-\d{2})$/.test(item.idNino)
       && Array.isArray(item.hallazgosDeterministicos) && Array.isArray(item.sugerencias));
 }

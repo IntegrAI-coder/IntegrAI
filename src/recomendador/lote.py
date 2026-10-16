@@ -11,6 +11,7 @@ from .rag import cargar_indice, cargar_manifiesto, sha256_manifiesto
 
 RAIZ = Path(__file__).resolve().parents[2]
 CASOS = RAIZ / "datos_sinteticos" / "recomendador" / "casos.json"
+CASOS_EQUIPO = RAIZ / "datos_sinteticos" / "recomendador" / "casos_equipo.json"  # curso demo del equipo (por nivel E-1)
 SALIDA = RAIZ / "data" / "recomendaciones.json"
 
 
@@ -18,7 +19,10 @@ def generar(casos: list[dict] | None = None, fecha_ref: str | None = None, max_i
             cursos: set[str] | None = None, generado_en: str | None = None) -> LoteRecomendaciones:
     manifiesto = cargar_manifiesto()
     indice = cargar_indice(manifiesto=manifiesto)
-    casos = casos if casos is not None else json.loads(CASOS.read_text(encoding="utf-8"))["casos"]
+    if casos is None:
+        casos = json.loads(CASOS.read_text(encoding="utf-8"))["casos"]
+        if CASOS_EQUIPO.exists():
+            casos += json.loads(CASOS_EQUIPO.read_text(encoding="utf-8"))["casos"]
     if cursos:
         casos = [c for c in casos if f"{c['id_jardin']}:{c['sala_grupo']}" in cursos]
     if max_items is not None:

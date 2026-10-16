@@ -1,0 +1,1034 @@
+{
+ "descripcion": "Casos del curso demo del equipo (JAR-EQUIPO), derivados de /api/datos el 2026-10-16: nivel E-1 de Identidad y Autonomía con rezago o estancamiento. Sin nombres.",
+ "casos": [
+  {
+   "id": "CASO-EQ-01",
+   "id_nino": "NINO-2C-03",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2021-01-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 2,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9004964",
+     "OBS-9005131"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-02",
+   "id_nino": "NINO-2C-05",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2022-04-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 5,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9004966",
+     "OBS-9005134"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-03",
+   "id_nino": "NINO-2C-06",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2021-12-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 8,
+    "esperado": 8,
+    "fecha": "2026-10-13",
+    "rezago_relativo": false,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9004967",
+     "OBS-9005135"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-04",
+   "id_nino": "NINO-2C-07",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2023-08-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 3,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9004969",
+     "OBS-9005136"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-05",
+   "id_nino": "NINO-2C-08",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2022-02-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 6,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9004971",
+     "OBS-9005137"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-06",
+   "id_nino": "NINO-2C-09",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2022-09-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 1,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9004972",
+     "OBS-9005138"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-07",
+   "id_nino": "NINO-2C-10",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2022-02-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 7,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9004974",
+     "OBS-9005139"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-08",
+   "id_nino": "NINO-2C-12",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2023-02-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 8,
+    "esperado": 8,
+    "fecha": "2026-10-13",
+    "rezago_relativo": false,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005142",
+     "OBS-9005143"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-09",
+   "id_nino": "NINO-2C-13",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2021-07-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 3,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005144",
+     "OBS-9005145"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-10",
+   "id_nino": "NINO-2C-15",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2023-04-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 1,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005148",
+     "OBS-9005149"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-11",
+   "id_nino": "NINO-2C-17",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2021-11-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 4,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9004984",
+     "OBS-9005152"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-12",
+   "id_nino": "NINO-2C-19",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2021-08-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 3,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005155",
+     "OBS-9005156"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-13",
+   "id_nino": "NINO-2C-22",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2023-09-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 6,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9004990",
+     "OBS-9005160"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-14",
+   "id_nino": "NINO-2C-23",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2021-08-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 2,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9004991",
+     "OBS-9005161"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-15",
+   "id_nino": "NINO-2C-25",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2022-08-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 1,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005164",
+     "OBS-9005165"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-16",
+   "id_nino": "NINO-2C-26",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Mariposa",
+   "fecha_nacimiento": "2022-04-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 5,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9004996",
+     "OBS-9005166"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-17",
+   "id_nino": "NINO-3C-01",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2023-01-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 6,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9004998",
+     "OBS-9005167"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-18",
+   "id_nino": "NINO-3C-05",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2022-06-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 5,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005005",
+     "OBS-9005171"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-19",
+   "id_nino": "NINO-3C-09",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2022-07-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 3,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005011",
+     "OBS-9005177"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-20",
+   "id_nino": "NINO-3C-11",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2021-05-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 4,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005180",
+     "OBS-9005181"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-21",
+   "id_nino": "NINO-3C-15",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2023-03-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 6,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005188",
+     "OBS-9005189"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-22",
+   "id_nino": "NINO-3C-16",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2021-01-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 8,
+    "esperado": 8,
+    "fecha": "2026-10-13",
+    "rezago_relativo": false,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005024",
+     "OBS-9005190"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-23",
+   "id_nino": "NINO-3C-18",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2021-11-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 6,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005193",
+     "OBS-9005194"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-24",
+   "id_nino": "NINO-3C-19",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2022-09-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 3,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005028",
+     "OBS-9005195"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-25",
+   "id_nino": "NINO-3C-20",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2021-12-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 7,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005029",
+     "OBS-9005196"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-26",
+   "id_nino": "NINO-3C-21",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2022-10-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 4,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005031",
+     "OBS-9005197"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-27",
+   "id_nino": "NINO-3C-22",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2023-07-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 8,
+    "esperado": 8,
+    "fecha": "2026-10-13",
+    "rezago_relativo": false,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005198",
+     "OBS-9005199"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-28",
+   "id_nino": "NINO-3C-23",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2022-10-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 1,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005200",
+     "OBS-9005201"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-29",
+   "id_nino": "NINO-3C-25",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2022-05-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 3,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005204",
+     "OBS-9005205"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-30",
+   "id_nino": "NINO-3C-30",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Estrella",
+   "fecha_nacimiento": "2022-09-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 6,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005212",
+     "OBS-9005213"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-31",
+   "id_nino": "NINO-4C-03",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2022-09-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 3,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005217",
+     "OBS-9005218"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-32",
+   "id_nino": "NINO-4C-05",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2022-04-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 1,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005052",
+     "OBS-9005220"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-33",
+   "id_nino": "NINO-4C-06",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2023-05-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 5,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005054",
+     "OBS-9005221"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-34",
+   "id_nino": "NINO-4C-07",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2021-03-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 3,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005056",
+     "OBS-9005222"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-35",
+   "id_nino": "NINO-4C-08",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2022-02-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 1,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005058",
+     "OBS-9005223"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-36",
+   "id_nino": "NINO-4C-09",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2023-09-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 2,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005059",
+     "OBS-9005224"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-37",
+   "id_nino": "NINO-4C-11",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2022-02-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 4,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005062",
+     "OBS-9005227"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-38",
+   "id_nino": "NINO-4C-12",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2023-06-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 7,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005228",
+     "OBS-9005229"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-39",
+   "id_nino": "NINO-4C-13",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2023-02-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 4,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005230",
+     "OBS-9005231"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-40",
+   "id_nino": "NINO-4C-14",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2022-01-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 6,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005067",
+     "OBS-9005232"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-41",
+   "id_nino": "NINO-4C-15",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2022-12-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 2,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005068",
+     "OBS-9005233"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-42",
+   "id_nino": "NINO-4C-16",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2023-12-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 5,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005069",
+     "OBS-9005234"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-43",
+   "id_nino": "NINO-4C-18",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2021-06-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 5,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005072",
+     "OBS-9005237"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-44",
+   "id_nino": "NINO-4C-19",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2021-10-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 7,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005238",
+     "OBS-9005239"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-45",
+   "id_nino": "NINO-4C-21",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2023-07-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 5,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005242",
+     "OBS-9005243"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-46",
+   "id_nino": "NINO-4C-22",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2023-02-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 8,
+    "esperado": 8,
+    "fecha": "2026-10-13",
+    "rezago_relativo": false,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005244",
+     "OBS-9005245"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-47",
+   "id_nino": "NINO-4C-25",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2022-05-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 1,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": true,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005249",
+     "OBS-9005250"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-48",
+   "id_nino": "NINO-4C-26",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2022-08-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 7,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005083",
+     "OBS-9005251"
+    ]
+   }
+  },
+  {
+   "id": "CASO-EQ-49",
+   "id_nino": "NINO-4C-27",
+   "id_jardin": "JAR-EQUIPO",
+   "sala_grupo": "Sala Cometa",
+   "fecha_nacimiento": "2022-09-15",
+   "fecha_referencia": "2026-10-16",
+   "nota": "",
+   "nivel": {
+    "vigente": 6,
+    "esperado": 9,
+    "fecha": "2026-10-13",
+    "rezago_relativo": true,
+    "estancamiento": false,
+    "alerta_absoluta": false,
+    "observacion_ids": [
+     "OBS-9005084",
+     "OBS-9005252"
+    ]
+   }
+  }
+ ]
+}
