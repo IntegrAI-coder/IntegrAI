@@ -9,8 +9,14 @@ Hackathon AWS Breaking Barriers Chile 2026 — **Desafío 1 de Fundación Integr
 | Página | Enlace |
 |---|---|
 | **Dashboard general**: cursos por jardín y panorama de niveles | https://integrai-coder.github.io/IntegrAI/ |
-| **Vista de profesoras**: ingreso con número de WhatsApp de demostración | https://integrai-coder.github.io/IntegrAI/#/profesora |
-| **Ficha de un niño/a** (ej. NINO-00008): nivel vigente, esperado, brecha y trayectoria | https://integrai-coder.github.io/IntegrAI/#/nino/NINO-00008 |
+| **Jardines**: resumen por establecimiento | https://integrai-coder.github.io/IntegrAI/#/jardines |
+| **Curso** (ej. JAR-0001 · SG-A): niños/as de la sala con su nivel | https://integrai-coder.github.io/IntegrAI/#/curso/JAR-0001/SG-A |
+| **Ficha de un niño/a** (ej. NINO-00008): nivel vigente, esperado, brecha, trayectoria y recomendaciones aprobadas | https://integrai-coder.github.io/IntegrAI/#/nino/NINO-00008 |
+| **Acompañamiento pedagógico** (coordinación) | https://integrai-coder.github.io/IntegrAI/#/experiencia |
+| **Por verificar** (coordinación): cola de revisión + **recomendaciones RAG** con citas OMS/CDC/MINEDUC | https://integrai-coder.github.io/IntegrAI/#/pendientes |
+| **Vista de profesoras**: ingreso con número de WhatsApp de demostración. Con **EDU-0001** se ven sus casos por confirmar y las recomendaciones RAG de NINO-00008 | https://integrai-coder.github.io/IntegrAI/#/profesora |
+
+> En Pages los datos salen de CSV estáticos: los nombres "Nombre I." y la cola en vivo solo aparecen en el despliegue de AWS. Las decisiones sobre recomendaciones se guardan en el navegador (demo). Ver [`docs/RECOMENDADOR.md`](docs/RECOMENDADOR.md).
 
 **Despliegue en AWS (CloudFront, datos vivos de la API):**
 
