@@ -4,7 +4,6 @@ import { Curso } from './pages/Curso';
 import { Nino } from './pages/Nino';
 import { Jardines } from './pages/Jardines';
 import { Pendientes } from './pages/Pendientes';
-import { Sincronizacion } from './pages/Sincronizacion';
 import { Experiencia } from './pages/Experiencia';
 
 export function App() {
@@ -25,7 +24,6 @@ export function App() {
             <NavLink to="/jardines">Jardines</NavLink>
             <NavLink to="/experiencia">Acompañamiento</NavLink>
             <NavLink to="/pendientes">Por verificar</NavLink>
-            <NavLink to="/sincronizacion">Sincronización</NavLink>
           </nav>
         </div>
       </header>
@@ -39,7 +37,6 @@ export function App() {
             <Route path="/jardines" element={<Jardines />} />
             <Route path="/experiencia" element={<Experiencia />} />
             <Route path="/pendientes" element={<Pendientes />} />
-            <Route path="/sincronizacion" element={<Sincronizacion />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
