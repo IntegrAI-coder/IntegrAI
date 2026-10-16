@@ -59,12 +59,26 @@ app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS, allow_methods=["G
 # --- SSE: aviso en vivo al dashboard de que llegó una observación ---
 _subs: set = set()
 _loop = None
+_parando = False
 
 
 @app.on_event("startup")
 async def _captura_loop() -> None:
     global _loop
     _loop = asyncio.get_running_loop()
+
+
+@app.on_event("shutdown")
+async def _cerrar_sse() -> None:
+    """Cierra los streams SSE abiertos para que uvicorn NO espere en el shutdown. Sin esto, el
+    restart esperaba a las conexiones vivas del dashboard y systemd lo mataba recién a los 90 s."""
+    global _parando
+    _parando = True
+    for q in list(_subs):
+        try:
+            q.put_nowait({"evento": "cerrar"})
+        except Exception:  # noqa: BLE001
+            pass
 
 
 def _publicar(evento: dict) -> None:
@@ -370,6 +384,40 @@ def _catalogo(nombre: str) -> list[dict]:
     return data   # ruta_niveles.json ya trae las claves que usa el frontend
 
 
+def _etiqueta_nombre(filas: list[dict]) -> dict[str, str]:
+    """id_nino -> etiqueta legible 'Nombre I.' = nombre de pila + inicial del 1er apellido.
+    Si dos niños/as de la MISMA sala comparten "Nombre I", se alarga la inicial hasta distinguirlos
+    ("Emilia Co." / "Emilia Ca."). NUNCA expone el nombre completo (dato personal del menor)."""
+    from collections import defaultdict
+    por_sala: dict[str, list[dict]] = defaultdict(list)
+    for f in filas:
+        por_sala[f.get("sala_grupo") or ""].append(f)
+    out: dict[str, str] = {}
+    for ns in por_sala.values():
+        por_pila: dict[str, list[dict]] = defaultdict(list)
+        for n in ns:
+            por_pila[(n.get("nombre_pila") or "").strip()].append(n)
+        for pila, kids in por_pila.items():
+            aps = [(k.get("apellidos") or "").strip() for k in kids]
+            if not pila or not any(aps):
+                for k in kids:
+                    out[k["id_nino"]] = pila or k["id_nino"]
+                continue
+            L = 1
+            while L < 8 and len({a[:L].lower() for a in aps}) < len({a.lower() for a in aps}):
+                L += 1
+            for k, a in zip(kids, aps):
+                out[k["id_nino"]] = f"{pila} {a[:L].capitalize()}." if a else pila
+    return out
+
+
+def _etiquetas() -> dict[str, str]:
+    """id_nino -> etiqueta legible de TODA la plataforma (para no exponer nunca el nombre completo)."""
+    filas = [dict(r) for r in plat.con.execute(
+        "SELECT id_nino,nombre_pila,apellidos,sala_grupo FROM ninos").fetchall()]
+    return _etiqueta_nombre(filas)
+
+
 def _sql_filas(consulta: str) -> list[dict]:
     return [dict(r) for r in plat.con.execute(consulta).fetchall()]
 
@@ -378,13 +426,17 @@ def _sql_filas(consulta: str) -> list[dict]:
 def api_datos() -> dict:
     """Dataset completo para el dashboard (MISMAS columnas que los CSV que ya lee),
     pero leído de la BD viva: incluye JAR-EQUIPO y las observaciones de WhatsApp."""
+    etiquetas = _etiquetas()
+    ninos = _sql_filas(
+        "SELECT id_nino,fecha_nacimiento,id_jardin,sala_grupo,fecha_ingreso FROM ninos ORDER BY id_nino")
+    for n in ninos:   # solo la etiqueta legible; nunca el nombre/apellido completos
+        n["nombre_visible"] = etiquetas.get(n["id_nino"], n["id_nino"])
     return {
         "ruta_niveles": _catalogo("ruta_niveles"),
         "manifestaciones": _catalogo("manifestaciones"),
         "jardines": _sql_filas(
             "SELECT id_jardin,nombre_fantasia,comuna,region FROM jardines ORDER BY id_jardin"),
-        "ninos": _sql_filas(
-            "SELECT id_nino,fecha_nacimiento,id_jardin,sala_grupo,fecha_ingreso FROM ninos ORDER BY id_nino"),
+        "ninos": ninos,
         "observaciones": _sql_filas(
             "SELECT id_observacion,id_nino,fecha_observacion,formato_captura,nivel_estimado "
             "FROM observaciones ORDER BY id_observacion"),
@@ -406,14 +458,17 @@ async def api_eventos(request: Request) -> StreamingResponse:
     async def gen():
         try:
             yield "data: {\"evento\": \"hola\"}\n\n"
-            while True:
+            while not _parando:
                 if await request.is_disconnected():
                     break
                 try:
                     ev = await asyncio.wait_for(cola.get(), timeout=20)
-                    yield f"data: {json.dumps(ev)}\n\n"
                 except asyncio.TimeoutError:
                     yield ": keep-alive\n\n"
+                    continue
+                if ev.get("evento") == "cerrar":
+                    break
+                yield f"data: {json.dumps(ev)}\n\n"
         finally:
             _subs.discard(cola)
 
@@ -446,6 +501,9 @@ def api_pendientes(estado: str = "pendiente", limit: int = 300,
     sql += " ORDER BY p.creado_en DESC LIMIT ?"
     params.append(int(limit))
     filas = [dict(r) for r in plat.con.execute(sql, tuple(params)).fetchall()]
+    etiquetas = _etiquetas()
+    for f in filas:
+        f["nombre_visible"] = etiquetas.get(f["id_nino_propuesto"], f["id_nino_propuesto"])
     return {"ok": True, "n": len(filas), "pendientes": filas}
 
 

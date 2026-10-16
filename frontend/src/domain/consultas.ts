@@ -16,6 +16,8 @@ export const UMBRAL_REZAGO_RELATIVO = 1.0;
 
 export interface AlumnoCurso {
   idNino: string;
+  /** Etiqueta legible del backend ("Emilia Co."); si falta, la UI cae al código. */
+  nombreVisible?: string;
   edadMeses: number;
   nivelVigente: number | null;
   nivelEsperado: number | null;
@@ -82,6 +84,7 @@ export function alumnoDesde(
     : tieneAlerta(valorBrecha);
   return {
     idNino: nino.idNino,
+    nombreVisible: nino.nombreVisible ?? '',
     edadMeses: meses,
     nivelVigente: vigente,
     nivelEsperado: esperado,
