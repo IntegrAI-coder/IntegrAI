@@ -7,6 +7,7 @@ import {
   fichaNino,
   claveCurso,
   resumenJardines,
+  observacionesDeSala,
 } from './consultas';
 import type { AlumnoCurso } from './consultas';
 
@@ -162,5 +163,37 @@ describe('rezago relativo + panorama de jardín', () => {
     expect(j1?.totalSalas).toBe(1);
     expect(j1?.totalNinos).toBe(3);
     expect(j1?.nombreJardin).toBe('Jardín Uno');
+  });
+});
+
+describe('observacionesDeSala', () => {
+  const datosSalas: Datos = {
+    ...datos,
+    ninos: [
+      ...datos.ninos,
+      { idNino: 'NINO-3', fechaNacimiento: '2024-01-01', idJardin: 'JAR-1', salaGrupo: 'SG-B', fechaIngreso: '' },
+      { idNino: 'NINO-4', fechaNacimiento: '2024-01-01', idJardin: 'JAR-2', salaGrupo: 'SG-A', fechaIngreso: '' },
+    ],
+    observaciones: [
+      ...datos.observaciones,
+      { idObservacion: 'OBS-4', idNino: 'NINO-3', fechaObservacion: '2025-07-01', formatoCaptura: 'texto', nivelEstimado: 5 },
+      { idObservacion: 'OBS-5', idNino: 'NINO-4', fechaObservacion: '2025-07-01', formatoCaptura: 'texto', nivelEstimado: 3 },
+    ],
+  };
+
+  it('devuelve las observaciones de los niños de esa sala', () => {
+    const ids = observacionesDeSala(datosSalas, 'JAR-1', 'SG-A').map((o) => o.idObservacion);
+    expect(ids.sort()).toEqual(['OBS-1', 'OBS-2', 'OBS-3']);
+  });
+
+  it('devuelve [] para una sala inexistente', () => {
+    expect(observacionesDeSala(datosSalas, 'JAR-1', 'SG-Z')).toEqual([]);
+  });
+
+  it('no mezcla otra sala ni la misma sala de otro jardín', () => {
+    const ids = observacionesDeSala(datosSalas, 'JAR-1', 'SG-B').map((o) => o.idObservacion);
+    expect(ids).toEqual(['OBS-4']);
+    const otro = observacionesDeSala(datosSalas, 'JAR-2', 'SG-A').map((o) => o.idObservacion);
+    expect(otro).toEqual(['OBS-5']);
   });
 });

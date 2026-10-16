@@ -253,6 +253,21 @@ export function nivelPorNumero(niveles: Nivel[]): Map<number, Nivel> {
   return new Map(niveles.map((n) => [n.nivel, n]));
 }
 
+/** Observaciones de TODOS los niños/as de una sala (mismo jardín + misma sala),
+ *  sin ordenar. Sala inexistente => `[]`. Base del "promedio del grupo". */
+export function observacionesDeSala(
+  datos: Datos,
+  idJardin: string,
+  salaGrupo: string,
+): Observacion[] {
+  const ids = new Set(
+    datos.ninos
+      .filter((n) => n.idJardin === idJardin && n.salaGrupo === salaGrupo)
+      .map((n) => n.idNino),
+  );
+  return datos.observaciones.filter((o) => ids.has(o.idNino));
+}
+
 export interface ResumenJardin {
   idJardin: string;
   nombreJardin: string;
