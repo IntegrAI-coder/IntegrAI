@@ -58,6 +58,12 @@ export function ProfesoraInicio() {
         />
       </section>
 
+      <p className="profesora-ayuda">
+        <Link className="boton boton--secundario" to="/profesora/experiencia">
+          Ver acompañamiento pedagógico
+        </Link>
+      </p>
+
       <section id="advertencias" className="seccion-profesora" aria-labelledby="titulo-advertencias">
         <h3 id="titulo-advertencias">Por confirmar</h3>
         {estadoPendientes.estado === 'cargando' && <Cargando mensaje="Cargando advertencias…" />}
