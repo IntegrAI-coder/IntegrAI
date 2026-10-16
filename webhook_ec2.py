@@ -15,6 +15,7 @@ import csv
 import json
 import os
 import tempfile
+import time
 from datetime import date, datetime
 from pathlib import Path
 
@@ -60,6 +61,13 @@ app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS, allow_methods=["G
 _subs: set = set()
 _loop = None
 _parando = False
+
+# Mensajes AMBIGUOS pendientes de elegir por BOTÓN (homónimos): teléfono -> datos del mensaje.
+_PEND_DESAMB: dict[str, dict] = {}
+
+
+def _clave_tel(tel: str) -> str:
+    return "".join(ch for ch in (tel or "") if ch.isdigit())
 
 
 @app.on_event("startup")
@@ -345,8 +353,20 @@ def _procesar(from_: str, texto: str, fecha: str | None = None, formato: str = "
 
     if not registros:
         men0, r0 = pendientes[0]
-        return {"ok": False, "estado": r0.estado, "metodo": r0.metodo,
+        resp = {"ok": False, "estado": r0.estado, "metodo": r0.metodo,
                 "candidatos": r0.candidatos, "ack": _ack_no_identificado(men0, r0)}
+        # HOMÓNIMO: en vez de pedir que reescriba, ofrecer BOTONES con los candidatos. Se guarda el
+        # mensaje pendiente para registrar cuando la educadora toque el botón (ver POST /elegir).
+        if r0.estado == "ambiguo" and r0.candidatos:
+            _PEND_DESAMB[_clave_tel(from_)] = {"texto_clas": texto_clas, "revisar_u2": revisar_u2,
+                                               "formato": formato, "ts": time.time()}
+            etiquetas = _etiquetas()
+            resp["tipo"] = "elegir_nino"
+            resp["texto"] = (f"Detecté {len(r0.candidatos)} niños/as con el nombre «{men0.split()[0]}» "
+                             f"en tu sala. ¿A cuál te refieres?")
+            resp["opciones"] = [{"id": idn, "titulo": etiquetas.get(idn, idn)[:20]}
+                                for idn in r0.candidatos[:3]]
+        return resp
 
     ack = _ack_registros(registros, pendientes)
     if len(registros) == 1:
@@ -668,6 +688,35 @@ def analizar_video_bytes(data: bytes, ext: str = ".mp4") -> tuple[str, str]:
     except Exception as e:  # noqa: BLE001
         print(f"[video] error: {type(e).__name__}", flush=True)
         return "", ""
+
+
+class Eleccion(BaseModel):
+    from_: str = Field(alias="from")
+    id_nino: str
+
+    class Config:
+        populate_by_name = True
+
+
+@app.post("/elegir", dependencies=[Depends(requiere_token)])
+def elegir(m: Eleccion) -> dict:
+    """La educadora TOCÓ un botón para elegir al niño/a de un homónimo. Registra la observación
+    que quedó pendiente (guardada al detectar la ambigüedad) para el id_nino elegido."""
+    ctx = _ctx_remitente(m.from_)
+    if not ctx:
+        return {"ok": False, "estado": "remitente_desconocido", "ack": "⚠️ No reconozco este número."}
+    filas = _filas_ctx(ctx)
+    if m.id_nino not in {f["id_nino"] for f in filas}:
+        return {"ok": False, "estado": "no_en_sala", "ack": "⚠️ Ese niño/a no está en tu sala."}
+    pend = _PEND_DESAMB.get(_clave_tel(m.from_))
+    if not pend or (time.time() - pend["ts"]) > 900:   # 15 min para elegir
+        return {"ok": False, "estado": "sin_pendiente",
+                "ack": "⚠️ No tengo un caso pendiente para ese botón. Reenvía la observación."}
+    nin = plat.nino(m.id_nino) or {}
+    reg = _registrar_uno(nin, ctx[0]["id_educadora"], pend["texto_clas"], pend["revisar_u2"],
+                         date.today().isoformat(), "elegido", pend.get("formato", "texto"))
+    _PEND_DESAMB.pop(_clave_tel(m.from_), None)
+    return {"ok": True, **reg, "ack": _ack_registros([reg], [])}
 
 
 class MediaMsg(BaseModel):
