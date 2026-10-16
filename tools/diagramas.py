@@ -14,7 +14,7 @@ from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 OUT = Path(__file__).resolve().parent.parent / "docs" / "img"
 OUT.mkdir(parents=True, exist_ok=True)
 
-TINTA = "#1F2A44"; GRIS = "#4A5568"; FONDO = "#FAF7F2"; BORDE = "#C9CFD8"
+TINTA = "#1F2A44"; GRIS = "#4A5568"; FONDO = "#FAF7F2"; BORDE = "#C9CFD8"; VERDE = "#3D7D5A"
 CLASE = {"S": ("#B5541A", "S · Sensible (menores)"), "C": ("#2F6DB5", "C · Confidencial"),
          "I": ("#3D7D5A", "I · Interno"), "P": ("#7A7F87", "P · Público")}
 DUENO = {"Ivan": "#6B4FA0", "Sebastián": "#2F6DB5", "Santiago": "#3D7D5A", "Mauricio": "#B5541A",
@@ -33,7 +33,7 @@ def lienzo(titulo: str, sub: str):
 
 def caja(ax, x, y, w, h, titulo, lineas=(), clase=None, dueno=None, borde=BORDE, relleno="#FFFFFF", alerta=False):
     ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.4,rounding_size=1.5",
-                                fc=relleno, ec="#B5541A" if alerta else borde, lw=2.2 if alerta else 1.2))
+                                fc=relleno, ec="#B5541A" if alerta else borde, lw=2.2 if alerta or borde != BORDE else 1.2))
     ax.text(x + 1.2, y + h - 1.4, titulo, fontsize=11, fontweight="bold", color=TINTA, va="top")
     for i, l in enumerate(lineas):
         ax.text(x + 1.2, y + h - 5.0 - i * 3.1, l, fontsize=8.8, color=GRIS, va="top")
@@ -63,83 +63,135 @@ def leyenda_clases(ax, x, y):
 
 def infra_datos():
     fig, ax = lienzo("Gobierno de datos · flujo de una observación",
-                     "Estado al 15-oct · Responsable: Fundación Integra (DPD) · Encargados con DPA: Meta, AWS, operador del webhook · Ley 21.719, 21.430")
-    W, H = 25, 20
-    fila1 = [(3, "Tía · WhatsApp", ["texto, post-it, voz, video", "código o apodo del niño/a", "nunca RUT"], "S", "Integra"),
-             (32, "Meta Cloud API", ["encargado (DPA)", "medio disponible por", "tiempo limitado"], "S", "Meta"),
-             (61, "Webhook (externo)", ["servidor Traefik + TLS", "firma HMAC + whitelist", "Chatwoot = tercero (DPA)"], "S", "Sebastián"),
-             (90, "Medios temporales", ["temporal en la EC2,", "se borra al procesar ✓", "objetivo: S3 KMS 24 h"], "S", "Ivan"),
-             (119, "U2 · Ingesta", ["post-it · voz · video visual", "→ conductas sin nombres", "magic bytes, ≤ 16 MB"], "S", "Mauricio"),
-             (148, "Bedrock (us-east-1)", ["encargado, sin entrenar", "transferencia: cláusulas", "tipo (arts. 27-28)"], "S", "AWS")]
-    y1 = 60
-    for x, t, l, c, d in fila1:
+                     "Arquitectura final (16-oct-2026) · Responsable: Fundación Integra (DPD) · "
+                     "Encargados con DPA: Meta, AWS, operador del webhook · Ley 21.719, 21.430")
+    W, H = 30, 21
+    xs = [3, 39, 75, 111, 147]
+    # Fila 1 (izq. → der.): de la observación a las conductas
+    y1 = 63
+    fila1 = [("1 · Observación", ["la tía escribe por WhatsApp", "nombre o apodo del niño/a",
+                                  "botones si el nombre se repite"], "S", "Integra"),
+             ("2 · Medio recibido", ["texto · imagen (post-it)", "audio (nota de voz) · video",
+                                     "magic bytes, ≤ 16 MB"], "S", "Sebastián"),
+             ("3 · Transcripción", ["post-it: Claude Sonnet 5", "audio: faster-whisper (CPU)",
+                                    "video: Pegasus (TwelveLabs)"], "S", "Mauricio"),
+             ("4 · Controles de ingesta", ["PII redactada", "detector de inyección → cola",
+                                           "escáner de secretos (salidas)"], "S", "Mauricio"),
+             ("5 · Conductas con cita", ["conductas observables", "cada una con cita literal",
+                                         "sin nombres → se guarda en BD"], "C", "Mauricio")]
+    for x, (t, l, c, d) in zip(xs, fila1):
         caja(ax, x, y1, W, H, t, l, c, d)
-    for i in range(len(fila1) - 1):
-        flecha(ax, (fila1[i][0] + W + 0.6, y1 + H / 2), (fila1[i + 1][0] - 0.6, y1 + H / 2))
-    fila2 = [(148, "Clasificador", ["rúbrica Integra: resultado", "determinístico de entrada", "integración futura"], "C", "Sebastián"),
-             (119, "Análisis determinístico", ["edad · hito · curso", "nivel E-1 con paridad", "sin inferir ausencia"], "C", "Mauricio"),
-             (90, "Recomendador RAG", ["demo por lote, fuera EC2", "citas OMS/CDC/MINEDUC", "→ JSON sintético"], "I", "Mauricio"),
-             (61, "Cola por verificar", ["aprobar · editar · descartar", "estado local de demo", "revisión humana siempre"], "C", "Integra"),
-             (32, "Ficha", ["solo recomendaciones", "aprobadas por educadora", "aviso no diagnóstico"], "C", "Santiago"),
-             (3, "Datos sintéticos", ["dataset E-1 + notas RAG", "únicos datos infantiles", "versionados en repo"], "P", "Mauricio")]
-    y2 = 28
-    for x, t, l, c, d in fila2:
+    for i in range(4):
+        flecha(ax, (xs[i] + W + 0.6, y1 + H / 2), (xs[i + 1] - 0.6, y1 + H / 2))
+    # Fila 2 (der. → izq.): del tramo por edad a la decisión de la educadora
+    y2 = 36
+    rx = list(reversed(xs))
+    fila2 = [("6 · Tramo por edad", ["edad al 31 de marzo:", "Sala Cuna · Nivel Medio", "· Transición"], "C", "Sebastián"),
+             ("7 · Juez de la rúbrica", ["rúbrica Integra: Identidad y", "Autonomía, 3 tramos × 8 niveles",
+                                         "Claude Sonnet 5 + evidencia"], "C", "Sebastián"),
+             ("8 · Compuerta", ["confianza del juez", "alertas: rezago, inyección,", "medio dudoso"], "C", "Sebastián"),
+             ("9 · Auto o \"Por verificar\"", ["alta confianza → automático", "duda o alerta → cola en vivo",
+                                               "de la profesora (SSE)"], "C", "Sebastián"),
+             ("10 · Educadora decide", ["\"Confirma a Nombre I.\"", "confirma o corrige el nivel",
+                                        "revisión humana (art. 8 bis)"], "S", "Integra")]
+    for x, (t, l, c, d) in zip(rx, fila2):
         caja(ax, x, y2, W, H, t, l, c, d)
-    flecha(ax, (148 + W / 2, y1 - 0.6), (148 + W / 2, y2 + H + 0.6), "texto sin nombres")
-    for i in range(len(fila2) - 2):
-        flecha(ax, (fila2[i][0] - 0.6, y2 + H / 2), (fila2[i + 1][0] + W + 0.6, y2 + H / 2))
-    caja(ax, 61, 6, 54, 14, "Corpus RAG público → índice local", ["19 PDF OMS · CDC · MINEDUC → ingesta y SHA-256 → índice léxico privado",
-                                                     "índice → análisis determinístico → recomendador → JSON demo; integración backend futura"], None, "Mauricio")
-    flecha(ax, (95, 20.6), (90 + W / 2, y2 - 0.6), "citas ≤ 300", dash=True)
+    for i in range(4):
+        flecha(ax, (rx[i] - 0.6, y2 + H / 2), (rx[i + 1] + W + 0.6, y2 + H / 2))
+    flecha(ax, (147 + W / 2, y1 - 0.6), (147 + W / 2, y2 + H + 0.6))
+    ax.text(147 + W / 2 + 1.2, (y1 + y2 + H) / 2, "texto sin nombres", fontsize=8.5, color=GRIS, va="center")
+    # Fila 3 (izq. → der.): del nivel oficial al dashboard
+    y3 = 9
+    fila3 = [("11 · Nivel oficial", ["nivel confirmado + evidencia", "trayectoria del niño/a",
+                                     "seudónimo NINO-xxxxx"], "S", "Integra"),
+             ("12 · Recomendador RAG", ["corpus OMS · CDC · MINEDUC", "hitos motores OMS (bebés) ·",
+                                        "Identidad y Autonomía (2-6)"], "C", "Mauricio"),
+             ("13 · Revisión profesora", ["recomendaciones con cita", "\"Por verificar\": aprobar,",
+                                                "editar o descartar"], "C", "Integra"),
+             ("14 · Dashboard", ["ficha: nivel, brecha, trayectoria", "y recomendaciones aprobadas",
+                                 "coordinación: métricas por jardín"], "I", "Santiago")]
+    for x, (t, l, c, d) in zip(xs, fila3):
+        caja(ax, x, y3, W, H, t, l, c, d)
+    flecha(ax, (3 + W / 2, y2 - 0.6), (3 + W / 2, y3 + H + 0.6))
+    for i in range(3):
+        flecha(ax, (xs[i] + W + 0.6, y3 + H / 2), (xs[i + 1] - 0.6, y3 + H / 2))
+    caja(ax, 147, 3.5, W, 26.5, "Se guarda · se borra",
+         ["✗ medio crudo (foto, audio, video):", "    se borra al procesar (≤ 24 h)", "✗ nombres: no llegan a la BD",
+          "✓ solo conductas sin nombres", "✓ nivel, evidencia, quién confirmó", "✓ datos de la demo: sintéticos"],
+         borde=VERDE, dueno="Integra")
     leyenda_clases(ax, 3, 2.5)
     fig.savefig(OUT / "infra_datos.png", bbox_inches="tight", facecolor=FONDO); plt.close(fig)
 
 
 def infra_ti():
-    fig, ax = lienzo("Infraestructura TI · hoy vs. objetivo",
-                     "Etiqueta = responsable · borde naranjo = riesgo abierto · ✓ = ya aplicado (15-oct) · cuenta AWS del evento, us-east-1")
-    # --- HOY (auditado el 15-oct por SSM y la API de AWS) ---
-    ax.text(3, 85, "HOY", fontsize=15, fontweight="bold", color="#B5541A")
-    caja(ax, 3, 63, 24, 17, "CloudFront ✓", ["HTTPS + HSTS ✓", "/ → S3 · resto → EC2", "sin WAF ni login aún"], alerta=True, dueno="Mauricio")
-    caja(ax, 3, 45, 24, 14, "S3 frontend ✓", ["React en la raíz", "privado + OAC ✓"], clase="P", dueno="Mauricio")
-    caja(ax, 3, 25, 24, 15, "Webhook externo", ["Traefik TLS + Chatwoot", "→ EC2 por HTTP plano"], alerta=True, dueno="Sebastián")
-    caja(ax, 33, 44, 33, 36, "EC2 integra-server", [":80 y :8000 abiertos a internet", "IMDSv2 ✓ · 443 cerrado ✓",
-                                                    "código seguro + rúbrica ✓", "API sin token (falta el corte)",
-                                                    "servicios como root", "EBS sin cifrar · rol IAM del evento",
-                                                    "Streamlit /streamlit · API · SQLite"], alerta=True, dueno="Sebastián")
-    caja(ax, 33, 27, 33, 13, "Bedrock", ["Sonnet 5 · Nova · Pegasus · Titan", "sin logging de invocación ✓"], dueno="AWS")
-    caja(ax, 3, 5, 31, 17, "GitHub", ["repo público · IDs redactados ✓", "CI: Gitleaks + tests + pip-audit ✓",
-                                      "Pages: falta activarlo"], clase="P", dueno="Mauricio")
-    caja(ax, 38, 5, 28, 17, "Demo RAG estática", ["19 PDF → ingesta/índice local", "análisis → recomendador", "JSON → cola → ficha", "no corre en EC2"], dueno="Mauricio")
-    flecha(ax, (27.6, 72), (32.4, 72))
-    flecha(ax, (15, 62.4), (15, 59.6))
-    flecha(ax, (27.6, 33), (32.4, 46), "HTTP", color="#B5541A")
-    flecha(ax, (49, 43.4), (49, 40.6))
-    ax.plot([72, 72], [5, 88], color=BORDE, lw=1.5, ls="--")
-    # --- OBJETIVO ---
-    ax.text(78, 85, "OBJETIVO", fontsize=15, fontweight="bold", color="#3D7D5A")
-    caja(ax, 78, 66, 20, 15, "Tías / directoras", ["login Cognito (MFA)", "RBAC por sala/jardín"], dueno="Santiago")
-    caja(ax, 78, 47, 20, 15, "Webhook", ["firma fail-closed", "whitelist + token"], dueno="Sebastián")
-    caja(ax, 104, 58, 22, 22, "CloudFront + WAF", ["TLS (ACM)", "reglas administradas", "rate limit", "sin /docs ni /openapi"], dueno="Ivan")
-    ax.add_patch(FancyBboxPatch((131, 22), 46, 60, boxstyle="round,pad=0.4,rounding_size=2", fc="#EEF1F6", ec="#9AA8BF", lw=1.2, ls="--"))
-    ax.text(132.5, 80.5, "VPC · subred privada", fontsize=10, fontweight="bold", color=GRIS, va="top")
-    caja(ax, 134, 56, 40, 20, "EC2 (sin IP pública)", ["SG: solo desde CloudFront", "IMDSv2 · SSM (sin SSH)", "EBS cifrado (KMS)",
-                                                       "API con token · U2 · ensemble"], dueno="Ivan")
-    caja(ax, 134, 38, 19, 14, "S3 medios", ["KMS · lifecycle 24 h", "Block Public Access"], clase="S", dueno="Ivan")
-    caja(ax, 155, 38, 19, 14, "BD y backups", ["cifrada (KMS)", "seudónimos"], clase="C", dueno="Ivan")
-    caja(ax, 134, 24, 40, 11, "VPC endpoint → Bedrock", ["tráfico privado · logging cifrado o desactivado"], dueno="Mauricio")
-    caja(ax, 78, 21, 48, 23, "Seguridad y operación", ["Secrets Manager: token Meta, app secret", "CloudTrail + GuardDuty + Security Hub",
-                                                       "CloudWatch: logs sin PII, alarmas", "AWS Budgets: tope de gasto Bedrock",
-                                                       "IAM mínimo privilegio · Access Analyzer"], dueno="Ivan")
-    caja(ax, 78, 3, 99, 15, "Gobierno (Integra)", ["DPD · EIPD (art. 15 ter) · DPA con AWS y Meta · consentimiento de apoderados (art. 16 quáter)", "canal ARCO+ (30 días) · respuesta a incidentes · revisión anual de riesgos"],
+    fig, ax = lienzo("Infraestructura TI · arquitectura desplegada",
+                     "Estado al 16-oct-2026 · cuenta AWS del evento, us-east-1 · etiqueta = responsable · "
+                     "todos los datos de la demo son sintéticos")
+    # --- Columna 1: usuarios y entrada por WhatsApp ---
+    caja(ax, 3, 64, 32, 22, "Educadora (tía)", ["WhatsApp: texto, post-it, voz, video",
+                                                 "vista de profesora: casos por",
+                                                 "confirmar (\"Confirma a Nombre I.\")",
+                                                 "y recomendaciones a revisar"], clase="S", dueno="Integra")
+    caja(ax, 3, 43, 32, 17, "WhatsApp Cloud API", ["texto · foto de post-it", "nota de voz · video",
+                                                   "botones: niños con igual nombre"], clase="S", dueno="Meta")
+    caja(ax, 3, 25, 32, 14, "Webhook HTTPS", ["firma HMAC fail-closed + whitelist", "→ CloudFront /procesar*"],
+         dueno="Sebastián")
+    caja(ax, 3, 4, 32, 17, "Ficha y coordinación", ["ficha: nivel oficial, trayectoria", "y recomendaciones aprobadas",
+                                                    "coordinación: métricas por jardín"], clase="I", dueno="Santiago")
+    flecha(ax, (19, 63.4), (19, 60.6))
+    flecha(ax, (19, 42.4), (19, 39.6))
+    # --- Columna 2: CloudFront, S3 y GitHub Pages ---
+    caja(ax, 40, 41, 30, 45, "CloudFront (HTTPS)", ["TLS + HSTS · sin caché", "",
+                                                    "/  → React (S3 privado)", "/streamlit* → Streamlit :80",
+                                                    "/api/* · /procesar*", "/clasificar · /health",
+                                                    "     → API FastAPI :8000"], dueno="Ivan")
+    caja(ax, 40, 22, 30, 15, "S3 frontend (privado)", ["React · acceso solo por OAC", "Block Public Access"],
+         clase="P", dueno="Santiago")
+    caja(ax, 40, 3, 30, 15, "GitHub Pages", ["demo pública secundaria", "datos sintéticos (CSV)"],
+         clase="P", dueno="Mauricio")
+    flecha(ax, (55, 40.4), (55, 37.6))
+    flecha(ax, (35.6, 76), (39.4, 76), "web")
+    flecha(ax, (35.6, 32), (39.4, 46))
+    flecha(ax, (35.6, 14), (39.4, 43))
+    # --- Columna 3: EC2 integra-server ---
+    ax.add_patch(FancyBboxPatch((75, 29), 50, 57, boxstyle="round,pad=0.4,rounding_size=2", fc="#EEF1F6",
+                                ec="#9AA8BF", lw=1.2, ls="--"))
+    ax.text(76.5, 85.2, "EC2 integra-server · admin por SSM (sin SSH)", fontsize=10.5, fontweight="bold",
+            color=TINTA, va="top")
+    caja(ax, 77, 57, 46, 24, "webhook_ec2.py · FastAPI :8000", ["resolución del niño/a en la sala de la tía",
+                                                                "U2 multimodal → conductas con cita",
+                                                                "juez de la rúbrica · compuerta",
+                                                                "cola \"Por verificar\" en vivo (SSE)",
+                                                                "API con token X-Api-Key"], dueno="Sebastián")
+    caja(ax, 77, 41, 22, 13, "Streamlit :80", ["dashboard operativo"], dueno="Santiago")
+    caja(ax, 101, 41, 22, 13, "faster-whisper", ["audio en CPU · ffmpeg"], dueno="Mauricio")
+    caja(ax, 77, 30.5, 46, 8, "BD de la plataforma (SQLite)", ["conductas sin nombres · niveles · cola"])
+    flecha(ax, (70.6, 70), (76.4, 70), ":8000")
+    flecha(ax, (70.6, 47), (76.4, 47), ":80")
+    flecha(ax, (112, 56.4), (112, 54.6))
+    # --- Recomendador RAG (lote) ---
+    caja(ax, 75, 3, 50, 22, "Recomendador RAG (lote)", ["corpus OMS · CDC · MINEDUC (Bases Curriculares)",
+                                                        "→ índice léxico → análisis determinístico:",
+                                                        "   hitos OMS (bebés) · Identidad y Autonomía (2-6)",
+                                                        "→ citas → recomendaciones.json → \"Por verificar\""],
          dueno="Mauricio")
-    flecha(ax, (98.6, 74), (103.4, 72), "")
-    flecha(ax, (98.6, 55), (103.4, 62), "")
-    ax.text(101, 76.5, "HTTPS", fontsize=8, color=GRIS, ha="center")
-    flecha(ax, (126.6, 69), (133.4, 66), "")
-    ax.text(129.5, 61.5, "origen\nprivado", fontsize=8, color=GRIS, ha="center")
-    flecha(ax, (154, 55.4), (154, 52.6))
-    flecha(ax, (150, 37.4), (150, 35.6))
+    flecha(ax, (100, 25.6), (100, 28.4), dash=True)
+    # --- Columna 4: Bedrock, seguridad y gobierno ---
+    caja(ax, 130, 60, 47, 26, "Amazon Bedrock", ["Claude Sonnet 5: post-it, conductas y juez",
+                                                 "Pegasus (TwelveLabs): video",
+                                                 "Titan Embeddings: búsqueda del RAG",
+                                                 "Claude Opus 5: juez DeepEval (offline)",
+                                                 "sin logging de invocación"], dueno="AWS")
+    caja(ax, 130, 26, 47, 30, "Seguridad", ["Secrets Manager: integrai/api-token",
+                                            "IMDSv2 obligatorio · admin por SSM",
+                                            "redacción de PII antes del modelo",
+                                            "inyección (\"dame todas las keys\") → cola",
+                                            "escáner de secretos en las salidas",
+                                            "medios: magic bytes; se borran al procesar"], dueno="Mauricio")
+    caja(ax, 130, 3, 47, 19, "Gobierno de datos", ["medios crudos ≤ 24 h · BD sin nombres",
+                                                   "la educadora confirma (art. 8 bis)",
+                                                   "repo público sin IDs ni secretos"], dueno="Integra")
+    flecha(ax, (125.6, 72), (129.4, 72))
     fig.savefig(OUT / "infra_ti.png", bbox_inches="tight", facecolor=FONDO); plt.close(fig)
 
 
