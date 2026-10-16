@@ -6,6 +6,13 @@ import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Tabla, type Columna } from '../components/Tabla';
 import { Cargando, ErrorEstado, Vacio } from '../components/Estado';
 
+function seguridad(margen: number | null): string {
+  if (margen === null) return '—';
+  if (margen >= 0.6) return 'alta';
+  if (margen >= 0.4) return 'media';
+  return 'baja';
+}
+
 type EstadoCarga =
   | { estado: 'cargando' }
   | { estado: 'error'; mensaje: string }
@@ -60,12 +67,12 @@ export function Pendientes() {
           </>
         ),
       },
-      { clave: 'tia', encabezado: 'Tía', ordenable: true, valor: (p) => p.idEducadora ?? '—' },
-      { clave: 'nivel', encabezado: 'Nivel prop.', numerica: true, ordenable: true, valor: (p) => p.nivelPropuesto ?? -1 },
-      { clave: 'margen', encabezado: 'Margen', numerica: true, ordenable: true, valor: (p) => p.margen ?? 0,
-        render: (p) => <>{p.margen === null ? '—' : p.margen.toFixed(3)}</> },
-      { clave: 'motivo', encabezado: 'Motivo', ordenable: true, valor: (p) => p.motivo },
-      { clave: 'creado', encabezado: 'Creado', ordenable: true, valor: (p) => p.creadoEn },
+      { clave: 'tia', encabezado: 'Profesora', ordenable: true, valor: (p) => p.idEducadora ?? '—' },
+      { clave: 'nivel', encabezado: 'Nivel sugerido', numerica: true, ordenable: true, valor: (p) => p.nivelPropuesto ?? -1 },
+      { clave: 'margen', encabezado: 'Seguridad', ordenable: true, valor: (p) => p.margen ?? 0,
+        render: (p) => <>{seguridad(p.margen)}</> },
+      { clave: 'motivo', encabezado: 'Por qué', ordenable: true, valor: (p) => p.motivo },
+      { clave: 'creado', encabezado: 'Cuándo', ordenable: true, valor: (p) => p.creadoEn },
       {
         clave: 'acciones',
         encabezado: 'Verificar',
@@ -74,15 +81,15 @@ export function Pendientes() {
           <div className="advertencia__acciones">
             <button type="button" disabled={resolviendo === p.idPendiente}
                     onClick={() => accion(p, 'aprobado')}>
-              ✓ Aprobar
+              ✓ Está bien
             </button>
             <button type="button" disabled={resolviendo === p.idPendiente}
                     onClick={() => accion(p, 'editado', p.nivelPropuesto ?? undefined)}>
-              ✏️ Editar {p.nivelPropuesto ?? ''}
+              ✏️ Cambiar nivel
             </button>
             <button type="button" disabled={resolviendo === p.idPendiente}
                     onClick={() => accion(p, 'rechazado')}>
-              🚫 Rechazar
+              🚫 No es este niño/a
             </button>
           </div>
         ),
@@ -108,11 +115,12 @@ export function Pendientes() {
 
   return (
     <>
-      <Breadcrumbs migas={[{ etiqueta: 'Por verificar' }]} />
-      <h2>Por verificar</h2>
+      <Breadcrumbs migas={[{ etiqueta: 'Por confirmar' }]} />
+      <h2>Confirma lo que observaste</h2>
       <p className="ficha-descripcion">
-        Cola de la tía: observaciones con margen bajo que el modelo dejó para confirmación humana.
-        Aprobar o editar (por WhatsApp) escribe la evaluación canónica.
+        Estas son las observaciones que el sistema <strong>no pudo dar por seguras</strong>. Mira el
+        nivel propuesto y <strong>confírmalo</strong> o <strong>corrígelo</strong>: lo que decidas
+        queda como el nivel oficial del niño/a.
       </p>
 
       {!hayApi && <Vacio mensaje="Esta vista requiere datos vivos del backend (no disponible en modo CSV)." />}
@@ -121,10 +129,10 @@ export function Pendientes() {
       {accionError && <ErrorEstado mensaje={accionError} />}
       {hayApi && carga.estado === 'listo' && (
         carga.pendientes.length === 0 ? (
-          <Vacio mensaje="No hay pendientes por verificar." />
+          <Vacio mensaje="¡Todo al día! No tienes observaciones por confirmar." />
         ) : (
           <>
-            <p className="estado">{carga.pendientes.length} pendientes. Aprobar o editar escribe la evaluación canónica.</p>
+            <p className="estado">Tienes {carga.pendientes.length} observaciones para confirmar.</p>
             <Tabla
               columnas={columnas}
               filas={carga.pendientes}
