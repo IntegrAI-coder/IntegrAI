@@ -42,7 +42,13 @@ export function Pendientes() {
 
   const columnas: Columna<Pendiente>[] = useMemo(
     () => [
-      { clave: 'nino', encabezado: 'Niño/a', ordenable: true, valor: (p) => p.idNinoPropuesto },
+      {
+        clave: 'nino',
+        encabezado: 'Niño/a',
+        ordenable: true,
+        valor: (p) => p.nombreVisible || p.idNinoPropuesto,
+        render: (p) => <span title={p.idNinoPropuesto}>{p.nombreVisible || p.idNinoPropuesto}</span>,
+      },
       {
         clave: 'curso',
         encabezado: 'Curso',
