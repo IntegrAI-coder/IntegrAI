@@ -6,7 +6,7 @@ import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Tarjeta } from '../components/Tarjeta';
 import { BadgeNivel } from '../components/BadgeNivel';
 import { BadgeAlerta } from '../components/BadgeAlerta';
-import { GraficoTrayectoria } from '../components/GraficoTrayectoria';
+import { GraficoTrayectoriaNivel } from '../components/GraficoTrayectoriaNivel';
 import { Cargando, ErrorEstado, Vacio } from '../components/Estado';
 
 const HOY = new Date();
@@ -28,10 +28,6 @@ export function Nino() {
       ficha,
       nivelVigenteInfo:
         ficha.nivelVigente !== null ? niveles.get(ficha.nivelVigente) : undefined,
-      trayectoria: ficha.observaciones.map((o) => ({
-        fecha: o.fechaObservacion,
-        nivel: o.nivelEstimado,
-      })),
     };
   }, [estado, idNino]);
 
@@ -108,14 +104,7 @@ export function Nino() {
           )}
 
           <section aria-label="Trayectoria del nivel" className="panel">
-            {vista.trayectoria.length === 0 ? (
-              <>
-                <h3 className="seccion__titulo">Evolución en el tiempo</h3>
-                <Vacio mensaje="Sin observaciones registradas." />
-              </>
-            ) : (
-              <GraficoTrayectoria datos={vista.trayectoria} />
-            )}
+            <GraficoTrayectoriaNivel datos={estado.datos} idNino={idNino} />
           </section>
 
           <section aria-label="Observaciones" className="panel">

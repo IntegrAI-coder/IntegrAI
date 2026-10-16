@@ -91,6 +91,38 @@ observación más reciente del niño/a.
 
 Navegación con breadcrumbs: Cursos › Curso › Niño/a.
 
+## Gráfico de trayectoria de nivel
+
+Gráfico Plotly del nivel (1 a 9) de cada niño/a en el tiempo. Aparece en
+`/nino/:idNino`, en `/curso/:idJardin/:sala` (con selector de niño/a de la
+sala) y en `/experiencia` (ficha de la parvularia y selector de la directora,
+acotado a los filtros de jardín y sala).
+
+- **Qué muestra**: cada observación (círculo vacío con tooltip de fecha, nivel,
+  dominios y fuente), el promedio mensual del niño/a (línea sólida con rombos),
+  el promedio de su sala (línea discontinua con cuadrados) y la tendencia
+  (línea punteada). El eje Y rotula cada nivel con su nombre de
+  `ruta_niveles.csv`; en pantallas de hasta 520 px solo muestra el número.
+- **Promedio mensual y de la sala**: media de `nivel_estimado` de todas las
+  observaciones del mes `YYYY-MM`, sin redondear (mismo método que el dashboard
+  anterior). El grupo son las observaciones de los niños/as de la misma sala
+  (mismo jardín y sala), incluido el niño/a elegido.
+- **Tendencia**: regresión lineal por mínimos cuadrados sobre el promedio
+  mensual del niño/a, con la distancia real en meses entre puntos. Es "sube" si
+  la pendiente supera 0,1 niveles por mes, "baja" si es menor que -0,1 y
+  "estable" en otro caso. Se necesitan observaciones en al menos 2 meses.
+- **Datos insuficientes**: con menos de 2 observaciones se muestra un mensaje
+  (y la observación única, si la hay) y no se carga Plotly.
+- **Carga perezosa**: Plotly (`plotly.js-basic-dist-min`, versión fija) va en un
+  chunk aparte que se descarga solo al mostrar un gráfico con datos. Los tipos
+  son propios (`src/plotly-basic-dist-min.d.ts` y `src/components/plotly/tipos.ts`).
+- **Accesibilidad**: título visible, `aria-label` descriptivo, series
+  distinguibles por forma y trazo además del color, y una tabla equivalente
+  dentro de «Ver los datos del gráfico en tabla».
+- **Alcance por rol**: `ninosEnAlcance` acota los selectores (parvularia = su
+  sala, directora = su jardín o todos). En esta rama no hay inicio de sesión:
+  es una restricción de la interfaz, no control de acceso.
+
 ## Privacidad
 
 Solo se muestran códigos (`NINO-00001`), nunca nombres ni RUT. El dato

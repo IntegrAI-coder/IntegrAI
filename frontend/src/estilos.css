@@ -834,3 +834,73 @@ a:focus-visible {
     position: static;
   }
 }
+
+.grafico-plotly {
+  width: 100%;
+  min-width: 0;
+}
+
+.trayectoria-nota {
+  line-height: 1.5;
+}
+
+.narrativa {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+}
+
+.narrativa > div {
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  padding: 0.6rem 0.8rem;
+}
+
+.narrativa dt {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-texto-tenue);
+  margin: 0 0 0.2rem;
+}
+
+.narrativa dd {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.selector-nino .buscador {
+  max-width: 320px;
+  margin-bottom: 0.75rem;
+}
+
+.trayectoria-datos {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.trayectoria-datos summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-acento);
+}
+
+.trayectoria-datos summary:focus-visible {
+  outline: 3px solid var(--color-acento-suave);
+  outline-offset: 2px;
+}
+
+.trayectoria-datos .tabla {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 520px) {
+  .narrativa {
+    grid-template-columns: 1fr;
+  }
+
+  .selector-nino .buscador {
+    max-width: none;
+  }
+}

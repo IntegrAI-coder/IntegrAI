@@ -8,12 +8,14 @@ import {
 } from '../domain/consultas';
 import { promedio } from '../domain/metrics';
 import { formatearPromedio } from '../domain/formato';
+import { ninosEnAlcance } from '../domain/trayectoria';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Tabla, type Columna } from '../components/Tabla';
 import { Tarjeta } from '../components/Tarjeta';
 import { BadgeNivel } from '../components/BadgeNivel';
 import { BadgeAlerta } from '../components/BadgeAlerta';
 import { GraficoDistribucion } from '../components/GraficoDistribucion';
+import { SelectorTrayectoriaNino } from '../components/SelectorTrayectoriaNino';
 import { Cargando, ErrorEstado, Vacio } from '../components/Estado';
 
 const HOY = new Date();
@@ -37,6 +39,11 @@ export function Curso() {
       nivelPromedio: promedio(nivelesVigentes),
       totalAlertas: alumnos.filter((a) => a.alerta).length,
       distribucion: distribucionNiveles(alumnos),
+      ninosSala: ninosEnAlcance(estado.datos.ninos, {
+        rol: 'parvularia',
+        idJardin,
+        salaGrupo: sala,
+      }),
     };
   }, [estado, idJardin, sala]);
 
@@ -92,6 +99,14 @@ export function Curso() {
 
               <section aria-label="Distribución por nivel" className="panel">
                 <GraficoDistribucion datos={vista.distribucion} />
+              </section>
+
+              <section aria-label="Trayectoria de un niño/a de la sala" className="panel">
+                <SelectorTrayectoriaNino
+                  datos={estado.datos}
+                  ninos={vista.ninosSala}
+                  titulo="Trayectoria de un niño/a de la sala"
+                />
               </section>
 
               <section aria-label="Alumnos del curso" className="panel">

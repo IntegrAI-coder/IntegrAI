@@ -23,11 +23,13 @@ import {
   DOMINIOS,
 } from '../domain/experiencia';
 import { estadoManifestaciones, planEstimulacion } from '../domain/estimulacion';
+import { ninosEnAlcance } from '../domain/trayectoria';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Tarjeta } from '../components/Tarjeta';
 import { BadgeNivel } from '../components/BadgeNivel';
 import { BadgeAlerta } from '../components/BadgeAlerta';
-import { GraficoTrayectoria } from '../components/GraficoTrayectoria';
+import { GraficoTrayectoriaNivel } from '../components/GraficoTrayectoriaNivel';
+import { SelectorTrayectoriaNino } from '../components/SelectorTrayectoriaNino';
 import { GraficoDistribucion } from '../components/GraficoDistribucion';
 import { GraficoBarras } from '../components/GraficoBarras';
 import { Tabla, type Columna } from '../components/Tabla';
@@ -281,10 +283,6 @@ function FichaAcompanamiento({
   const faltantes = dominiosFaltantes(ficha);
   const niveles = nivelPorNumero(datos.niveles);
   const nivelInfo = ficha.nivelVigente !== null ? niveles.get(ficha.nivelVigente) : undefined;
-  const trayectoria = ficha.observaciones.map((o) => ({
-    fecha: o.fechaObservacion,
-    nivel: o.nivelEstimado,
-  }));
   const estadoMan = estadoManifestaciones(ficha);
   const plan = planEstimulacion(ficha);
 
@@ -366,14 +364,7 @@ function FichaAcompanamiento({
       )}
 
       <section aria-label="Trayectoria del nivel" className="panel">
-        {trayectoria.length === 0 ? (
-          <>
-            <h3 className="seccion__titulo">Trayectoria</h3>
-            <Vacio mensaje="Sin observaciones registradas todavía." />
-          </>
-        ) : (
-          <GraficoTrayectoria datos={trayectoria} />
-        )}
+        <GraficoTrayectoriaNivel datos={datos} idNino={ficha.nino.idNino} />
         {nivelInfo && (
           <p className="ficha-descripcion">
             Nivel {nivelInfo.nivel}: {nivelInfo.nombreNivel}. {nivelInfo.descripcion}
@@ -658,6 +649,17 @@ function PanelDirectora({ datos, cursos }: { datos: Datos; cursos: ResumenCurso[
             etiqueta="Sin seguimiento"
             valor={String(tray.sinSeguimiento)}
             descripcion="Con una o ninguna observación"
+          />
+        </section>
+
+        <section aria-label="Trayectoria de un niño/a" className="panel">
+          <SelectorTrayectoriaNino
+            datos={datos}
+            ninos={ninosEnAlcance(ninosFiltrados, {
+              rol: 'directora',
+              idJardin: jardinSel === '__todos__' ? null : jardinSel,
+            })}
+            titulo="Trayectoria de nivel de un niño/a de la selección"
           />
         </section>
 
