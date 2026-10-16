@@ -7,7 +7,9 @@ import { Tabla, type Columna } from '../components/Tabla';
 import { Tarjeta } from '../components/Tarjeta';
 import { useEstadoDatos } from '../data/DatosContext';
 import { useRevision } from '../data/RevisionContext';
-import { filtrarCursosDeProfesora } from '../domain/acceso';
+import { useRecomendaciones } from '../data/RecomendacionesContext';
+import { TarjetaRecomendacion } from '../components/TarjetaRecomendacion';
+import { filtrarCursosDeProfesora, tieneAccesoCurso } from '../domain/acceso';
 import { resumenCursos, type ResumenCurso } from '../domain/consultas';
 import { formatearPromedio } from '../domain/formato';
 
@@ -18,6 +20,12 @@ export function ProfesoraInicio() {
   const { profesora, modo, notificaciones, estadoPendientes, resolver } = useRevision();
   const [resolviendo, setResolviendo] = useState<string | null>(null);
   const [errorAccion, setErrorAccion] = useState<string | null>(null);
+  const recomendaciones = useRecomendaciones();
+  const [mensajeRecomendacion, setMensajeRecomendacion] = useState('');
+  // Solo las recomendaciones de niños/as de los cursos de esta profesora
+  const misRecomendaciones = profesora
+    ? recomendaciones.pendientes.filter((item) => tieneAccesoCurso(profesora, item.idJardin, item.salaGrupo))
+    : [];
 
   async function manejarResolver(idPendiente: string, accion: 'aprobado' | 'editado' | 'rechazado', nivel?: number) {
     setResolviendo(idPendiente);
@@ -56,6 +64,11 @@ export function ProfesoraInicio() {
           valor={String(notificaciones.length)}
           alerta={notificaciones.length > 0}
         />
+        <Tarjeta
+          etiqueta="Recomendaciones"
+          valor={String(misRecomendaciones.length)}
+          alerta={misRecomendaciones.length > 0}
+        />
       </section>
 
       <p className="profesora-ayuda">
@@ -89,6 +102,30 @@ export function ProfesoraInicio() {
             </>
           )
         )}
+      </section>
+
+      <section className="seccion-profesora" aria-labelledby="titulo-recomendaciones">
+        <h3 id="titulo-recomendaciones">Recomendaciones por verificar</h3>
+        <p className="aviso-demo"><strong>Demo:</strong> estas decisiones se guardan solo en este navegador y no escriben en producción.</p>
+        <p className="sr-only" aria-live="polite">{mensajeRecomendacion}</p>
+        {recomendaciones.carga.estado === 'cargando' && <Cargando mensaje="Cargando recomendaciones…" />}
+        {recomendaciones.carga.estado === 'error' && <ErrorEstado mensaje={recomendaciones.carga.mensaje} />}
+        {recomendaciones.carga.estado === 'listo' && (misRecomendaciones.length === 0
+          ? <Vacio mensaje="No tienes recomendaciones por verificar." />
+          : (
+            <>
+              <p className="profesora-ayuda">
+                Propuestas de actividades según lo observado en tus niños/as. Revísalas y elige:
+                <strong> Aprobar</strong>, <strong>Editar</strong> o <strong>Descartar</strong>.
+              </p>
+              <div className="lista-recomendaciones">{misRecomendaciones.map((item) => (
+                <TarjetaRecomendacion key={item.idRecomendacion} item={item} onDecidir={(decision) => {
+                  recomendaciones.decidir(item.idRecomendacion, decision);
+                  setMensajeRecomendacion(`${item.idRecomendacion}: decisión guardada.`);
+                }} />
+              ))}</div>
+            </>
+          ))}
       </section>
 
       <section className="seccion-profesora" aria-labelledby="titulo-mis-cursos">
