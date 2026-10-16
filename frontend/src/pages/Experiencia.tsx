@@ -24,6 +24,8 @@ import {
 } from '../domain/experiencia';
 import { estadoManifestaciones, planEstimulacion } from '../domain/estimulacion';
 import { ninosEnAlcance } from '../domain/trayectoria';
+import { rankingBrecha } from '../domain/rankingBrecha';
+import { TablaRankingBrecha } from '../components/TablaRankingBrecha';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Tarjeta } from '../components/Tarjeta';
 import { BadgeNivel } from '../components/BadgeNivel';
@@ -251,6 +253,20 @@ function PanelParvularia({ datos, cursos }: { datos: Datos; cursos: ResumenCurso
             </>
           )}
         </section>
+
+        {cursoActivo && (
+          <TablaRankingBrecha
+            filas={rankingBrecha(
+              datos,
+              ninosEnAlcance(datos.ninos, {
+                rol: 'parvularia',
+                idJardin: cursoActivo.idJardin,
+                salaGrupo: cursoActivo.salaGrupo,
+              }),
+              { hoy: HOY },
+            )}
+          />
+        )}
 
         <section aria-label="Niveles de la sala" className="panel">
           <GraficoDistribucion
@@ -729,6 +745,17 @@ function PanelDirectora({ datos, cursos }: { datos: Datos; cursos: ResumenCurso[
                 columnas={columnasSalas}
               />
             </section>
+
+            <TablaRankingBrecha
+              filas={rankingBrecha(
+                datos,
+                ninosEnAlcance(ninosFiltrados, {
+                  rol: 'directora',
+                  idJardin: jardinSel === '__todos__' ? null : jardinSel,
+                }),
+                { hoy: HOY },
+              )}
+            />
           </>
         )}
       </div>
