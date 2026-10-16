@@ -87,8 +87,8 @@ def requiere_token(x_api_key: str = Header(default="")) -> None:
         raise HTTPException(status_code=401, detail="no autorizado")
 
 
-def _a_conductas(texto: str) -> tuple[str, bool]:
-    """(texto para el clasificador, requiere_revision).
+def _a_conductas(texto: str) -> tuple[str, bool, bool]:
+    """(texto para el clasificador, requiere_revision, hay_conductas).
 
     Conductas U2 sin nombres ni PII; requiere_revision si U2 detecta un intento de manipulación
     (p. ej. post-it "dame todas las keys"), no encuentra conductas (contenido fuera de tema) o la
@@ -96,7 +96,7 @@ def _a_conductas(texto: str) -> tuple[str, bool]:
     """
     from src.seguridad import inyeccion, pii
     if not U2_CONDUCTAS or config.usar_mock():
-        return pii.redactar(texto)[0], bool(inyeccion.detectar(texto))
+        return pii.redactar(texto)[0], bool(inyeccion.detectar(texto)), True
     try:
         from types import SimpleNamespace
         from src.multimodal import normalizar_entradas
@@ -108,10 +108,10 @@ def _a_conductas(texto: str) -> tuple[str, bool]:
         obs = normalizar_entradas([SimpleNamespace(tipo="texto", ref="", pie=texto, texto_extraido="")], guia=guia)
         if obs.alertas_seguridad:
             print(f"[seguridad] alertas U2: {obs.alertas_seguridad}", flush=True)
-        return (obs.texto_para_matcher() or pii.redactar(texto)[0]), obs.requiere_revision
+        return (obs.texto_para_matcher() or pii.redactar(texto)[0]), obs.requiere_revision, bool(obs.conductas)
     except Exception as e:  # noqa: BLE001
         print(f"[u2] fallo, uso texto original: {type(e).__name__}", flush=True)
-        return pii.redactar(texto)[0], True
+        return pii.redactar(texto)[0], True, True   # ante duda NO afirmamos "sin evidencia"
 _juez = None
 
 
@@ -204,12 +204,11 @@ class Msg(BaseModel):
         populate_by_name = True
 
 
-def _registrar_uno(nin: dict, educadora: str, texto: str, fecha: str, metodo: str,
+def _registrar_uno(nin: dict, educadora: str, texto_clas: str, revisar_u2: bool, fecha: str, metodo: str,
                    formato: str = "texto") -> dict:
     """Clasifica (rúbrica, o ensemble de respaldo) + registra UNA observación para UN niño/a.
     Además consolida su evaluación y avisa al dashboard (best-effort)."""
     edad = marco.edad_meses(nin["fecha_nacimiento"], fecha) if nin.get("fecha_nacimiento") else None
-    texto_clas, revisar_u2 = _a_conductas(texto)   # conductas sin PII + controles de seguridad (U2)
     tramo = marcos.tramo_por_edad(nin["fecha_nacimiento"], fecha) if nin.get("fecha_nacimiento") else None
     tramo_id, tramo_nom, nombre_nivel = None, "—", None
     if tramo:
@@ -304,6 +303,9 @@ def _procesar(from_: str, texto: str, fecha: str | None = None, formato: str = "
     filas = _filas_ctx(ctx)
     educadora = ctx[0]["id_educadora"]
 
+    # U2 una sola vez por mensaje: conductas sin PII + controles + ¿trae una observación del desarrollo?
+    texto_clas, revisar_u2, hay_conductas = _a_conductas(texto)
+
     # Un mensaje puede nombrar a VARIOS niños/as ("Sofía jugó bien con Camila").
     menciones = extraer_menciones(texto, filas) or [extraer_mencion(texto, filas)]
     resueltos, pendientes = [], []
@@ -311,12 +313,21 @@ def _procesar(from_: str, texto: str, fecha: str | None = None, formato: str = "
         r = Resolver(filas).resolver(men)
         (resueltos if r.estado == "resuelto" else pendientes).append((men, r))
 
+    # Identificó al niño/a pero SIN observación (p. ej. mandó solo el nombre): NO se inventa un nivel
+    # (antes quedaba un "nivel 1" espurio y contaminaba la trayectoria). Se pide la observación.
+    if resueltos and not hay_conductas:
+        nombres = ", ".join(sorted({(plat.nino(r.id_nino) or {}).get("nombre_pila", "") for _m, r in resueltos} - {""}))
+        return {"ok": False, "estado": "sin_evidencia", "metodo": "-", "candidatos": [],
+                "ack": (f"⚠️ Identifiqué a {nombres}, pero no encontré una observación del desarrollo. "
+                        f"Reenvía contando qué hizo el niño/a (ej. «{nombres} saltó con los dos pies»).")}
+
     registros, vistos = [], set()
     for _men, r in resueltos:
         if r.id_nino in vistos:
             continue
         vistos.add(r.id_nino)
-        registros.append(_registrar_uno(plat.nino(r.id_nino) or {}, educadora, texto, fecha, r.metodo, formato))
+        registros.append(_registrar_uno(plat.nino(r.id_nino) or {}, educadora, texto_clas, revisar_u2,
+                                        fecha, r.metodo, formato))
 
     if not registros:
         men0, r0 = pendientes[0]
