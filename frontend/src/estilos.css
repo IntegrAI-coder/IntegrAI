@@ -784,3 +784,14 @@ h3 {
     min-height: 2.75rem;
   }
 }
+
+.lista-recomendaciones { display: grid; gap: 1rem; }
+.recomendacion { padding: 1rem; border: 1px solid var(--color-borde); border-radius: var(--radio); background: var(--color-superficie); box-shadow: var(--sombra); }
+.recomendacion__cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: .75rem; }
+.recomendacion__cabecera h4 { margin: 0; text-transform: capitalize; }
+.recomendacion h5 { margin-bottom: .25rem; }
+.recomendacion blockquote { margin: .6rem 0; padding-left: .8rem; border-left: 3px solid var(--color-acento); overflow-wrap: anywhere; }
+.recomendacion__limite { padding: .65rem; background: var(--color-alerta-fondo); color: var(--color-alerta); border-radius: 6px; }
+.recomendacion__edicion { display: grid; gap: .5rem; }
+.recomendacion__edicion textarea { min-height: 7rem; width: 100%; padding: .6rem; font: inherit; }
+.recomendacion-ficha + .recomendacion-ficha { border-top: 1px solid var(--color-borde); padding-top: .75rem; }
