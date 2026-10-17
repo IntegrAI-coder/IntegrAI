@@ -1,0 +1,15 @@
+# CODEOWNERS — revisores por defecto.
+#
+# NOTA: confirma los handles del equipo y ajusta. Formato: <ruta> @usuario
+# Equipo:  Ivan @icortesve (infraestructura/seguridad) · Sebastián @sebawag (WhatsApp/clasificador) ·
+#          Santiago (frontend) · Mauricio (multimodal/seguridad)
+# Completa los handles de Santiago y Mauricio antes de confiar en estas reglas.
+
+* @icortesve
+
+/infra/ @icortesve
+/tools/ @icortesve
+/.github/ @icortesve
+/docs/SEGURIDAD.md @icortesve
+/docs/GOBIERNO_DATOS.md @icortesve
+/infra/integra-server.yaml @icortesve
