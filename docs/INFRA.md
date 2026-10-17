@@ -12,13 +12,13 @@
 
 La demo **no** crea infraestructura serverless nueva: reutiliza lo que existe. El camino serverless queda documentado como plan (§6) para que Integra lo despliegue sin reescribir la lógica.
 
-## 1.1 Demo RAG de la rama (no desplegada)
+## 1.1 Recomendador RAG (lote)
 
-La rama `recomendador-rag` agrega un flujo estático para Pages: fuentes públicas `RAG/` → ingesta e índice léxico local ignorado → análisis determinístico → recomendador → JSON sintético → cola humana → ficha. No corre en la EC2 ni modifica CloudFront/WhatsApp. La integración backend, persistencia y RBAC son objetivos futuros.
+Fuentes públicas `RAG/` (OMS, CDC, MINEDUC) → índice léxico → análisis determinístico → recomendaciones con cita → `data/recomendaciones.json` → cola "Por verificar" de la profesora → ficha si la educadora aprueba o edita. Se genera por lote (`tools/recomendar_lote.py`), no como servicio en la EC2. La persistencia de las decisiones y el RBAC siguen como objetivos futuros.
 
 ## 2. Componentes y estado (auditado el 15-oct, tarde)
 
-![Infraestructura TI: hoy vs. objetivo](img/infra_ti.png)
+![Infraestructura TI: arquitectura desplegada (16-oct)](img/infra_ti.png)
 
 | Componente | Hoy | IaC |
 |---|---|---|
@@ -31,7 +31,7 @@ La rama `recomendador-rag` agrega un flujo estático para Pages: fuentes públic
 | Logs y alarmas | ❌ Sin configurar | `infra/integra-server.yaml` + `tools/cloudwatch_aws.py` |
 | Respaldos EBS | ❌ Sin configurar | `infra/integra-server.yaml` + `tools/backup_aws.py` |
 | Frontend (S3) | ✅ Bucket privado `integrai-frontend-<cuenta>` (BPA, cifrado, solo CloudFront vía OAC) | `tools/desplegar_frontend.py` |
-| GitHub Pages | ❌ Workflow `pages.yml` falla: Pages no está activado en el repo | Activar en *Settings → Pages → GitHub Actions* |
+| GitHub Pages | ✅ Demo pública secundaria con datos sintéticos (CSV) | `.github/workflows/pages.yml` |
 | Stack CloudFormation | ❌ No desplegado | `infra/integra-server.yaml` (corregido en PR #14) |
 
 ## 3. Despliegue de la plantilla (por otra persona)
