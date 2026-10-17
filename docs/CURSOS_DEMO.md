@@ -13,10 +13,10 @@
 
 | Sala | Nº de WhatsApp | Educadora | Niños |
 |---|---|---|---|
-| 🟡 **Sala Girasol** | `+569 58947607` (Wagner) | `EDU-EQ-1` | 28 |
-| 🦋 **Sala Mariposa** | `+569 41257056` (equipo 1) | `EDU-EQ-2` | 26 |
-| ⭐ **Sala Estrella** | `+549 381 209 0006` (equipo 2 · AR) | `EDU-EQ-3` | 30 |
-| ☄️ **Sala Cometa** | `+569 56433264` (equipo 3) | `EDU-EQ-4` | 27 |
+| 🟡 **Sala Girasol** | `+569 0000 0001` (demo) | `EDU-EQ-1` | 28 |
+| 🦋 **Sala Mariposa** | `+569 0000 0002` (demo) | `EDU-EQ-2` | 26 |
+| ⭐ **Sala Estrella** | `+549 0000 0003` (demo) | `EDU-EQ-3` | 30 |
+| ☄️ **Sala Cometa** | `+569 0000 0004` (demo) | `EDU-EQ-4` | 27 |
 
 > Cada número rutea a **su** sala (mapeo tía→sala). El sistema **no** ve las otras salas.
 

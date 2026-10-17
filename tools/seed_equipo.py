@@ -24,12 +24,12 @@ JARDIN = "JAR-EQUIPO"
 NOMBRE_JARDIN = "Jardín Equipo — Demo"
 SEED = 20261015
 
-# (sala, id_educadora, teléfono)  — el orden sigue los números que pasó Wagner
+# (sala, id_educadora, teléfono)  — teléfonos de DEMO (no reales)
 CURSOS = [
-    ("Sala Girasol",  "EDU-EQ-1", "+569 58947607"),       # Wagner
-    ("Sala Mariposa", "EDU-EQ-2", "+569 41257056"),       # equipo 1
-    ("Sala Estrella", "EDU-EQ-3", "+549 381 209 0006"),   # equipo 2 (AR)
-    ("Sala Cometa",   "EDU-EQ-4", "+569 56433264"),       # equipo 3
+    ("Sala Girasol",  "EDU-EQ-1", "+569 0000 0001"),       # demo
+    ("Sala Mariposa", "EDU-EQ-2", "+569 0000 0002"),       # demo
+    ("Sala Estrella", "EDU-EQ-3", "+549 0000 0003"),       # demo
+    ("Sala Cometa",   "EDU-EQ-4", "+569 0000 0004"),       # demo
 ]
 TAMANOS = {"Sala Girasol": 28, "Sala Mariposa": 26, "Sala Estrella": 30, "Sala Cometa": 27}
 

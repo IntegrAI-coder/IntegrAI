@@ -93,7 +93,7 @@ def _auditoria(recs: list[dict], t: float) -> list[str]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--url", default="http://44.204.243.156:8000")
+    ap.add_argument("--url", default="http://localhost:8000")
     ap.add_argument("--casos", default="casos_300.jsonl")
     ap.add_argument("--umbral", type=float, default=0.15)
     ap.add_argument("--limite", type=int, default=None)

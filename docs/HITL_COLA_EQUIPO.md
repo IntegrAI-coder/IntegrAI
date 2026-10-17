@@ -20,10 +20,10 @@ rechazar) → la decisión se escribe en `evaluaciones`.
 
 | Curso | Tía | WhatsApp | Pendientes |
 |---|---|---|---:|
-| Sala Girasol | `EDU-EQ-1` | +56 9 5894 7607 | 6 |
-| Sala Mariposa | `EDU-EQ-2` | +56 9 4125 7056 | 6 |
-| Sala Estrella | `EDU-EQ-3` | +54 9 381 209 0006 | 6 |
-| Sala Cometa | `EDU-EQ-4` | +56 9 5643 3264 | 6 |
+| Sala Girasol | `EDU-EQ-1` | +56 9 0000 0001 | 6 |
+| Sala Mariposa | `EDU-EQ-2` | +56 9 0000 0002 | 6 |
+| Sala Estrella | `EDU-EQ-3` | +54 9 0000 0003 | 6 |
+| Sala Cometa | `EDU-EQ-4` | +56 9 0000 0004 | 6 |
 
 - El seeder es **idempotente**: borra lo sembrado (`origen=demo_cola`) y los pendientes de
   `JAR-EQUIPO`, y **retrocede el watermark del cron** al mínimo sembrado. Esto último es necesario
@@ -34,7 +34,7 @@ rechazar) → la decisión se escribe en `evaluaciones`.
 
 ```bash
 # cada tía ve SOLO lo suyo (se identifica por su número)
-curl -H "x-api-key: $INTEGRA_API_TOKEN" "http://44.204.243.156:8000/pendientes?from=56958947607"
+curl -H "x-api-key: $INTEGRA_API_TOKEN" "$INTEGRA_BACKEND/pendientes?from=EDU-0001"
 
 # aprobar | editar (con nivel) | rechazar
 /opt/integra/.venv/bin/python tools/test_cola_htl.py

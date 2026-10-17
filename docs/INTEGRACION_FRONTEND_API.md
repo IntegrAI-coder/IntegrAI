@@ -36,7 +36,7 @@ Conteos rápidos (cabecera/estado): `{ok, jardines, ninos, observaciones, ...}`.
 |---|---|
 | **sin definir** | CSV estáticos (`data/*.csv`) — GitHub Pages |
 | **`""`** (vacío) | Mismo origen → **datos vivos** (CloudFront enruta `/api/*` al backend) |
-| **URL absoluta** | Backend directo (ej. `http://44.204.243.156:8000`) — requiere CORS |
+| **URL absoluta** | Backend directo (ej. `https://<tu-backend>`) — requiere CORS |
 
 Si la API no responde, **cae automáticamente a los CSV** (el dashboard nunca se rompe).
 

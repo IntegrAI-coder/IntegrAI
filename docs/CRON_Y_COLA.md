@@ -66,16 +66,16 @@ Cuando una evaluación tiene **margen bajo**, no se decide sola: entra a
 
 ### Ejemplo
 ```bash
-# la tía de Sala Girasol (+56958947607) pide su cola
-curl -H "x-api-key: $INTEGRA_API_TOKEN" "http://44.204.243.156:8000/pendientes?from=56958947607"
+# la tía de Sala Girasol (EDU-0001) pide su cola
+curl -H "x-api-key: $INTEGRA_API_TOKEN" "$INTEGRA_BACKEND/pendientes?from=EDU-0001"
 
 # aprueba el nivel propuesto
-curl -X POST http://44.204.243.156:8000/pendiente/resolver \
+curl -X POST "$INTEGRA_BACKEND/pendiente/resolver" \
   -H "x-api-key: $INTEGRA_API_TOKEN" -H 'Content-Type: application/json' \
   -d '{"id_pendiente":"PEND-90001","accion":"aprobado","resuelto_por":"EDU-EQ-1"}'
 
 # o lo corrige
-curl -X POST http://44.204.243.156:8000/pendiente/resolver \
+curl -X POST "$INTEGRA_BACKEND/pendiente/resolver" \
   -H "x-api-key: $INTEGRA_API_TOKEN" -H 'Content-Type: application/json' \
   -d '{"id_pendiente":"PEND-90001","accion":"editado","nivel":5}'
 ```
